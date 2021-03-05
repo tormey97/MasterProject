@@ -1,0 +1,1 @@
+# Rule-based vehicles that take photos in many different conditions, and save them.
