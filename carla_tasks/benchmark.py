@@ -1,1 +1,0 @@
-# this will run the benchmark where we evaluate the performance of a vehicle. there must be a bunch of options, e.g. attack or no attack and so forth
