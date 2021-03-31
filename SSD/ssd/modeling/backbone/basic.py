@@ -132,7 +132,7 @@ class BasicModel(torch.nn.Module):
         for idx, feature in enumerate(out_features):
             s = self.output_feature_shape[idx]
             out_channel = self.output_channels[idx]
-            expected_shape = (out_channel, s)
+            expected_shape = (out_channel, s, s)
             assert feature.shape[1:] == expected_shape, \
                 f"Expected shape: {expected_shape}, got: {feature.shape[1:]} at output IDX: {idx}"
         return out_features
