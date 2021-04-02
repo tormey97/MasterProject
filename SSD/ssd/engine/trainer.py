@@ -6,9 +6,9 @@ import time
 import torch
 import torch.distributed as dist
 
-from ssd.engine.inference import do_evaluation
-from ssd.utils import dist_util
-from ssd.utils.metric_logger import MetricLogger
+from SSD.ssd.engine.inference import do_evaluation
+from SSD.ssd.utils import dist_util
+from SSD.ssd.utils.metric_logger import MetricLogger
 
 
 def write_metric(eval_result, prefix, summary_writer, global_step):

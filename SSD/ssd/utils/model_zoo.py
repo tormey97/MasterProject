@@ -4,7 +4,7 @@ import sys
 
 import torch
 
-from ssd.utils.dist_util import is_main_process, synchronize
+from SSD.ssd.utils.dist_util import is_main_process, synchronize
 
 from torch.hub import download_url_to_file
 from torch.hub import urlparse

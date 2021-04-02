@@ -2,7 +2,7 @@ import torch
 import pathlib
 import numpy as np
 from .mnist_object_detection.mnist_object_dataset import load_dataset
-from ssd.container import Container
+from SSD.ssd.container import Container
 
 
 class MNISTDetection(torch.utils.data.Dataset):

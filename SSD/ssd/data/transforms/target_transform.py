@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-from ssd.utils import box_utils
+from SSD.ssd.utils import box_utils
 
 
 class SSDTargetTransform:

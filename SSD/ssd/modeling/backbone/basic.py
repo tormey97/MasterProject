@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from ssd.modeling import registry
+from SSD.ssd.modeling import registry
 
 class BasicModel(torch.nn.Module):
     """
@@ -21,8 +21,8 @@ class BasicModel(torch.nn.Module):
         image_channels = cfg.MODEL.BACKBONE.INPUT_CHANNELS
         self.output_feature_shape = cfg.MODEL.PRIORS.FEATURE_MAPS
         self.sizes = [38,19,10,5,3,1]
-        self.filters_per_size = [None, 128, 256, 128, 128, 128]
-        num_filters = 64
+        self.filters_per_size = [None, 8, 8, 8, 8, 8]
+        num_filters = 8
         self.feature_maps = nn.ModuleList()
         self.feature_maps.append(
             nn.Sequential(
@@ -55,8 +55,8 @@ class BasicModel(torch.nn.Module):
                 ),
                 nn.ReLU(),
                 nn.Conv2d(
-                    in_channels= num_filters * 2,
-                    out_channels= num_filters * 4,
+                    in_channels=num_filters * 2,
+                    out_channels=num_filters * 4,
                     kernel_size=3,
                     stride=1,
                     padding=1
@@ -65,12 +65,13 @@ class BasicModel(torch.nn.Module):
                 nn.BatchNorm2d(num_filters * 4),
                 nn.ReLU(),
                 nn.Conv2d(
-                    in_channels= num_filters * 4,
+                    in_channels=num_filters * 4,
                     out_channels=output_channels[0],
                     kernel_size=3,
                     stride=2,
                     padding=1
                 ),
+
             )
         )
         for i in range(1, len(self.sizes)):
@@ -83,12 +84,12 @@ class BasicModel(torch.nn.Module):
             layer = nn.Sequential(
                 nn.ReLU(),
                 nn.Conv2d(
-                    in_channels= output_channels[i-1],
-                    out_channels= self.filters_per_size[i],
+                    in_channels=output_channels[i - 1],
+                    out_channels=self.filters_per_size[i],
                     kernel_size=3,
                     stride=1,
                     padding=1
-                  ),
+                ),
                 nn.BatchNorm2d(self.filters_per_size[i]),
                 nn.ReLU(),
                 nn.Conv2d(
@@ -107,6 +108,7 @@ class BasicModel(torch.nn.Module):
                     stride=conv_stride,
                     padding=conv_padding
                 )
+
             )
             self.feature_maps.append(layer)
 

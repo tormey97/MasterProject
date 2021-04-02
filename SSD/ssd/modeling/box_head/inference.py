@@ -1,7 +1,7 @@
 import torch
 
-from ssd.structures.container import Container
-from ssd.utils.nms import batched_nms
+from SSD.ssd.structures.container import Container
+from SSD.ssd.utils.nms import batched_nms
 
 
 class PostProcessor:

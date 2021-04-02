@@ -1,7 +1,7 @@
 from torch import nn
 
-from ssd.modeling.backbone import build_backbone
-from ssd.modeling.box_head import build_box_head
+from SSD.ssd.modeling.backbone import build_backbone
+from SSD.ssd.modeling.box_head import build_box_head
 
 
 class SSDDetector(nn.Module):

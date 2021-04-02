@@ -2,10 +2,10 @@ import torch
 from torch.utils.data import DataLoader
 from torch.utils.data.dataloader import default_collate
 
-from ssd.data import samplers
-from ssd.data.datasets import build_dataset
-from ssd.data.transforms import build_transforms, build_target_transform
-from ssd.structures.container import Container
+from SSD.ssd.data import samplers
+from SSD.ssd.data.datasets import build_dataset
+from SSD.ssd.data.transforms import build_transforms, build_target_transform
+from SSD.ssd.structures.container import Container
 
 
 class BatchCollator:

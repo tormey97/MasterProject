@@ -1,4 +1,4 @@
-from ssd.modeling import registry
+from SSD.ssd.modeling import registry
 from .box_head import SSDBoxHead
 
 __all__ = ['build_box_head', 'SSDBoxHead']

@@ -3,7 +3,7 @@ import torch.utils.data
 import numpy as np
 from PIL import Image
 
-from ssd.structures.container import Container
+from SSD.ssd.structures.container import Container
 
 
 class COCODataset(torch.utils.data.Dataset):

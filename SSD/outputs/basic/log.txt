@@ -1116,3 +1116,1693 @@ TEST:
   NMS_THRESHOLD: 0.45
 2021-03-26 13:18:44,243 SSD.trainer INFO: No checkpoint found.
 2021-03-26 13:18:51,652 SSD.trainer INFO: Start training ...
+2021-04-01 15:45:11,878 SSD INFO: Using 1 GPUs
+2021-04-01 15:45:11,878 SSD INFO: Namespace(config_file='./configs/mnist.yaml', distributed=False, eval_step=2500, local_rank=0, log_step=10, num_gpus=1, opts=[], save_step=2500, skip_test=False, use_tensorboard=True)
+2021-04-01 15:45:11,878 SSD INFO: Loaded configuration file ./configs/mnist.yaml
+2021-04-01 15:45:11,879 SSD INFO: 
+MODEL:
+    NUM_CLASSES: 11
+    BACKBONE:
+        NAME: 'basic'
+        PRETRAINED: False
+        OUT_CHANNELS: [256, 256, 128, 128, 128, 128]
+        INPUT_CHANNELS: 3
+INPUT:
+    IMAGE_SIZE: 300
+DATASETS:
+    TRAIN: ("mnist_detection_train", "mnist_detection_val")
+    TEST: ("mnist_detection_val", )
+SOLVER:
+    MAX_ITER: 10000
+    GAMMA: 0.1
+    BATCH_SIZE: 16
+    LR: 2e-3
+OUTPUT_DIR: 'outputs/basic'
+
+2021-04-01 15:45:11,879 SSD INFO: Running with config:
+DATASETS:
+  TEST: ('mnist_detection_val',)
+  TRAIN: ('mnist_detection_train', 'mnist_detection_val')
+DATA_LOADER:
+  NUM_WORKERS: 8
+  PIN_MEMORY: True
+INPUT:
+  IMAGE_SIZE: 300
+  PIXEL_MEAN: [123, 117, 104]
+MODEL:
+  BACKBONE:
+    INPUT_CHANNELS: 3
+    NAME: basic
+    OUT_CHANNELS: (256, 256, 128, 128, 128, 128)
+    PRETRAINED: False
+  BOX_HEAD:
+    NAME: SSDBoxHead
+    PREDICTOR: SSDBoxPredictor
+  CENTER_VARIANCE: 0.1
+  DEVICE: cpu
+  META_ARCHITECTURE: SSDDetector
+  NEG_POS_RATIO: 3
+  NUM_CLASSES: 11
+  PRIORS:
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+    CLIP: True
+    FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
+    MAX_SIZES: [60, 111, 162, 213, 264, 315]
+    MIN_SIZES: [30, 60, 111, 162, 213, 264]
+    STRIDES: [8, 16, 32, 64, 100, 300]
+  SIZE_VARIANCE: 0.2
+  THRESHOLD: 0.5
+OUTPUT_DIR: outputs/basic
+SOLVER:
+  BATCH_SIZE: 16
+  GAMMA: 0.1
+  LR: 0.002
+  LR_STEPS: [80000, 100000]
+  MAX_ITER: 10000
+  MOMENTUM: 0.9
+  WARMUP_FACTOR: 0.3333333333333333
+  WARMUP_ITERS: 500
+  WEIGHT_DECAY: 0.0005
+TEST:
+  BATCH_SIZE: 10
+  CONFIDENCE_THRESHOLD: 0.01
+  MAX_PER_CLASS: -1
+  MAX_PER_IMAGE: 100
+  NMS_THRESHOLD: 0.45
+2021-04-01 15:45:11,996 SSD.trainer INFO: No checkpoint found.
+2021-04-01 15:45:24,096 SSD.trainer INFO: Start training ...
+2021-04-01 15:46:55,505 SSD INFO: Using 1 GPUs
+2021-04-01 15:46:55,505 SSD INFO: Namespace(config_file='./configs/mnist.yaml', distributed=False, eval_step=2500, local_rank=0, log_step=10, num_gpus=1, opts=[], save_step=2500, skip_test=False, use_tensorboard=True)
+2021-04-01 15:46:55,505 SSD INFO: Loaded configuration file ./configs/mnist.yaml
+2021-04-01 15:46:55,505 SSD INFO: 
+MODEL:
+    NUM_CLASSES: 11
+    BACKBONE:
+        NAME: 'basic'
+        PRETRAINED: False
+        OUT_CHANNELS: [256, 256, 128, 128, 128, 128]
+        INPUT_CHANNELS: 3
+INPUT:
+    IMAGE_SIZE: 300
+DATASETS:
+    TRAIN: ("mnist_detection_train", "mnist_detection_val")
+    TEST: ("mnist_detection_val", )
+SOLVER:
+    MAX_ITER: 10000
+    GAMMA: 0.1
+    BATCH_SIZE: 16
+    LR: 2e-3
+OUTPUT_DIR: 'outputs/basic'
+
+2021-04-01 15:46:55,505 SSD INFO: Running with config:
+DATASETS:
+  TEST: ('mnist_detection_val',)
+  TRAIN: ('mnist_detection_train', 'mnist_detection_val')
+DATA_LOADER:
+  NUM_WORKERS: 8
+  PIN_MEMORY: True
+INPUT:
+  IMAGE_SIZE: 300
+  PIXEL_MEAN: [123, 117, 104]
+MODEL:
+  BACKBONE:
+    INPUT_CHANNELS: 3
+    NAME: basic
+    OUT_CHANNELS: (256, 256, 128, 128, 128, 128)
+    PRETRAINED: False
+  BOX_HEAD:
+    NAME: SSDBoxHead
+    PREDICTOR: SSDBoxPredictor
+  CENTER_VARIANCE: 0.1
+  DEVICE: cpu
+  META_ARCHITECTURE: SSDDetector
+  NEG_POS_RATIO: 3
+  NUM_CLASSES: 11
+  PRIORS:
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+    CLIP: True
+    FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
+    MAX_SIZES: [60, 111, 162, 213, 264, 315]
+    MIN_SIZES: [30, 60, 111, 162, 213, 264]
+    STRIDES: [8, 16, 32, 64, 100, 300]
+  SIZE_VARIANCE: 0.2
+  THRESHOLD: 0.5
+OUTPUT_DIR: outputs/basic
+SOLVER:
+  BATCH_SIZE: 16
+  GAMMA: 0.1
+  LR: 0.002
+  LR_STEPS: [80000, 100000]
+  MAX_ITER: 10000
+  MOMENTUM: 0.9
+  WARMUP_FACTOR: 0.3333333333333333
+  WARMUP_ITERS: 500
+  WEIGHT_DECAY: 0.0005
+TEST:
+  BATCH_SIZE: 10
+  CONFIDENCE_THRESHOLD: 0.01
+  MAX_PER_CLASS: -1
+  MAX_PER_IMAGE: 100
+  NMS_THRESHOLD: 0.45
+2021-04-01 15:46:55,583 SSD.trainer INFO: No checkpoint found.
+2021-04-01 15:46:55,836 SSD.trainer INFO: Start training ...
+2021-04-01 15:52:48,492 SSD INFO: Using 1 GPUs
+2021-04-01 15:52:48,492 SSD INFO: Namespace(config_file='./configs/mnist.yaml', distributed=False, eval_step=2500, local_rank=0, log_step=10, num_gpus=1, opts=[], save_step=2500, skip_test=False, use_tensorboard=True)
+2021-04-01 15:52:48,492 SSD INFO: Loaded configuration file ./configs/mnist.yaml
+2021-04-01 15:52:48,492 SSD INFO: 
+MODEL:
+    NUM_CLASSES: 11
+    BACKBONE:
+        NAME: 'basic'
+        PRETRAINED: False
+        OUT_CHANNELS: [256, 256, 128, 128, 128, 128]
+        INPUT_CHANNELS: 3
+INPUT:
+    IMAGE_SIZE: 300
+DATASETS:
+    TRAIN: ("mnist_detection_train", "mnist_detection_val")
+    TEST: ("mnist_detection_val", )
+SOLVER:
+    MAX_ITER: 10000
+    GAMMA: 0.1
+    BATCH_SIZE: 16
+    LR: 2e-3
+OUTPUT_DIR: 'outputs/basic'
+
+2021-04-01 15:52:48,492 SSD INFO: Running with config:
+DATASETS:
+  TEST: ('mnist_detection_val',)
+  TRAIN: ('mnist_detection_train', 'mnist_detection_val')
+DATA_LOADER:
+  NUM_WORKERS: 8
+  PIN_MEMORY: True
+INPUT:
+  IMAGE_SIZE: 300
+  PIXEL_MEAN: [123, 117, 104]
+MODEL:
+  BACKBONE:
+    INPUT_CHANNELS: 3
+    NAME: basic
+    OUT_CHANNELS: (256, 256, 128, 128, 128, 128)
+    PRETRAINED: False
+  BOX_HEAD:
+    NAME: SSDBoxHead
+    PREDICTOR: SSDBoxPredictor
+  CENTER_VARIANCE: 0.1
+  DEVICE: cpu
+  META_ARCHITECTURE: SSDDetector
+  NEG_POS_RATIO: 3
+  NUM_CLASSES: 11
+  PRIORS:
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+    CLIP: True
+    FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
+    MAX_SIZES: [60, 111, 162, 213, 264, 315]
+    MIN_SIZES: [30, 60, 111, 162, 213, 264]
+    STRIDES: [8, 16, 32, 64, 100, 300]
+  SIZE_VARIANCE: 0.2
+  THRESHOLD: 0.5
+OUTPUT_DIR: outputs/basic
+SOLVER:
+  BATCH_SIZE: 16
+  GAMMA: 0.1
+  LR: 0.002
+  LR_STEPS: [80000, 100000]
+  MAX_ITER: 10000
+  MOMENTUM: 0.9
+  WARMUP_FACTOR: 0.3333333333333333
+  WARMUP_ITERS: 500
+  WEIGHT_DECAY: 0.0005
+TEST:
+  BATCH_SIZE: 10
+  CONFIDENCE_THRESHOLD: 0.01
+  MAX_PER_CLASS: -1
+  MAX_PER_IMAGE: 100
+  NMS_THRESHOLD: 0.45
+2021-04-01 15:52:48,608 SSD.trainer INFO: No checkpoint found.
+2021-04-01 15:52:49,078 SSD.trainer INFO: Start training ...
+2021-04-01 15:57:12,144 SSD INFO: Using 1 GPUs
+2021-04-01 15:57:12,145 SSD INFO: Namespace(config_file='./configs/mnist.yaml', distributed=False, eval_step=2500, local_rank=0, log_step=10, num_gpus=1, opts=[], save_step=2500, skip_test=False, use_tensorboard=True)
+2021-04-01 15:57:12,145 SSD INFO: Loaded configuration file ./configs/mnist.yaml
+2021-04-01 15:57:12,145 SSD INFO: 
+MODEL:
+    NUM_CLASSES: 11
+    BACKBONE:
+        NAME: 'basic'
+        PRETRAINED: False
+        OUT_CHANNELS: [256, 256, 128, 128, 128, 128]
+        INPUT_CHANNELS: 3
+INPUT:
+    IMAGE_SIZE: 300
+DATASETS:
+    TRAIN: ("mnist_detection_train", "mnist_detection_val")
+    TEST: ("mnist_detection_val", )
+SOLVER:
+    MAX_ITER: 10000
+    GAMMA: 0.1
+    BATCH_SIZE: 16
+    LR: 2e-3
+OUTPUT_DIR: 'outputs/basic'
+
+2021-04-01 15:57:12,145 SSD INFO: Running with config:
+DATASETS:
+  TEST: ('mnist_detection_val',)
+  TRAIN: ('mnist_detection_train', 'mnist_detection_val')
+DATA_LOADER:
+  NUM_WORKERS: 8
+  PIN_MEMORY: True
+INPUT:
+  IMAGE_SIZE: 300
+  PIXEL_MEAN: [123, 117, 104]
+MODEL:
+  BACKBONE:
+    INPUT_CHANNELS: 3
+    NAME: basic
+    OUT_CHANNELS: (256, 256, 128, 128, 128, 128)
+    PRETRAINED: False
+  BOX_HEAD:
+    NAME: SSDBoxHead
+    PREDICTOR: SSDBoxPredictor
+  CENTER_VARIANCE: 0.1
+  DEVICE: cpu
+  META_ARCHITECTURE: SSDDetector
+  NEG_POS_RATIO: 3
+  NUM_CLASSES: 11
+  PRIORS:
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+    CLIP: True
+    FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
+    MAX_SIZES: [60, 111, 162, 213, 264, 315]
+    MIN_SIZES: [30, 60, 111, 162, 213, 264]
+    STRIDES: [8, 16, 32, 64, 100, 300]
+  SIZE_VARIANCE: 0.2
+  THRESHOLD: 0.5
+OUTPUT_DIR: outputs/basic
+SOLVER:
+  BATCH_SIZE: 16
+  GAMMA: 0.1
+  LR: 0.002
+  LR_STEPS: [80000, 100000]
+  MAX_ITER: 10000
+  MOMENTUM: 0.9
+  WARMUP_FACTOR: 0.3333333333333333
+  WARMUP_ITERS: 500
+  WEIGHT_DECAY: 0.0005
+TEST:
+  BATCH_SIZE: 10
+  CONFIDENCE_THRESHOLD: 0.01
+  MAX_PER_CLASS: -1
+  MAX_PER_IMAGE: 100
+  NMS_THRESHOLD: 0.45
+2021-04-01 15:57:12,213 SSD.trainer INFO: No checkpoint found.
+2021-04-01 15:57:12,525 SSD.trainer INFO: Start training ...
+2021-04-01 16:00:44,662 SSD INFO: Using 1 GPUs
+2021-04-01 16:00:44,663 SSD INFO: Namespace(config_file='./configs/mnist.yaml', distributed=False, eval_step=2500, local_rank=0, log_step=10, num_gpus=1, opts=[], save_step=2500, skip_test=False, use_tensorboard=True)
+2021-04-01 16:00:44,663 SSD INFO: Loaded configuration file ./configs/mnist.yaml
+2021-04-01 16:00:44,663 SSD INFO: 
+MODEL:
+    NUM_CLASSES: 11
+    BACKBONE:
+        NAME: 'basic'
+        PRETRAINED: False
+        OUT_CHANNELS: [64, 64, 64, 64, 64, 64]
+        INPUT_CHANNELS: 3
+INPUT:
+    IMAGE_SIZE: 300
+DATASETS:
+    TRAIN: ("mnist_detection_train", "mnist_detection_val")
+    TEST: ("mnist_detection_val", )
+SOLVER:
+    MAX_ITER: 10000
+    GAMMA: 0.1
+    BATCH_SIZE: 16
+    LR: 2e-3
+OUTPUT_DIR: 'outputs/basic'
+
+2021-04-01 16:00:44,663 SSD INFO: Running with config:
+DATASETS:
+  TEST: ('mnist_detection_val',)
+  TRAIN: ('mnist_detection_train', 'mnist_detection_val')
+DATA_LOADER:
+  NUM_WORKERS: 8
+  PIN_MEMORY: True
+INPUT:
+  IMAGE_SIZE: 300
+  PIXEL_MEAN: [123, 117, 104]
+MODEL:
+  BACKBONE:
+    INPUT_CHANNELS: 3
+    NAME: basic
+    OUT_CHANNELS: (64, 64, 64, 64, 64, 64)
+    PRETRAINED: False
+  BOX_HEAD:
+    NAME: SSDBoxHead
+    PREDICTOR: SSDBoxPredictor
+  CENTER_VARIANCE: 0.1
+  DEVICE: cpu
+  META_ARCHITECTURE: SSDDetector
+  NEG_POS_RATIO: 3
+  NUM_CLASSES: 11
+  PRIORS:
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+    CLIP: True
+    FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
+    MAX_SIZES: [60, 111, 162, 213, 264, 315]
+    MIN_SIZES: [30, 60, 111, 162, 213, 264]
+    STRIDES: [8, 16, 32, 64, 100, 300]
+  SIZE_VARIANCE: 0.2
+  THRESHOLD: 0.5
+OUTPUT_DIR: outputs/basic
+SOLVER:
+  BATCH_SIZE: 16
+  GAMMA: 0.1
+  LR: 0.002
+  LR_STEPS: [80000, 100000]
+  MAX_ITER: 10000
+  MOMENTUM: 0.9
+  WARMUP_FACTOR: 0.3333333333333333
+  WARMUP_ITERS: 500
+  WEIGHT_DECAY: 0.0005
+TEST:
+  BATCH_SIZE: 10
+  CONFIDENCE_THRESHOLD: 0.01
+  MAX_PER_CLASS: -1
+  MAX_PER_IMAGE: 100
+  NMS_THRESHOLD: 0.45
+2021-04-01 16:00:44,699 SSD.trainer INFO: No checkpoint found.
+2021-04-01 16:00:44,857 SSD.trainer INFO: Start training ...
+2021-04-01 16:06:54,438 SSD INFO: Using 1 GPUs
+2021-04-01 16:06:54,438 SSD INFO: Namespace(config_file='./configs/mnist.yaml', distributed=False, eval_step=2500, local_rank=0, log_step=10, num_gpus=1, opts=[], save_step=2500, skip_test=False, use_tensorboard=True)
+2021-04-01 16:06:54,438 SSD INFO: Loaded configuration file ./configs/mnist.yaml
+2021-04-01 16:06:54,438 SSD INFO: 
+MODEL:
+    NUM_CLASSES: 11
+    BACKBONE:
+        NAME: 'basic'
+        PRETRAINED: False
+        OUT_CHANNELS: [64, 64, 64, 64, 64, 64]
+        INPUT_CHANNELS: 3
+INPUT:
+    IMAGE_SIZE: 300
+DATASETS:
+    TRAIN: ("mnist_detection_train", "mnist_detection_val")
+    TEST: ("mnist_detection_val", )
+SOLVER:
+    MAX_ITER: 10000
+    GAMMA: 0.1
+    BATCH_SIZE: 16
+    LR: 2e-3
+OUTPUT_DIR: 'outputs/basic'
+
+2021-04-01 16:06:54,438 SSD INFO: Running with config:
+DATASETS:
+  TEST: ('mnist_detection_val',)
+  TRAIN: ('mnist_detection_train', 'mnist_detection_val')
+DATA_LOADER:
+  NUM_WORKERS: 8
+  PIN_MEMORY: True
+INPUT:
+  IMAGE_SIZE: 300
+  PIXEL_MEAN: [123, 117, 104]
+MODEL:
+  BACKBONE:
+    INPUT_CHANNELS: 3
+    NAME: basic
+    OUT_CHANNELS: (64, 64, 64, 64, 64, 64)
+    PRETRAINED: False
+  BOX_HEAD:
+    NAME: SSDBoxHead
+    PREDICTOR: SSDBoxPredictor
+  CENTER_VARIANCE: 0.1
+  DEVICE: cpu
+  META_ARCHITECTURE: SSDDetector
+  NEG_POS_RATIO: 3
+  NUM_CLASSES: 11
+  PRIORS:
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+    CLIP: True
+    FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
+    MAX_SIZES: [60, 111, 162, 213, 264, 315]
+    MIN_SIZES: [30, 60, 111, 162, 213, 264]
+    STRIDES: [8, 16, 32, 64, 100, 300]
+  SIZE_VARIANCE: 0.2
+  THRESHOLD: 0.5
+OUTPUT_DIR: outputs/basic
+SOLVER:
+  BATCH_SIZE: 16
+  GAMMA: 0.1
+  LR: 0.002
+  LR_STEPS: [80000, 100000]
+  MAX_ITER: 10000
+  MOMENTUM: 0.9
+  WARMUP_FACTOR: 0.3333333333333333
+  WARMUP_ITERS: 500
+  WEIGHT_DECAY: 0.0005
+TEST:
+  BATCH_SIZE: 10
+  CONFIDENCE_THRESHOLD: 0.01
+  MAX_PER_CLASS: -1
+  MAX_PER_IMAGE: 100
+  NMS_THRESHOLD: 0.45
+2021-04-01 16:06:54,476 SSD.trainer INFO: No checkpoint found.
+2021-04-01 16:06:54,654 SSD.trainer INFO: Start training ...
+2021-04-01 16:11:49,988 SSD INFO: Using 1 GPUs
+2021-04-01 16:11:49,988 SSD INFO: Namespace(config_file='./configs/mnist.yaml', distributed=False, eval_step=2500, local_rank=0, log_step=10, num_gpus=1, opts=[], save_step=2500, skip_test=False, use_tensorboard=True)
+2021-04-01 16:11:49,988 SSD INFO: Loaded configuration file ./configs/mnist.yaml
+2021-04-01 16:11:49,988 SSD INFO: 
+MODEL:
+    NUM_CLASSES: 11
+    BACKBONE:
+        NAME: 'basic'
+        PRETRAINED: False
+        OUT_CHANNELS: [64, 64, 64, 64, 64, 64]
+        INPUT_CHANNELS: 3
+INPUT:
+    IMAGE_SIZE: 300
+DATASETS:
+    TRAIN: ("mnist_detection_train", "mnist_detection_val")
+    TEST: ("mnist_detection_val", )
+SOLVER:
+    MAX_ITER: 10000
+    GAMMA: 0.1
+    BATCH_SIZE: 16
+    LR: 2e-3
+OUTPUT_DIR: 'outputs/basic'
+
+2021-04-01 16:11:49,988 SSD INFO: Running with config:
+DATASETS:
+  TEST: ('mnist_detection_val',)
+  TRAIN: ('mnist_detection_train', 'mnist_detection_val')
+DATA_LOADER:
+  NUM_WORKERS: 8
+  PIN_MEMORY: True
+INPUT:
+  IMAGE_SIZE: 300
+  PIXEL_MEAN: [123, 117, 104]
+MODEL:
+  BACKBONE:
+    INPUT_CHANNELS: 3
+    NAME: basic
+    OUT_CHANNELS: (64, 64, 64, 64, 64, 64)
+    PRETRAINED: False
+  BOX_HEAD:
+    NAME: SSDBoxHead
+    PREDICTOR: SSDBoxPredictor
+  CENTER_VARIANCE: 0.1
+  DEVICE: cpu
+  META_ARCHITECTURE: SSDDetector
+  NEG_POS_RATIO: 3
+  NUM_CLASSES: 11
+  PRIORS:
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+    CLIP: True
+    FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
+    MAX_SIZES: [60, 111, 162, 213, 264, 315]
+    MIN_SIZES: [30, 60, 111, 162, 213, 264]
+    STRIDES: [8, 16, 32, 64, 100, 300]
+  SIZE_VARIANCE: 0.2
+  THRESHOLD: 0.5
+OUTPUT_DIR: outputs/basic
+SOLVER:
+  BATCH_SIZE: 16
+  GAMMA: 0.1
+  LR: 0.002
+  LR_STEPS: [80000, 100000]
+  MAX_ITER: 10000
+  MOMENTUM: 0.9
+  WARMUP_FACTOR: 0.3333333333333333
+  WARMUP_ITERS: 500
+  WEIGHT_DECAY: 0.0005
+TEST:
+  BATCH_SIZE: 10
+  CONFIDENCE_THRESHOLD: 0.01
+  MAX_PER_CLASS: -1
+  MAX_PER_IMAGE: 100
+  NMS_THRESHOLD: 0.45
+2021-04-01 16:11:50,035 SSD.trainer INFO: No checkpoint found.
+2021-04-01 16:11:50,273 SSD.trainer INFO: Start training ...
+2021-04-01 16:13:57,759 SSD INFO: Using 1 GPUs
+2021-04-01 16:13:57,759 SSD INFO: Namespace(config_file='./configs/mnist.yaml', distributed=False, eval_step=2500, local_rank=0, log_step=10, num_gpus=1, opts=[], save_step=2500, skip_test=False, use_tensorboard=True)
+2021-04-01 16:13:57,759 SSD INFO: Loaded configuration file ./configs/mnist.yaml
+2021-04-01 16:13:57,759 SSD INFO: 
+MODEL:
+    NUM_CLASSES: 11
+    BACKBONE:
+        NAME: 'basic'
+        PRETRAINED: False
+        OUT_CHANNELS: [64, 64, 64, 64, 64, 64]
+        INPUT_CHANNELS: 3
+INPUT:
+    IMAGE_SIZE: 300
+DATASETS:
+    TRAIN: ("mnist_detection_train", "mnist_detection_val")
+    TEST: ("mnist_detection_val", )
+SOLVER:
+    MAX_ITER: 10000
+    GAMMA: 0.1
+    BATCH_SIZE: 16
+    LR: 2e-3
+OUTPUT_DIR: 'outputs/basic'
+
+2021-04-01 16:13:57,759 SSD INFO: Running with config:
+DATASETS:
+  TEST: ('mnist_detection_val',)
+  TRAIN: ('mnist_detection_train', 'mnist_detection_val')
+DATA_LOADER:
+  NUM_WORKERS: 8
+  PIN_MEMORY: True
+INPUT:
+  IMAGE_SIZE: 300
+  PIXEL_MEAN: [123, 117, 104]
+MODEL:
+  BACKBONE:
+    INPUT_CHANNELS: 3
+    NAME: basic
+    OUT_CHANNELS: (64, 64, 64, 64, 64, 64)
+    PRETRAINED: False
+  BOX_HEAD:
+    NAME: SSDBoxHead
+    PREDICTOR: SSDBoxPredictor
+  CENTER_VARIANCE: 0.1
+  DEVICE: cpu
+  META_ARCHITECTURE: SSDDetector
+  NEG_POS_RATIO: 3
+  NUM_CLASSES: 11
+  PRIORS:
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+    CLIP: True
+    FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
+    MAX_SIZES: [60, 111, 162, 213, 264, 315]
+    MIN_SIZES: [30, 60, 111, 162, 213, 264]
+    STRIDES: [8, 16, 32, 64, 100, 300]
+  SIZE_VARIANCE: 0.2
+  THRESHOLD: 0.5
+OUTPUT_DIR: outputs/basic
+SOLVER:
+  BATCH_SIZE: 16
+  GAMMA: 0.1
+  LR: 0.002
+  LR_STEPS: [80000, 100000]
+  MAX_ITER: 10000
+  MOMENTUM: 0.9
+  WARMUP_FACTOR: 0.3333333333333333
+  WARMUP_ITERS: 500
+  WEIGHT_DECAY: 0.0005
+TEST:
+  BATCH_SIZE: 10
+  CONFIDENCE_THRESHOLD: 0.01
+  MAX_PER_CLASS: -1
+  MAX_PER_IMAGE: 100
+  NMS_THRESHOLD: 0.45
+2021-04-01 16:13:57,808 SSD.trainer INFO: No checkpoint found.
+2021-04-01 16:13:57,987 SSD.trainer INFO: Start training ...
+2021-04-01 16:27:17,261 SSD INFO: Using 1 GPUs
+2021-04-01 16:27:17,261 SSD INFO: Namespace(config_file='./configs/mnist.yaml', distributed=False, eval_step=2500, local_rank=0, log_step=10, num_gpus=1, opts=[], save_step=2500, skip_test=False, use_tensorboard=True)
+2021-04-01 16:27:17,261 SSD INFO: Loaded configuration file ./configs/mnist.yaml
+2021-04-01 16:27:17,261 SSD INFO: 
+MODEL:
+    NUM_CLASSES: 11
+    BACKBONE:
+        NAME: 'basic'
+        PRETRAINED: False
+        OUT_CHANNELS: [64, 64, 64, 64, 64, 64]
+        INPUT_CHANNELS: 3
+INPUT:
+    IMAGE_SIZE: 300
+DATASETS:
+    TRAIN: ("mnist_detection_train", "mnist_detection_val")
+    TEST: ("mnist_detection_val", )
+SOLVER:
+    MAX_ITER: 10000
+    GAMMA: 0.1
+    BATCH_SIZE: 16
+    LR: 2e-3
+OUTPUT_DIR: 'outputs/basic'
+
+2021-04-01 16:27:17,261 SSD INFO: Running with config:
+DATASETS:
+  TEST: ('mnist_detection_val',)
+  TRAIN: ('mnist_detection_train', 'mnist_detection_val')
+DATA_LOADER:
+  NUM_WORKERS: 8
+  PIN_MEMORY: True
+INPUT:
+  IMAGE_SIZE: 300
+  PIXEL_MEAN: [123, 117, 104]
+MODEL:
+  BACKBONE:
+    INPUT_CHANNELS: 3
+    NAME: basic
+    OUT_CHANNELS: (64, 64, 64, 64, 64, 64)
+    PRETRAINED: False
+  BOX_HEAD:
+    NAME: SSDBoxHead
+    PREDICTOR: SSDBoxPredictor
+  CENTER_VARIANCE: 0.1
+  DEVICE: cpu
+  META_ARCHITECTURE: SSDDetector
+  NEG_POS_RATIO: 3
+  NUM_CLASSES: 11
+  PRIORS:
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+    CLIP: True
+    FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
+    MAX_SIZES: [60, 111, 162, 213, 264, 315]
+    MIN_SIZES: [30, 60, 111, 162, 213, 264]
+    STRIDES: [8, 16, 32, 64, 100, 300]
+  SIZE_VARIANCE: 0.2
+  THRESHOLD: 0.5
+OUTPUT_DIR: outputs/basic
+SOLVER:
+  BATCH_SIZE: 16
+  GAMMA: 0.1
+  LR: 0.002
+  LR_STEPS: [80000, 100000]
+  MAX_ITER: 10000
+  MOMENTUM: 0.9
+  WARMUP_FACTOR: 0.3333333333333333
+  WARMUP_ITERS: 500
+  WEIGHT_DECAY: 0.0005
+TEST:
+  BATCH_SIZE: 10
+  CONFIDENCE_THRESHOLD: 0.01
+  MAX_PER_CLASS: -1
+  MAX_PER_IMAGE: 100
+  NMS_THRESHOLD: 0.45
+2021-04-01 16:27:17,324 SSD.trainer INFO: No checkpoint found.
+2021-04-01 16:27:17,509 SSD.trainer INFO: Start training ...
+2021-04-01 16:27:52,032 SSD INFO: Using 1 GPUs
+2021-04-01 16:27:52,032 SSD INFO: Namespace(config_file='./configs/mnist.yaml', distributed=False, eval_step=2500, local_rank=0, log_step=10, num_gpus=1, opts=[], save_step=2500, skip_test=False, use_tensorboard=True)
+2021-04-01 16:27:52,032 SSD INFO: Loaded configuration file ./configs/mnist.yaml
+2021-04-01 16:27:52,032 SSD INFO: 
+MODEL:
+    NUM_CLASSES: 11
+    BACKBONE:
+        NAME: 'basic'
+        PRETRAINED: False
+        OUT_CHANNELS: [64, 64, 64, 64, 64, 64]
+        INPUT_CHANNELS: 3
+INPUT:
+    IMAGE_SIZE: 300
+DATASETS:
+    TRAIN: ("mnist_detection_train", "mnist_detection_val")
+    TEST: ("mnist_detection_val", )
+SOLVER:
+    MAX_ITER: 10000
+    GAMMA: 0.1
+    BATCH_SIZE: 16
+    LR: 2e-3
+OUTPUT_DIR: 'outputs/basic'
+
+2021-04-01 16:27:52,032 SSD INFO: Running with config:
+DATASETS:
+  TEST: ('mnist_detection_val',)
+  TRAIN: ('mnist_detection_train', 'mnist_detection_val')
+DATA_LOADER:
+  NUM_WORKERS: 8
+  PIN_MEMORY: True
+INPUT:
+  IMAGE_SIZE: 300
+  PIXEL_MEAN: [123, 117, 104]
+MODEL:
+  BACKBONE:
+    INPUT_CHANNELS: 3
+    NAME: basic
+    OUT_CHANNELS: (64, 64, 64, 64, 64, 64)
+    PRETRAINED: False
+  BOX_HEAD:
+    NAME: SSDBoxHead
+    PREDICTOR: SSDBoxPredictor
+  CENTER_VARIANCE: 0.1
+  DEVICE: cpu
+  META_ARCHITECTURE: SSDDetector
+  NEG_POS_RATIO: 3
+  NUM_CLASSES: 11
+  PRIORS:
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+    CLIP: True
+    FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
+    MAX_SIZES: [60, 111, 162, 213, 264, 315]
+    MIN_SIZES: [30, 60, 111, 162, 213, 264]
+    STRIDES: [8, 16, 32, 64, 100, 300]
+  SIZE_VARIANCE: 0.2
+  THRESHOLD: 0.5
+OUTPUT_DIR: outputs/basic
+SOLVER:
+  BATCH_SIZE: 16
+  GAMMA: 0.1
+  LR: 0.002
+  LR_STEPS: [80000, 100000]
+  MAX_ITER: 10000
+  MOMENTUM: 0.9
+  WARMUP_FACTOR: 0.3333333333333333
+  WARMUP_ITERS: 500
+  WEIGHT_DECAY: 0.0005
+TEST:
+  BATCH_SIZE: 10
+  CONFIDENCE_THRESHOLD: 0.01
+  MAX_PER_CLASS: -1
+  MAX_PER_IMAGE: 100
+  NMS_THRESHOLD: 0.45
+2021-04-01 16:27:52,148 SSD.trainer INFO: No checkpoint found.
+2021-04-01 16:27:52,411 SSD.trainer INFO: Start training ...
+2021-04-01 16:29:03,464 SSD INFO: Using 1 GPUs
+2021-04-01 16:29:03,464 SSD INFO: Namespace(config_file='./configs/mnist.yaml', distributed=False, eval_step=2500, local_rank=0, log_step=10, num_gpus=1, opts=[], save_step=2500, skip_test=False, use_tensorboard=True)
+2021-04-01 16:29:03,464 SSD INFO: Loaded configuration file ./configs/mnist.yaml
+2021-04-01 16:29:03,464 SSD INFO: 
+MODEL:
+    NUM_CLASSES: 11
+    BACKBONE:
+        NAME: 'basic'
+        PRETRAINED: False
+        OUT_CHANNELS: [64, 64, 64, 64, 64, 64]
+        INPUT_CHANNELS: 3
+INPUT:
+    IMAGE_SIZE: 300
+DATASETS:
+    TRAIN: ("mnist_detection_train", "mnist_detection_val")
+    TEST: ("mnist_detection_val", )
+SOLVER:
+    MAX_ITER: 10000
+    GAMMA: 0.1
+    BATCH_SIZE: 16
+    LR: 2e-3
+OUTPUT_DIR: 'outputs/basic'
+
+2021-04-01 16:29:03,464 SSD INFO: Running with config:
+DATASETS:
+  TEST: ('mnist_detection_val',)
+  TRAIN: ('mnist_detection_train', 'mnist_detection_val')
+DATA_LOADER:
+  NUM_WORKERS: 8
+  PIN_MEMORY: True
+INPUT:
+  IMAGE_SIZE: 300
+  PIXEL_MEAN: [123, 117, 104]
+MODEL:
+  BACKBONE:
+    INPUT_CHANNELS: 3
+    NAME: basic
+    OUT_CHANNELS: (64, 64, 64, 64, 64, 64)
+    PRETRAINED: False
+  BOX_HEAD:
+    NAME: SSDBoxHead
+    PREDICTOR: SSDBoxPredictor
+  CENTER_VARIANCE: 0.1
+  DEVICE: cpu
+  META_ARCHITECTURE: SSDDetector
+  NEG_POS_RATIO: 3
+  NUM_CLASSES: 11
+  PRIORS:
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+    CLIP: True
+    FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
+    MAX_SIZES: [60, 111, 162, 213, 264, 315]
+    MIN_SIZES: [30, 60, 111, 162, 213, 264]
+    STRIDES: [8, 16, 32, 64, 100, 300]
+  SIZE_VARIANCE: 0.2
+  THRESHOLD: 0.5
+OUTPUT_DIR: outputs/basic
+SOLVER:
+  BATCH_SIZE: 16
+  GAMMA: 0.1
+  LR: 0.002
+  LR_STEPS: [80000, 100000]
+  MAX_ITER: 10000
+  MOMENTUM: 0.9
+  WARMUP_FACTOR: 0.3333333333333333
+  WARMUP_ITERS: 500
+  WEIGHT_DECAY: 0.0005
+TEST:
+  BATCH_SIZE: 10
+  CONFIDENCE_THRESHOLD: 0.01
+  MAX_PER_CLASS: -1
+  MAX_PER_IMAGE: 100
+  NMS_THRESHOLD: 0.45
+2021-04-01 16:29:03,530 SSD.trainer INFO: No checkpoint found.
+2021-04-01 16:29:22,176 SSD.trainer INFO: Start training ...
+2021-04-01 16:30:29,902 SSD INFO: Using 1 GPUs
+2021-04-01 16:30:29,902 SSD INFO: Namespace(config_file='./configs/mnist.yaml', distributed=False, eval_step=2500, local_rank=0, log_step=10, num_gpus=1, opts=[], save_step=2500, skip_test=False, use_tensorboard=True)
+2021-04-01 16:30:29,902 SSD INFO: Loaded configuration file ./configs/mnist.yaml
+2021-04-01 16:30:29,902 SSD INFO: 
+MODEL:
+    NUM_CLASSES: 11
+    BACKBONE:
+        NAME: 'basic'
+        PRETRAINED: False
+        OUT_CHANNELS: [64, 64, 64, 64, 64, 64]
+        INPUT_CHANNELS: 3
+INPUT:
+    IMAGE_SIZE: 300
+DATASETS:
+    TRAIN: ("mnist_detection_train", "mnist_detection_val")
+    TEST: ("mnist_detection_val", )
+SOLVER:
+    MAX_ITER: 10000
+    GAMMA: 0.1
+    BATCH_SIZE: 16
+    LR: 2e-3
+OUTPUT_DIR: 'outputs/basic'
+
+2021-04-01 16:30:29,902 SSD INFO: Running with config:
+DATASETS:
+  TEST: ('mnist_detection_val',)
+  TRAIN: ('mnist_detection_train', 'mnist_detection_val')
+DATA_LOADER:
+  NUM_WORKERS: 8
+  PIN_MEMORY: True
+INPUT:
+  IMAGE_SIZE: 300
+  PIXEL_MEAN: [123, 117, 104]
+MODEL:
+  BACKBONE:
+    INPUT_CHANNELS: 3
+    NAME: basic
+    OUT_CHANNELS: (64, 64, 64, 64, 64, 64)
+    PRETRAINED: False
+  BOX_HEAD:
+    NAME: SSDBoxHead
+    PREDICTOR: SSDBoxPredictor
+  CENTER_VARIANCE: 0.1
+  DEVICE: cpu
+  META_ARCHITECTURE: SSDDetector
+  NEG_POS_RATIO: 3
+  NUM_CLASSES: 11
+  PRIORS:
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+    CLIP: True
+    FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
+    MAX_SIZES: [60, 111, 162, 213, 264, 315]
+    MIN_SIZES: [30, 60, 111, 162, 213, 264]
+    STRIDES: [8, 16, 32, 64, 100, 300]
+  SIZE_VARIANCE: 0.2
+  THRESHOLD: 0.5
+OUTPUT_DIR: outputs/basic
+SOLVER:
+  BATCH_SIZE: 16
+  GAMMA: 0.1
+  LR: 0.002
+  LR_STEPS: [80000, 100000]
+  MAX_ITER: 10000
+  MOMENTUM: 0.9
+  WARMUP_FACTOR: 0.3333333333333333
+  WARMUP_ITERS: 500
+  WEIGHT_DECAY: 0.0005
+TEST:
+  BATCH_SIZE: 10
+  CONFIDENCE_THRESHOLD: 0.01
+  MAX_PER_CLASS: -1
+  MAX_PER_IMAGE: 100
+  NMS_THRESHOLD: 0.45
+2021-04-01 16:30:29,968 SSD.trainer INFO: No checkpoint found.
+2021-04-01 16:30:30,168 SSD.trainer INFO: Start training ...
+2021-04-01 16:31:56,798 SSD INFO: Using 1 GPUs
+2021-04-01 16:31:56,798 SSD INFO: Namespace(config_file='./configs/mnist.yaml', distributed=False, eval_step=2500, local_rank=0, log_step=10, num_gpus=1, opts=[], save_step=2500, skip_test=False, use_tensorboard=True)
+2021-04-01 16:31:56,798 SSD INFO: Loaded configuration file ./configs/mnist.yaml
+2021-04-01 16:31:56,814 SSD INFO: 
+MODEL:
+    NUM_CLASSES: 11
+    BACKBONE:
+        NAME: 'basic'
+        PRETRAINED: False
+        OUT_CHANNELS: [64, 64, 64, 64, 64, 64]
+        INPUT_CHANNELS: 3
+INPUT:
+    IMAGE_SIZE: 300
+DATASETS:
+    TRAIN: ("mnist_detection_train", "mnist_detection_val")
+    TEST: ("mnist_detection_val", )
+SOLVER:
+    MAX_ITER: 10000
+    GAMMA: 0.1
+    BATCH_SIZE: 16
+    LR: 2e-3
+OUTPUT_DIR: 'outputs/basic'
+
+2021-04-01 16:31:56,814 SSD INFO: Running with config:
+DATASETS:
+  TEST: ('mnist_detection_val',)
+  TRAIN: ('mnist_detection_train', 'mnist_detection_val')
+DATA_LOADER:
+  NUM_WORKERS: 8
+  PIN_MEMORY: True
+INPUT:
+  IMAGE_SIZE: 300
+  PIXEL_MEAN: [123, 117, 104]
+MODEL:
+  BACKBONE:
+    INPUT_CHANNELS: 3
+    NAME: basic
+    OUT_CHANNELS: (64, 64, 64, 64, 64, 64)
+    PRETRAINED: False
+  BOX_HEAD:
+    NAME: SSDBoxHead
+    PREDICTOR: SSDBoxPredictor
+  CENTER_VARIANCE: 0.1
+  DEVICE: cpu
+  META_ARCHITECTURE: SSDDetector
+  NEG_POS_RATIO: 3
+  NUM_CLASSES: 11
+  PRIORS:
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+    CLIP: True
+    FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
+    MAX_SIZES: [60, 111, 162, 213, 264, 315]
+    MIN_SIZES: [30, 60, 111, 162, 213, 264]
+    STRIDES: [8, 16, 32, 64, 100, 300]
+  SIZE_VARIANCE: 0.2
+  THRESHOLD: 0.5
+OUTPUT_DIR: outputs/basic
+SOLVER:
+  BATCH_SIZE: 16
+  GAMMA: 0.1
+  LR: 0.002
+  LR_STEPS: [80000, 100000]
+  MAX_ITER: 10000
+  MOMENTUM: 0.9
+  WARMUP_FACTOR: 0.3333333333333333
+  WARMUP_ITERS: 500
+  WEIGHT_DECAY: 0.0005
+TEST:
+  BATCH_SIZE: 10
+  CONFIDENCE_THRESHOLD: 0.01
+  MAX_PER_CLASS: -1
+  MAX_PER_IMAGE: 100
+  NMS_THRESHOLD: 0.45
+2021-04-01 16:31:56,899 SSD.trainer INFO: No checkpoint found.
+2021-04-01 16:31:57,161 SSD.trainer INFO: Start training ...
+2021-04-01 16:33:10,406 SSD.trainer INFO: iter: 000010, lr: 0.00069, total_loss: 15.410 (15.410), reg_loss: 3.941 (3.941), cls_loss: 11.469 (11.469), time: 7.279 (7.279), eta: 20:11:54
+2021-04-01 16:34:04,855 SSD.trainer INFO: iter: 000020, lr: 0.00072, total_loss: 12.696 (14.053), reg_loss: 3.488 (3.715), cls_loss: 9.207 (10.338), time: 5.445 (6.362), eta: 17:38:12
+2021-04-01 16:35:08,465 SSD INFO: Using 1 GPUs
+2021-04-01 16:35:08,465 SSD INFO: Namespace(config_file='./configs/mnist.yaml', distributed=False, eval_step=2500, local_rank=0, log_step=10, num_gpus=1, opts=[], save_step=2500, skip_test=False, use_tensorboard=True)
+2021-04-01 16:35:08,465 SSD INFO: Loaded configuration file ./configs/mnist.yaml
+2021-04-01 16:35:08,465 SSD INFO: 
+MODEL:
+    NUM_CLASSES: 11
+    BACKBONE:
+        NAME: 'basic'
+        PRETRAINED: False
+        OUT_CHANNELS: [64, 64, 64, 64, 64, 64]
+        INPUT_CHANNELS: 3
+INPUT:
+    IMAGE_SIZE: 300
+DATASETS:
+    TRAIN: ("mnist_detection_train", "mnist_detection_val")
+    TEST: ("mnist_detection_val", )
+SOLVER:
+    MAX_ITER: 10000
+    GAMMA: 0.1
+    BATCH_SIZE: 16
+    LR: 2e-3
+OUTPUT_DIR: 'outputs/basic'
+
+2021-04-01 16:35:08,465 SSD INFO: Running with config:
+DATASETS:
+  TEST: ('mnist_detection_val',)
+  TRAIN: ('mnist_detection_train', 'mnist_detection_val')
+DATA_LOADER:
+  NUM_WORKERS: 8
+  PIN_MEMORY: True
+INPUT:
+  IMAGE_SIZE: 300
+  PIXEL_MEAN: [123, 117, 104]
+MODEL:
+  BACKBONE:
+    INPUT_CHANNELS: 3
+    NAME: basic
+    OUT_CHANNELS: (64, 64, 64, 64, 64, 64)
+    PRETRAINED: False
+  BOX_HEAD:
+    NAME: SSDBoxHead
+    PREDICTOR: SSDBoxPredictor
+  CENTER_VARIANCE: 0.1
+  DEVICE: cpu
+  META_ARCHITECTURE: SSDDetector
+  NEG_POS_RATIO: 3
+  NUM_CLASSES: 11
+  PRIORS:
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+    CLIP: True
+    FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
+    MAX_SIZES: [60, 111, 162, 213, 264, 315]
+    MIN_SIZES: [30, 60, 111, 162, 213, 264]
+    STRIDES: [8, 16, 32, 64, 100, 300]
+  SIZE_VARIANCE: 0.2
+  THRESHOLD: 0.5
+OUTPUT_DIR: outputs/basic
+SOLVER:
+  BATCH_SIZE: 16
+  GAMMA: 0.1
+  LR: 0.002
+  LR_STEPS: [80000, 100000]
+  MAX_ITER: 10000
+  MOMENTUM: 0.9
+  WARMUP_FACTOR: 0.3333333333333333
+  WARMUP_ITERS: 500
+  WEIGHT_DECAY: 0.0005
+TEST:
+  BATCH_SIZE: 10
+  CONFIDENCE_THRESHOLD: 0.01
+  MAX_PER_CLASS: -1
+  MAX_PER_IMAGE: 100
+  NMS_THRESHOLD: 0.45
+2021-04-01 16:35:08,516 SSD.trainer INFO: No checkpoint found.
+2021-04-01 16:35:08,678 SSD.trainer INFO: Start training ...
+2021-04-01 16:36:02,212 SSD.trainer INFO: iter: 000010, lr: 0.00069, total_loss: 16.092 (16.092), reg_loss: 4.004 (4.004), cls_loss: 12.089 (12.089), time: 5.313 (5.313), eta: 14:44:32
+2021-04-01 16:36:39,803 SSD.trainer INFO: iter: 000020, lr: 0.00072, total_loss: 13.255 (14.674), reg_loss: 3.259 (3.631), cls_loss: 9.996 (11.042), time: 3.759 (4.536), eta: 12:34:28
+2021-04-01 16:37:03,542 SSD INFO: Using 1 GPUs
+2021-04-01 16:37:03,542 SSD INFO: Namespace(config_file='./configs/mnist.yaml', distributed=False, eval_step=2500, local_rank=0, log_step=10, num_gpus=1, opts=[], save_step=2500, skip_test=False, use_tensorboard=True)
+2021-04-01 16:37:03,542 SSD INFO: Loaded configuration file ./configs/mnist.yaml
+2021-04-01 16:37:03,542 SSD INFO: 
+MODEL:
+    NUM_CLASSES: 11
+    BACKBONE:
+        NAME: 'basic'
+        PRETRAINED: False
+        OUT_CHANNELS: [64, 64, 64, 64, 64, 64]
+        INPUT_CHANNELS: 3
+INPUT:
+    IMAGE_SIZE: 300
+DATASETS:
+    TRAIN: ("mnist_detection_train", "mnist_detection_val")
+    TEST: ("mnist_detection_val", )
+SOLVER:
+    MAX_ITER: 10000
+    GAMMA: 0.1
+    BATCH_SIZE: 16
+    LR: 2e-3
+OUTPUT_DIR: 'outputs/basic'
+
+2021-04-01 16:37:03,542 SSD INFO: Running with config:
+DATASETS:
+  TEST: ('mnist_detection_val',)
+  TRAIN: ('mnist_detection_train', 'mnist_detection_val')
+DATA_LOADER:
+  NUM_WORKERS: 8
+  PIN_MEMORY: True
+INPUT:
+  IMAGE_SIZE: 300
+  PIXEL_MEAN: [123, 117, 104]
+MODEL:
+  BACKBONE:
+    INPUT_CHANNELS: 3
+    NAME: basic
+    OUT_CHANNELS: (64, 64, 64, 64, 64, 64)
+    PRETRAINED: False
+  BOX_HEAD:
+    NAME: SSDBoxHead
+    PREDICTOR: SSDBoxPredictor
+  CENTER_VARIANCE: 0.1
+  DEVICE: cpu
+  META_ARCHITECTURE: SSDDetector
+  NEG_POS_RATIO: 3
+  NUM_CLASSES: 11
+  PRIORS:
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+    CLIP: True
+    FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
+    MAX_SIZES: [60, 111, 162, 213, 264, 315]
+    MIN_SIZES: [30, 60, 111, 162, 213, 264]
+    STRIDES: [8, 16, 32, 64, 100, 300]
+  SIZE_VARIANCE: 0.2
+  THRESHOLD: 0.5
+OUTPUT_DIR: outputs/basic
+SOLVER:
+  BATCH_SIZE: 16
+  GAMMA: 0.1
+  LR: 0.002
+  LR_STEPS: [80000, 100000]
+  MAX_ITER: 10000
+  MOMENTUM: 0.9
+  WARMUP_FACTOR: 0.3333333333333333
+  WARMUP_ITERS: 500
+  WEIGHT_DECAY: 0.0005
+TEST:
+  BATCH_SIZE: 10
+  CONFIDENCE_THRESHOLD: 0.01
+  MAX_PER_CLASS: -1
+  MAX_PER_IMAGE: 100
+  NMS_THRESHOLD: 0.45
+2021-04-01 16:37:03,582 SSD.trainer INFO: No checkpoint found.
+2021-04-01 16:37:03,744 SSD.trainer INFO: Start training ...
+2021-04-01 16:37:46,665 SSD.trainer INFO: iter: 000010, lr: 0.00069, total_loss: 16.374 (16.374), reg_loss: 3.961 (3.961), cls_loss: 12.414 (12.414), time: 4.250 (4.250), eta: 11:47:34
+2021-04-01 16:38:13,741 SSD.trainer INFO: iter: 000020, lr: 0.00072, total_loss: 14.045 (15.210), reg_loss: 3.488 (3.724), cls_loss: 10.558 (11.486), time: 2.708 (3.479), eta: 9:38:37
+2021-04-01 16:38:41,025 SSD.trainer INFO: iter: 000030, lr: 0.00075, total_loss: 13.084 (14.501), reg_loss: 3.312 (3.587), cls_loss: 9.771 (10.914), time: 2.728 (3.229), eta: 8:56:28
+2021-04-01 16:39:08,432 SSD.trainer INFO: iter: 000040, lr: 0.00077, total_loss: 12.317 (13.955), reg_loss: 3.176 (3.484), cls_loss: 9.141 (10.471), time: 2.741 (3.107), eta: 8:35:41
+2021-04-01 16:39:35,442 SSD.trainer INFO: iter: 000050, lr: 0.00080, total_loss: 11.820 (13.528), reg_loss: 3.180 (3.423), cls_loss: 8.640 (10.105), time: 2.701 (3.025), eta: 8:21:43
+2021-04-01 16:39:46,405 SSD INFO: Using 1 GPUs
+2021-04-01 16:39:46,405 SSD INFO: Namespace(config_file='./configs/mnist.yaml', distributed=False, eval_step=2500, local_rank=0, log_step=10, num_gpus=1, opts=[], save_step=2500, skip_test=False, use_tensorboard=True)
+2021-04-01 16:39:46,405 SSD INFO: Loaded configuration file ./configs/mnist.yaml
+2021-04-01 16:39:46,405 SSD INFO: 
+MODEL:
+    NUM_CLASSES: 11
+    BACKBONE:
+        NAME: 'basic'
+        PRETRAINED: False
+        OUT_CHANNELS: [64, 64, 64, 64, 64, 64]
+        INPUT_CHANNELS: 3
+INPUT:
+    IMAGE_SIZE: 300
+DATASETS:
+    TRAIN: ("mnist_detection_train", "mnist_detection_val")
+    TEST: ("mnist_detection_val", )
+SOLVER:
+    MAX_ITER: 1000
+    GAMMA: 0.1
+    BATCH_SIZE: 8
+    LR: 2e-3
+OUTPUT_DIR: 'outputs/basic'
+
+2021-04-01 16:39:46,405 SSD INFO: Running with config:
+DATASETS:
+  TEST: ('mnist_detection_val',)
+  TRAIN: ('mnist_detection_train', 'mnist_detection_val')
+DATA_LOADER:
+  NUM_WORKERS: 8
+  PIN_MEMORY: True
+INPUT:
+  IMAGE_SIZE: 300
+  PIXEL_MEAN: [123, 117, 104]
+MODEL:
+  BACKBONE:
+    INPUT_CHANNELS: 3
+    NAME: basic
+    OUT_CHANNELS: (64, 64, 64, 64, 64, 64)
+    PRETRAINED: False
+  BOX_HEAD:
+    NAME: SSDBoxHead
+    PREDICTOR: SSDBoxPredictor
+  CENTER_VARIANCE: 0.1
+  DEVICE: cpu
+  META_ARCHITECTURE: SSDDetector
+  NEG_POS_RATIO: 3
+  NUM_CLASSES: 11
+  PRIORS:
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+    CLIP: True
+    FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
+    MAX_SIZES: [60, 111, 162, 213, 264, 315]
+    MIN_SIZES: [30, 60, 111, 162, 213, 264]
+    STRIDES: [8, 16, 32, 64, 100, 300]
+  SIZE_VARIANCE: 0.2
+  THRESHOLD: 0.5
+OUTPUT_DIR: outputs/basic
+SOLVER:
+  BATCH_SIZE: 8
+  GAMMA: 0.1
+  LR: 0.002
+  LR_STEPS: [80000, 100000]
+  MAX_ITER: 1000
+  MOMENTUM: 0.9
+  WARMUP_FACTOR: 0.3333333333333333
+  WARMUP_ITERS: 500
+  WEIGHT_DECAY: 0.0005
+TEST:
+  BATCH_SIZE: 10
+  CONFIDENCE_THRESHOLD: 0.01
+  MAX_PER_CLASS: -1
+  MAX_PER_IMAGE: 100
+  NMS_THRESHOLD: 0.45
+2021-04-01 16:39:46,443 SSD.trainer INFO: No checkpoint found.
+2021-04-01 16:39:46,624 SSD.trainer INFO: Start training ...
+2021-04-01 16:40:17,219 SSD.trainer INFO: iter: 000010, lr: 0.00069, total_loss: 16.581 (16.581), reg_loss: 4.167 (4.167), cls_loss: 12.415 (12.415), time: 3.019 (3.019), eta: 0:49:48
+2021-04-01 16:40:34,686 SSD.trainer INFO: iter: 000020, lr: 0.00072, total_loss: 13.819 (15.200), reg_loss: 3.442 (3.804), cls_loss: 10.377 (11.396), time: 1.747 (2.383), eta: 0:38:55
+2021-04-01 16:40:50,955 SSD.trainer INFO: iter: 000030, lr: 0.00075, total_loss: 13.152 (14.517), reg_loss: 3.496 (3.701), cls_loss: 9.657 (10.816), time: 1.627 (2.131), eta: 0:34:26
+2021-04-01 16:41:03,007 SSD INFO: Using 1 GPUs
+2021-04-01 16:41:03,007 SSD INFO: Namespace(config_file='./configs/mnist.yaml', distributed=False, eval_step=2500, local_rank=0, log_step=10, num_gpus=1, opts=[], save_step=2500, skip_test=False, use_tensorboard=True)
+2021-04-01 16:41:03,007 SSD INFO: Loaded configuration file ./configs/mnist.yaml
+2021-04-01 16:41:03,007 SSD INFO: 
+MODEL:
+    NUM_CLASSES: 11
+    BACKBONE:
+        NAME: 'basic'
+        PRETRAINED: False
+        OUT_CHANNELS: [16, 16, 16, 16, 16, 16]
+        INPUT_CHANNELS: 3
+INPUT:
+    IMAGE_SIZE: 300
+DATASETS:
+    TRAIN: ("mnist_detection_train", "mnist_detection_val")
+    TEST: ("mnist_detection_val", )
+SOLVER:
+    MAX_ITER: 1000
+    GAMMA: 0.1
+    BATCH_SIZE: 8
+    LR: 2e-3
+OUTPUT_DIR: 'outputs/basic'
+
+2021-04-01 16:41:03,007 SSD INFO: Running with config:
+DATASETS:
+  TEST: ('mnist_detection_val',)
+  TRAIN: ('mnist_detection_train', 'mnist_detection_val')
+DATA_LOADER:
+  NUM_WORKERS: 8
+  PIN_MEMORY: True
+INPUT:
+  IMAGE_SIZE: 300
+  PIXEL_MEAN: [123, 117, 104]
+MODEL:
+  BACKBONE:
+    INPUT_CHANNELS: 3
+    NAME: basic
+    OUT_CHANNELS: (16, 16, 16, 16, 16, 16)
+    PRETRAINED: False
+  BOX_HEAD:
+    NAME: SSDBoxHead
+    PREDICTOR: SSDBoxPredictor
+  CENTER_VARIANCE: 0.1
+  DEVICE: cpu
+  META_ARCHITECTURE: SSDDetector
+  NEG_POS_RATIO: 3
+  NUM_CLASSES: 11
+  PRIORS:
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+    CLIP: True
+    FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
+    MAX_SIZES: [60, 111, 162, 213, 264, 315]
+    MIN_SIZES: [30, 60, 111, 162, 213, 264]
+    STRIDES: [8, 16, 32, 64, 100, 300]
+  SIZE_VARIANCE: 0.2
+  THRESHOLD: 0.5
+OUTPUT_DIR: outputs/basic
+SOLVER:
+  BATCH_SIZE: 8
+  GAMMA: 0.1
+  LR: 0.002
+  LR_STEPS: [80000, 100000]
+  MAX_ITER: 1000
+  MOMENTUM: 0.9
+  WARMUP_FACTOR: 0.3333333333333333
+  WARMUP_ITERS: 500
+  WEIGHT_DECAY: 0.0005
+TEST:
+  BATCH_SIZE: 10
+  CONFIDENCE_THRESHOLD: 0.01
+  MAX_PER_CLASS: -1
+  MAX_PER_IMAGE: 100
+  NMS_THRESHOLD: 0.45
+2021-04-01 16:41:03,022 SSD.trainer INFO: No checkpoint found.
+2021-04-01 16:41:03,191 SSD.trainer INFO: Start training ...
+2021-04-01 16:41:29,957 SSD.trainer INFO: iter: 000010, lr: 0.00069, total_loss: 15.367 (15.367), reg_loss: 3.708 (3.708), cls_loss: 11.659 (11.659), time: 2.638 (2.638), eta: 0:43:31
+2021-04-01 16:41:43,083 SSD.trainer INFO: iter: 000020, lr: 0.00072, total_loss: 14.107 (14.737), reg_loss: 3.563 (3.635), cls_loss: 10.544 (11.101), time: 1.313 (1.975), eta: 0:32:15
+2021-04-01 16:41:54,196 SSD.trainer INFO: iter: 000030, lr: 0.00075, total_loss: 13.660 (14.378), reg_loss: 3.556 (3.609), cls_loss: 10.105 (10.769), time: 1.111 (1.687), eta: 0:27:16
+2021-04-01 16:42:06,289 SSD.trainer INFO: iter: 000040, lr: 0.00077, total_loss: 12.902 (14.009), reg_loss: 3.239 (3.516), cls_loss: 9.662 (10.492), time: 1.209 (1.568), eta: 0:25:05
+2021-04-01 16:42:18,130 SSD.trainer INFO: iter: 000050, lr: 0.00080, total_loss: 12.574 (13.722), reg_loss: 3.183 (3.450), cls_loss: 9.391 (10.272), time: 1.184 (1.491), eta: 0:23:36
+2021-04-01 16:42:30,031 SSD.trainer INFO: iter: 000060, lr: 0.00083, total_loss: 12.041 (13.442), reg_loss: 2.931 (3.363), cls_loss: 9.110 (10.078), time: 1.190 (1.441), eta: 0:22:34
+2021-04-01 16:42:41,770 SSD.trainer INFO: iter: 000070, lr: 0.00085, total_loss: 12.125 (13.254), reg_loss: 3.264 (3.349), cls_loss: 8.861 (9.905), time: 1.174 (1.403), eta: 0:21:44
+2021-04-01 16:42:53,702 SSD.trainer INFO: iter: 000080, lr: 0.00088, total_loss: 11.462 (13.030), reg_loss: 2.910 (3.294), cls_loss: 8.552 (9.735), time: 1.193 (1.377), eta: 0:21:06
+2021-04-01 16:43:05,523 SSD.trainer INFO: iter: 000090, lr: 0.00091, total_loss: 11.225 (12.829), reg_loss: 3.024 (3.264), cls_loss: 8.202 (9.565), time: 1.182 (1.355), eta: 0:20:32
+2021-04-01 16:43:17,313 SSD.trainer INFO: iter: 000100, lr: 0.00093, total_loss: 10.484 (12.595), reg_loss: 2.833 (3.221), cls_loss: 7.651 (9.374), time: 1.179 (1.337), eta: 0:20:03
+2021-04-01 16:43:29,215 SSD.trainer INFO: iter: 000110, lr: 0.00096, total_loss: 10.176 (12.375), reg_loss: 3.023 (3.203), cls_loss: 7.153 (9.172), time: 1.190 (1.324), eta: 0:19:38
+2021-04-01 16:43:41,000 SSD.trainer INFO: iter: 000120, lr: 0.00099, total_loss: 9.574 (12.141), reg_loss: 2.986 (3.185), cls_loss: 6.588 (8.956), time: 1.179 (1.312), eta: 0:19:14
+2021-04-01 16:43:52,781 SSD.trainer INFO: iter: 000130, lr: 0.00101, total_loss: 9.029 (11.902), reg_loss: 2.919 (3.164), cls_loss: 6.110 (8.738), time: 1.178 (1.302), eta: 0:18:52
+2021-04-01 16:44:04,672 SSD.trainer INFO: iter: 000140, lr: 0.00104, total_loss: 8.717 (11.675), reg_loss: 2.904 (3.146), cls_loss: 5.813 (8.529), time: 1.189 (1.294), eta: 0:18:32
+2021-04-01 16:44:16,574 SSD.trainer INFO: iter: 000150, lr: 0.00107, total_loss: 8.326 (11.451), reg_loss: 2.918 (3.131), cls_loss: 5.408 (8.321), time: 1.190 (1.287), eta: 0:18:13
+2021-04-01 16:44:28,246 SSD.trainer INFO: iter: 000160, lr: 0.00109, total_loss: 8.273 (11.253), reg_loss: 2.942 (3.119), cls_loss: 5.331 (8.134), time: 1.167 (1.279), eta: 0:17:54
+2021-04-01 16:44:40,035 SSD.trainer INFO: iter: 000170, lr: 0.00112, total_loss: 7.984 (11.060), reg_loss: 2.877 (3.105), cls_loss: 5.107 (7.956), time: 1.179 (1.273), eta: 0:17:36
+2021-04-01 16:44:51,921 SSD.trainer INFO: iter: 000180, lr: 0.00115, total_loss: 7.998 (10.890), reg_loss: 2.876 (3.092), cls_loss: 5.122 (7.798), time: 1.189 (1.269), eta: 0:17:20
+2021-04-01 16:45:03,692 SSD.trainer INFO: iter: 000190, lr: 0.00117, total_loss: 7.879 (10.732), reg_loss: 2.813 (3.077), cls_loss: 5.066 (7.654), time: 1.177 (1.264), eta: 0:17:03
+2021-04-01 16:45:15,437 SSD.trainer INFO: iter: 000200, lr: 0.00120, total_loss: 7.759 (10.583), reg_loss: 2.781 (3.062), cls_loss: 4.977 (7.521), time: 1.174 (1.259), eta: 0:16:47
+2021-04-01 16:45:27,081 SSD.trainer INFO: iter: 000210, lr: 0.00123, total_loss: 7.882 (10.454), reg_loss: 2.850 (3.052), cls_loss: 5.032 (7.402), time: 1.164 (1.255), eta: 0:16:31
+2021-04-01 16:45:38,849 SSD.trainer INFO: iter: 000220, lr: 0.00125, total_loss: 7.896 (10.338), reg_loss: 2.843 (3.043), cls_loss: 5.053 (7.295), time: 1.177 (1.251), eta: 0:16:15
+2021-04-01 16:45:50,563 SSD.trainer INFO: iter: 000230, lr: 0.00128, total_loss: 7.470 (10.213), reg_loss: 2.600 (3.024), cls_loss: 4.870 (7.190), time: 1.171 (1.248), eta: 0:16:00
+2021-04-01 16:46:02,248 SSD.trainer INFO: iter: 000240, lr: 0.00131, total_loss: 7.732 (10.110), reg_loss: 2.760 (3.013), cls_loss: 4.972 (7.097), time: 1.168 (1.244), eta: 0:15:45
+2021-04-01 16:46:13,911 SSD.trainer INFO: iter: 000250, lr: 0.00133, total_loss: 7.409 (10.002), reg_loss: 2.523 (2.993), cls_loss: 4.886 (7.009), time: 1.166 (1.241), eta: 0:15:30
+2021-04-01 16:46:25,598 SSD.trainer INFO: iter: 000260, lr: 0.00136, total_loss: 7.512 (9.906), reg_loss: 2.557 (2.976), cls_loss: 4.956 (6.930), time: 1.169 (1.239), eta: 0:15:16
+2021-04-01 16:46:37,268 SSD.trainer INFO: iter: 000270, lr: 0.00139, total_loss: 7.571 (9.820), reg_loss: 2.699 (2.966), cls_loss: 4.872 (6.854), time: 1.167 (1.236), eta: 0:15:02
+2021-04-01 16:46:49,285 SSD.trainer INFO: iter: 000280, lr: 0.00141, total_loss: 7.744 (9.746), reg_loss: 2.783 (2.959), cls_loss: 4.961 (6.786), time: 1.202 (1.235), eta: 0:14:48
+2021-04-01 16:47:01,249 SSD.trainer INFO: iter: 000290, lr: 0.00144, total_loss: 7.474 (9.667), reg_loss: 2.559 (2.946), cls_loss: 4.915 (6.722), time: 1.196 (1.233), eta: 0:14:35
+2021-04-01 16:47:13,016 SSD.trainer INFO: iter: 000300, lr: 0.00147, total_loss: 7.294 (9.588), reg_loss: 2.469 (2.930), cls_loss: 4.825 (6.658), time: 1.177 (1.231), eta: 0:14:22
+2021-04-01 16:47:24,804 SSD.trainer INFO: iter: 000310, lr: 0.00149, total_loss: 7.446 (9.519), reg_loss: 2.624 (2.920), cls_loss: 4.822 (6.599), time: 1.179 (1.230), eta: 0:14:08
+2021-04-01 16:47:36,660 SSD.trainer INFO: iter: 000320, lr: 0.00152, total_loss: 7.257 (9.448), reg_loss: 2.438 (2.905), cls_loss: 4.819 (6.544), time: 1.186 (1.228), eta: 0:13:55
+2021-04-01 16:47:48,416 SSD.trainer INFO: iter: 000330, lr: 0.00155, total_loss: 7.082 (9.377), reg_loss: 2.344 (2.888), cls_loss: 4.739 (6.489), time: 1.176 (1.227), eta: 0:13:41
+2021-04-01 16:48:00,237 SSD.trainer INFO: iter: 000340, lr: 0.00157, total_loss: 7.212 (9.313), reg_loss: 2.455 (2.875), cls_loss: 4.758 (6.438), time: 1.182 (1.225), eta: 0:13:28
+2021-04-01 16:48:11,411 SSD.trainer INFO: iter: 000350, lr: 0.00160, total_loss: 7.108 (9.250), reg_loss: 2.353 (2.860), cls_loss: 4.755 (6.390), time: 1.117 (1.222), eta: 0:13:14
+2021-04-01 16:48:23,158 SSD.trainer INFO: iter: 000360, lr: 0.00163, total_loss: 7.294 (9.196), reg_loss: 2.501 (2.850), cls_loss: 4.793 (6.346), time: 1.175 (1.221), eta: 0:13:01
+2021-04-01 16:48:35,013 SSD.trainer INFO: iter: 000370, lr: 0.00165, total_loss: 7.351 (9.146), reg_loss: 2.491 (2.840), cls_loss: 4.860 (6.305), time: 1.186 (1.220), eta: 0:12:48
+2021-04-01 16:48:46,732 SSD.trainer INFO: iter: 000380, lr: 0.00168, total_loss: 7.033 (9.090), reg_loss: 2.343 (2.827), cls_loss: 4.690 (6.263), time: 1.172 (1.219), eta: 0:12:35
+2021-04-01 16:48:58,645 SSD.trainer INFO: iter: 000390, lr: 0.00171, total_loss: 7.372 (9.046), reg_loss: 2.557 (2.820), cls_loss: 4.815 (6.226), time: 1.191 (1.218), eta: 0:12:23
+2021-04-01 16:49:09,604 SSD.trainer INFO: iter: 000400, lr: 0.00173, total_loss: 7.096 (8.997), reg_loss: 2.394 (2.810), cls_loss: 4.702 (6.188), time: 1.096 (1.215), eta: 0:12:09
+2021-04-01 16:49:21,131 SSD.trainer INFO: iter: 000410, lr: 0.00176, total_loss: 6.911 (8.947), reg_loss: 2.261 (2.796), cls_loss: 4.650 (6.150), time: 1.153 (1.214), eta: 0:11:55
+2021-04-01 16:49:32,014 SSD.trainer INFO: iter: 000420, lr: 0.00179, total_loss: 7.220 (8.905), reg_loss: 2.503 (2.789), cls_loss: 4.717 (6.116), time: 1.088 (1.211), eta: 0:11:42
+2021-04-01 16:49:44,013 SSD.trainer INFO: iter: 000430, lr: 0.00181, total_loss: 7.103 (8.864), reg_loss: 2.347 (2.779), cls_loss: 4.757 (6.084), time: 1.200 (1.210), eta: 0:11:29
+2021-04-01 16:49:55,730 SSD.trainer INFO: iter: 000440, lr: 0.00184, total_loss: 6.837 (8.817), reg_loss: 2.184 (2.766), cls_loss: 4.653 (6.052), time: 1.172 (1.209), eta: 0:11:17
+2021-04-01 16:50:07,550 SSD.trainer INFO: iter: 000450, lr: 0.00187, total_loss: 7.142 (8.780), reg_loss: 2.479 (2.759), cls_loss: 4.663 (6.021), time: 1.182 (1.209), eta: 0:11:04
+2021-04-01 16:50:19,394 SSD.trainer INFO: iter: 000460, lr: 0.00189, total_loss: 6.874 (8.739), reg_loss: 2.258 (2.748), cls_loss: 4.617 (5.990), time: 1.184 (1.208), eta: 0:10:52
+2021-04-01 16:50:30,923 SSD.trainer INFO: iter: 000470, lr: 0.00192, total_loss: 6.918 (8.700), reg_loss: 2.319 (2.739), cls_loss: 4.599 (5.961), time: 1.153 (1.207), eta: 0:10:39
+2021-04-01 16:50:42,798 SSD.trainer INFO: iter: 000480, lr: 0.00195, total_loss: 6.952 (8.664), reg_loss: 2.328 (2.731), cls_loss: 4.624 (5.933), time: 1.187 (1.207), eta: 0:10:27
+2021-04-01 16:50:54,630 SSD.trainer INFO: iter: 000490, lr: 0.00197, total_loss: 6.833 (8.626), reg_loss: 2.214 (2.720), cls_loss: 4.618 (5.906), time: 1.183 (1.206), eta: 0:10:15
+2021-04-01 16:51:06,439 SSD.trainer INFO: iter: 000500, lr: 0.00200, total_loss: 6.757 (8.589), reg_loss: 2.142 (2.709), cls_loss: 4.615 (5.880), time: 1.181 (1.206), eta: 0:10:02
+2021-04-01 16:51:18,220 SSD.trainer INFO: iter: 000510, lr: 0.00200, total_loss: 6.754 (8.553), reg_loss: 2.161 (2.698), cls_loss: 4.593 (5.855), time: 1.178 (1.205), eta: 0:09:50
+2021-04-01 16:51:29,977 SSD.trainer INFO: iter: 000520, lr: 0.00200, total_loss: 6.960 (8.522), reg_loss: 2.325 (2.691), cls_loss: 4.635 (5.832), time: 1.176 (1.205), eta: 0:09:38
+2021-04-01 16:51:41,370 SSD.trainer INFO: iter: 000530, lr: 0.00200, total_loss: 6.674 (8.487), reg_loss: 2.117 (2.680), cls_loss: 4.557 (5.808), time: 1.139 (1.203), eta: 0:09:25
+2021-04-01 16:51:53,317 SSD.trainer INFO: iter: 000540, lr: 0.00200, total_loss: 6.586 (8.452), reg_loss: 2.056 (2.668), cls_loss: 4.530 (5.784), time: 1.195 (1.203), eta: 0:09:13
+2021-04-01 16:52:05,248 SSD.trainer INFO: iter: 000550, lr: 0.00200, total_loss: 7.203 (8.429), reg_loss: 2.473 (2.665), cls_loss: 4.730 (5.765), time: 1.193 (1.203), eta: 0:09:01
+2021-04-01 16:52:17,062 SSD.trainer INFO: iter: 000560, lr: 0.00200, total_loss: 6.602 (8.397), reg_loss: 2.022 (2.653), cls_loss: 4.581 (5.744), time: 1.181 (1.203), eta: 0:08:49
+2021-04-01 16:52:28,931 SSD.trainer INFO: iter: 000570, lr: 0.00200, total_loss: 6.616 (8.366), reg_loss: 2.044 (2.643), cls_loss: 4.572 (5.723), time: 1.187 (1.202), eta: 0:08:37
+2021-04-01 16:52:40,750 SSD.trainer INFO: iter: 000580, lr: 0.00200, total_loss: 6.721 (8.337), reg_loss: 2.146 (2.634), cls_loss: 4.575 (5.703), time: 1.182 (1.202), eta: 0:08:24
+2021-04-01 16:52:52,534 SSD.trainer INFO: iter: 000590, lr: 0.00200, total_loss: 6.589 (8.308), reg_loss: 2.065 (2.624), cls_loss: 4.524 (5.683), time: 1.178 (1.202), eta: 0:08:12
+2021-04-01 16:53:04,449 SSD.trainer INFO: iter: 000600, lr: 0.00200, total_loss: 6.683 (8.281), reg_loss: 2.139 (2.616), cls_loss: 4.543 (5.664), time: 1.192 (1.201), eta: 0:08:00
+2021-04-01 16:53:16,413 SSD.trainer INFO: iter: 000610, lr: 0.00200, total_loss: 6.396 (8.250), reg_loss: 1.906 (2.605), cls_loss: 4.490 (5.645), time: 1.196 (1.201), eta: 0:07:48
+2021-04-01 16:53:28,928 SSD.trainer INFO: iter: 000620, lr: 0.00200, total_loss: 6.616 (8.223), reg_loss: 2.118 (2.597), cls_loss: 4.498 (5.627), time: 1.251 (1.202), eta: 0:07:36
+2021-04-01 16:53:40,734 SSD.trainer INFO: iter: 000630, lr: 0.00200, total_loss: 6.470 (8.195), reg_loss: 1.989 (2.587), cls_loss: 4.482 (5.608), time: 1.181 (1.202), eta: 0:07:24
+2021-04-01 16:53:53,477 SSD.trainer INFO: iter: 000640, lr: 0.00200, total_loss: 6.482 (8.169), reg_loss: 2.008 (2.578), cls_loss: 4.474 (5.591), time: 1.274 (1.203), eta: 0:07:13
+2021-04-01 16:54:05,422 SSD.trainer INFO: iter: 000650, lr: 0.00200, total_loss: 6.674 (8.146), reg_loss: 2.141 (2.571), cls_loss: 4.534 (5.574), time: 1.195 (1.203), eta: 0:07:00
+2021-04-01 16:54:17,204 SSD.trainer INFO: iter: 000660, lr: 0.00200, total_loss: 6.783 (8.125), reg_loss: 2.174 (2.565), cls_loss: 4.609 (5.560), time: 1.178 (1.202), eta: 0:06:48
+2021-04-01 16:54:29,071 SSD.trainer INFO: iter: 000670, lr: 0.00200, total_loss: 6.739 (8.104), reg_loss: 2.137 (2.559), cls_loss: 4.602 (5.545), time: 1.187 (1.202), eta: 0:06:36
+2021-04-01 16:54:40,844 SSD.trainer INFO: iter: 000680, lr: 0.00200, total_loss: 6.728 (8.084), reg_loss: 2.133 (2.553), cls_loss: 4.595 (5.531), time: 1.177 (1.202), eta: 0:06:24
+2021-04-01 16:54:54,971 SSD.trainer INFO: iter: 000690, lr: 0.00200, total_loss: 6.688 (8.064), reg_loss: 2.132 (2.547), cls_loss: 4.556 (5.517), time: 1.413 (1.205), eta: 0:06:13
+2021-04-01 16:55:06,786 SSD.trainer INFO: iter: 000700, lr: 0.00200, total_loss: 6.484 (8.041), reg_loss: 1.969 (2.538), cls_loss: 4.516 (5.503), time: 1.181 (1.205), eta: 0:06:01
+2021-04-01 16:55:18,156 SSD.trainer INFO: iter: 000710, lr: 0.00200, total_loss: 6.642 (8.022), reg_loss: 2.128 (2.533), cls_loss: 4.514 (5.489), time: 1.137 (1.204), eta: 0:05:49
+2021-04-01 16:55:30,716 SSD.trainer INFO: iter: 000720, lr: 0.00200, total_loss: 6.519 (8.001), reg_loss: 2.018 (2.525), cls_loss: 4.501 (5.475), time: 1.256 (1.204), eta: 0:05:37
+2021-04-01 16:55:40,935 SSD.trainer INFO: iter: 000730, lr: 0.00200, total_loss: 6.543 (7.981), reg_loss: 2.028 (2.519), cls_loss: 4.515 (5.462), time: 1.022 (1.202), eta: 0:05:24
+2021-04-01 16:55:51,014 SSD.trainer INFO: iter: 000740, lr: 0.00200, total_loss: 6.630 (7.963), reg_loss: 2.069 (2.512), cls_loss: 4.561 (5.450), time: 1.008 (1.199), eta: 0:05:11
+2021-04-01 16:56:00,869 SSD.trainer INFO: iter: 000750, lr: 0.00200, total_loss: 6.486 (7.943), reg_loss: 2.000 (2.506), cls_loss: 4.486 (5.437), time: 0.986 (1.196), eta: 0:04:59
+2021-04-01 16:56:11,042 SSD.trainer INFO: iter: 000760, lr: 0.00200, total_loss: 6.489 (7.924), reg_loss: 2.013 (2.499), cls_loss: 4.475 (5.425), time: 1.017 (1.194), eta: 0:04:46
+2021-04-01 16:56:21,266 SSD.trainer INFO: iter: 000770, lr: 0.00200, total_loss: 6.572 (7.906), reg_loss: 2.031 (2.493), cls_loss: 4.541 (5.413), time: 1.022 (1.192), eta: 0:04:34
+2021-04-01 16:56:31,355 SSD.trainer INFO: iter: 000780, lr: 0.00200, total_loss: 6.109 (7.883), reg_loss: 1.722 (2.483), cls_loss: 4.387 (5.400), time: 1.009 (1.189), eta: 0:04:21
+2021-04-01 16:56:41,436 SSD.trainer INFO: iter: 000790, lr: 0.00200, total_loss: 6.507 (7.866), reg_loss: 2.017 (2.477), cls_loss: 4.490 (5.388), time: 1.008 (1.187), eta: 0:04:09
+2021-04-01 16:56:51,388 SSD.trainer INFO: iter: 000800, lr: 0.00200, total_loss: 6.307 (7.846), reg_loss: 1.942 (2.471), cls_loss: 4.365 (5.376), time: 0.995 (1.185), eta: 0:03:56
+2021-04-01 16:57:01,383 SSD.trainer INFO: iter: 000810, lr: 0.00200, total_loss: 6.342 (7.828), reg_loss: 1.909 (2.464), cls_loss: 4.433 (5.364), time: 0.999 (1.182), eta: 0:03:44
+2021-04-01 16:57:11,342 SSD.trainer INFO: iter: 000820, lr: 0.00200, total_loss: 6.261 (7.809), reg_loss: 1.825 (2.456), cls_loss: 4.436 (5.353), time: 0.996 (1.180), eta: 0:03:32
+2021-04-01 16:57:21,235 SSD.trainer INFO: iter: 000830, lr: 0.00200, total_loss: 6.418 (7.792), reg_loss: 1.921 (2.449), cls_loss: 4.496 (5.342), time: 0.989 (1.178), eta: 0:03:20
+2021-04-01 16:57:31,184 SSD.trainer INFO: iter: 000840, lr: 0.00200, total_loss: 6.513 (7.777), reg_loss: 2.020 (2.444), cls_loss: 4.493 (5.332), time: 0.995 (1.176), eta: 0:03:08
+2021-04-01 16:57:41,077 SSD.trainer INFO: iter: 000850, lr: 0.00200, total_loss: 6.228 (7.758), reg_loss: 1.863 (2.437), cls_loss: 4.365 (5.321), time: 0.989 (1.174), eta: 0:02:56
+2021-04-01 16:57:51,066 SSD.trainer INFO: iter: 000860, lr: 0.00200, total_loss: 6.498 (7.744), reg_loss: 2.059 (2.433), cls_loss: 4.439 (5.311), time: 0.999 (1.171), eta: 0:02:44
+2021-04-01 16:58:00,979 SSD.trainer INFO: iter: 000870, lr: 0.00200, total_loss: 6.276 (7.727), reg_loss: 1.844 (2.426), cls_loss: 4.432 (5.300), time: 0.991 (1.169), eta: 0:02:32
+2021-04-01 16:58:11,108 SSD.trainer INFO: iter: 000880, lr: 0.00200, total_loss: 6.156 (7.709), reg_loss: 1.751 (2.419), cls_loss: 4.406 (5.290), time: 1.013 (1.168), eta: 0:02:20
+2021-04-01 16:58:21,067 SSD.trainer INFO: iter: 000890, lr: 0.00200, total_loss: 6.140 (7.691), reg_loss: 1.766 (2.411), cls_loss: 4.374 (5.280), time: 0.996 (1.166), eta: 0:02:08
+2021-04-01 16:58:30,998 SSD.trainer INFO: iter: 000900, lr: 0.00200, total_loss: 6.083 (7.673), reg_loss: 1.724 (2.404), cls_loss: 4.359 (5.270), time: 0.993 (1.164), eta: 0:01:56
+2021-04-01 16:58:40,933 SSD.trainer INFO: iter: 000910, lr: 0.00200, total_loss: 5.985 (7.655), reg_loss: 1.674 (2.396), cls_loss: 4.312 (5.259), time: 0.993 (1.162), eta: 0:01:44
+2021-04-01 16:58:50,996 SSD.trainer INFO: iter: 000920, lr: 0.00200, total_loss: 6.142 (7.638), reg_loss: 1.785 (2.389), cls_loss: 4.356 (5.249), time: 1.006 (1.160), eta: 0:01:32
+2021-04-01 16:59:00,947 SSD.trainer INFO: iter: 000930, lr: 0.00200, total_loss: 6.431 (7.625), reg_loss: 1.955 (2.384), cls_loss: 4.476 (5.241), time: 0.995 (1.158), eta: 0:01:21
+2021-04-01 16:59:10,958 SSD.trainer INFO: iter: 000940, lr: 0.00200, total_loss: 6.266 (7.611), reg_loss: 1.884 (2.379), cls_loss: 4.382 (5.232), time: 1.001 (1.157), eta: 0:01:09
+2021-04-01 16:59:20,943 SSD.trainer INFO: iter: 000950, lr: 0.00200, total_loss: 6.594 (7.600), reg_loss: 2.155 (2.377), cls_loss: 4.439 (5.224), time: 0.999 (1.155), eta: 0:00:57
+2021-04-01 16:59:30,870 SSD.trainer INFO: iter: 000960, lr: 0.00200, total_loss: 6.447 (7.588), reg_loss: 2.010 (2.373), cls_loss: 4.438 (5.215), time: 0.993 (1.153), eta: 0:00:46
+2021-04-01 16:59:40,848 SSD.trainer INFO: iter: 000970, lr: 0.00200, total_loss: 6.439 (7.576), reg_loss: 1.962 (2.369), cls_loss: 4.476 (5.208), time: 0.998 (1.152), eta: 0:00:34
+2021-04-01 16:59:50,849 SSD.trainer INFO: iter: 000980, lr: 0.00200, total_loss: 6.214 (7.563), reg_loss: 1.813 (2.363), cls_loss: 4.401 (5.200), time: 1.000 (1.150), eta: 0:00:23
+2021-04-01 17:00:01,886 SSD.trainer INFO: iter: 000990, lr: 0.00200, total_loss: 6.285 (7.550), reg_loss: 1.856 (2.358), cls_loss: 4.429 (5.192), time: 1.104 (1.150), eta: 0:00:11
+2021-04-01 17:00:13,613 SSD.trainer INFO: iter: 001000, lr: 0.00200, total_loss: 6.247 (7.537), reg_loss: 1.851 (2.353), cls_loss: 4.395 (5.184), time: 1.173 (1.150), eta: 0:00:00
+2021-04-01 17:00:14,263 SSD.trainer INFO: Saving checkpoint to outputs/basic\model_final.pth
+2021-04-01 17:00:14,286 SSD.trainer INFO: Total training time: 0:19:10 (1.1500 s / it)
+2021-04-01 17:00:14,290 SSD INFO: Start evaluating...
+2021-04-01 17:00:14,367 SSD.inference INFO: Evaluating mnist_detection_val dataset(10 images):
+2021-04-01 17:36:59,107 SSD INFO: Using 1 GPUs
+2021-04-01 17:36:59,107 SSD INFO: Namespace(config_file='./configs/mnist.yaml', distributed=False, eval_step=2500, local_rank=0, log_step=10, num_gpus=1, opts=[], save_step=2500, skip_test=False, use_tensorboard=True)
+2021-04-01 17:36:59,107 SSD INFO: Loaded configuration file ./configs/mnist.yaml
+2021-04-01 17:36:59,107 SSD INFO: 
+MODEL:
+    NUM_CLASSES: 11
+    BACKBONE:
+        NAME: 'basic'
+        PRETRAINED: False
+        OUT_CHANNELS: [16, 16, 16, 16, 16, 16]
+        INPUT_CHANNELS: 3
+INPUT:
+    IMAGE_SIZE: 300
+DATASETS:
+    TRAIN: ("mnist_detection_train", "mnist_detection_val")
+    TEST: ("mnist_detection_val", )
+SOLVER:
+    MAX_ITER: 1000
+    GAMMA: 0.1
+    BATCH_SIZE: 8
+    LR: 2e-3
+OUTPUT_DIR: 'outputs/basic'
+
+2021-04-01 17:36:59,107 SSD INFO: Running with config:
+DATASETS:
+  TEST: ('mnist_detection_val',)
+  TRAIN: ('mnist_detection_train', 'mnist_detection_val')
+DATA_LOADER:
+  NUM_WORKERS: 8
+  PIN_MEMORY: True
+INPUT:
+  IMAGE_SIZE: 300
+  PIXEL_MEAN: [123, 117, 104]
+MODEL:
+  BACKBONE:
+    INPUT_CHANNELS: 3
+    NAME: basic
+    OUT_CHANNELS: (16, 16, 16, 16, 16, 16)
+    PRETRAINED: False
+  BOX_HEAD:
+    NAME: SSDBoxHead
+    PREDICTOR: SSDBoxPredictor
+  CENTER_VARIANCE: 0.1
+  DEVICE: cpu
+  META_ARCHITECTURE: SSDDetector
+  NEG_POS_RATIO: 3
+  NUM_CLASSES: 11
+  PRIORS:
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+    CLIP: True
+    FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
+    MAX_SIZES: [60, 111, 162, 213, 264, 315]
+    MIN_SIZES: [30, 60, 111, 162, 213, 264]
+    STRIDES: [8, 16, 32, 64, 100, 300]
+  SIZE_VARIANCE: 0.2
+  THRESHOLD: 0.5
+OUTPUT_DIR: outputs/basic
+SOLVER:
+  BATCH_SIZE: 8
+  GAMMA: 0.1
+  LR: 0.002
+  LR_STEPS: [80000, 100000]
+  MAX_ITER: 1000
+  MOMENTUM: 0.9
+  WARMUP_FACTOR: 0.3333333333333333
+  WARMUP_ITERS: 500
+  WEIGHT_DECAY: 0.0005
+TEST:
+  BATCH_SIZE: 10
+  CONFIDENCE_THRESHOLD: 0.01
+  MAX_PER_CLASS: -1
+  MAX_PER_IMAGE: 100
+  NMS_THRESHOLD: 0.45
+2021-04-01 17:36:59,156 SSD.trainer INFO: Loading checkpoint from outputs/basic\model_final.pth
+2021-04-01 17:36:59,172 SSD.trainer INFO: Loading optimizer from outputs/basic\model_final.pth
+2021-04-01 17:36:59,172 SSD.trainer INFO: Loading scheduler from outputs/basic\model_final.pth
+2021-04-01 17:36:59,339 SSD.trainer INFO: Start training ...
+2021-04-01 17:37:12,068 SSD.trainer INFO: Saving checkpoint to outputs/basic\model_final.pth
+2021-04-01 17:37:12,080 SSD.trainer INFO: Total training time: 0:00:12 (0.0120 s / it)
+2021-04-01 17:37:12,080 SSD INFO: Start evaluating...
+2021-04-01 17:37:12,159 SSD.inference INFO: Evaluating mnist_detection_val dataset(10 images):
+2021-04-01 17:38:44,921 SSD.inference INFO: mAP: 0.1373
+0               : 0.1686
+1               : 0.0544
+2               : 0.0458
+3               : 0.4103
+4               : 0.0748
+5               : 0.0165
+6               : 0.0379
+7               : 0.0532
+8               : 0.2439
+9               : 0.2676
+
+2021-04-01 17:39:23,464 SSD INFO: Using 1 GPUs
+2021-04-01 17:39:23,464 SSD INFO: Namespace(config_file='./configs/mnist.yaml', distributed=False, eval_step=2500, local_rank=0, log_step=10, num_gpus=1, opts=[], save_step=2500, skip_test=False, use_tensorboard=True)
+2021-04-01 17:39:23,464 SSD INFO: Loaded configuration file ./configs/mnist.yaml
+2021-04-01 17:39:23,464 SSD INFO: 
+MODEL:
+    NUM_CLASSES: 11
+    BACKBONE:
+        NAME: 'basic'
+        PRETRAINED: False
+        OUT_CHANNELS: [16, 16, 16, 16, 16, 16]
+        INPUT_CHANNELS: 3
+INPUT:
+    IMAGE_SIZE: 300
+DATASETS:
+    TRAIN: ("mnist_detection_train", "mnist_detection_val")
+    TEST: ("mnist_detection_val", )
+SOLVER:
+    MAX_ITER: 1000
+    GAMMA: 0.1
+    BATCH_SIZE: 8
+    LR: 2e-3
+OUTPUT_DIR: 'outputs/basic'
+
+2021-04-01 17:39:23,464 SSD INFO: Running with config:
+DATASETS:
+  TEST: ('mnist_detection_val',)
+  TRAIN: ('mnist_detection_train', 'mnist_detection_val')
+DATA_LOADER:
+  NUM_WORKERS: 8
+  PIN_MEMORY: True
+INPUT:
+  IMAGE_SIZE: 300
+  PIXEL_MEAN: [123, 117, 104]
+MODEL:
+  BACKBONE:
+    INPUT_CHANNELS: 3
+    NAME: basic
+    OUT_CHANNELS: (16, 16, 16, 16, 16, 16)
+    PRETRAINED: False
+  BOX_HEAD:
+    NAME: SSDBoxHead
+    PREDICTOR: SSDBoxPredictor
+  CENTER_VARIANCE: 0.1
+  DEVICE: cpu
+  META_ARCHITECTURE: SSDDetector
+  NEG_POS_RATIO: 3
+  NUM_CLASSES: 11
+  PRIORS:
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+    CLIP: True
+    FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
+    MAX_SIZES: [60, 111, 162, 213, 264, 315]
+    MIN_SIZES: [30, 60, 111, 162, 213, 264]
+    STRIDES: [8, 16, 32, 64, 100, 300]
+  SIZE_VARIANCE: 0.2
+  THRESHOLD: 0.5
+OUTPUT_DIR: outputs/basic
+SOLVER:
+  BATCH_SIZE: 8
+  GAMMA: 0.1
+  LR: 0.002
+  LR_STEPS: [80000, 100000]
+  MAX_ITER: 1000
+  MOMENTUM: 0.9
+  WARMUP_FACTOR: 0.3333333333333333
+  WARMUP_ITERS: 500
+  WEIGHT_DECAY: 0.0005
+TEST:
+  BATCH_SIZE: 10
+  CONFIDENCE_THRESHOLD: 0.01
+  MAX_PER_CLASS: -1
+  MAX_PER_IMAGE: 100
+  NMS_THRESHOLD: 0.45
+2021-04-01 17:39:23,495 SSD.trainer INFO: Loading checkpoint from outputs/basic\model_final.pth
+2021-04-01 17:39:23,511 SSD.trainer INFO: Loading optimizer from outputs/basic\model_final.pth
+2021-04-01 17:39:23,526 SSD.trainer INFO: Loading scheduler from outputs/basic\model_final.pth
+2021-04-01 17:39:23,711 SSD.trainer INFO: Start training ...
+2021-04-01 17:39:36,241 SSD.trainer INFO: Saving checkpoint to outputs/basic\model_final.pth
+2021-04-01 17:39:36,256 SSD.trainer INFO: Total training time: 0:00:12 (0.0120 s / it)
+2021-04-01 17:39:36,256 SSD INFO: Start evaluating...
+2021-04-01 17:39:36,303 SSD.inference INFO: Evaluating mnist_detection_val dataset(10 images):
+2021-04-01 17:41:07,870 SSD.inference INFO: mAP: 0.1373
+0               : 0.1686
+1               : 0.0544
+2               : 0.0458
+3               : 0.4103
+4               : 0.0748
+5               : 0.0165
+6               : 0.0379
+7               : 0.0532
+8               : 0.2439
+9               : 0.2676
+
+2021-04-01 17:41:38,347 SSD INFO: Using 1 GPUs
+2021-04-01 17:41:38,347 SSD INFO: Namespace(config_file='./configs/mnist.yaml', distributed=False, eval_step=2500, local_rank=0, log_step=10, num_gpus=1, opts=[], save_step=2500, skip_test=False, use_tensorboard=True)
+2021-04-01 17:41:38,347 SSD INFO: Loaded configuration file ./configs/mnist.yaml
+2021-04-01 17:41:38,347 SSD INFO: 
+MODEL:
+    NUM_CLASSES: 11
+    BACKBONE:
+        NAME: 'basic'
+        PRETRAINED: False
+        OUT_CHANNELS: [16, 16, 16, 16, 16, 16]
+        INPUT_CHANNELS: 3
+INPUT:
+    IMAGE_SIZE: 300
+DATASETS:
+    TRAIN: ("mnist_detection_train", "mnist_detection_val")
+    TEST: ("mnist_detection_val", )
+SOLVER:
+    MAX_ITER: 1000
+    GAMMA: 0.1
+    BATCH_SIZE: 8
+    LR: 2e-3
+OUTPUT_DIR: 'outputs/basic'
+
+2021-04-01 17:41:38,347 SSD INFO: Running with config:
+DATASETS:
+  TEST: ('mnist_detection_val',)
+  TRAIN: ('mnist_detection_train', 'mnist_detection_val')
+DATA_LOADER:
+  NUM_WORKERS: 8
+  PIN_MEMORY: True
+INPUT:
+  IMAGE_SIZE: 300
+  PIXEL_MEAN: [123, 117, 104]
+MODEL:
+  BACKBONE:
+    INPUT_CHANNELS: 3
+    NAME: basic
+    OUT_CHANNELS: (16, 16, 16, 16, 16, 16)
+    PRETRAINED: False
+  BOX_HEAD:
+    NAME: SSDBoxHead
+    PREDICTOR: SSDBoxPredictor
+  CENTER_VARIANCE: 0.1
+  DEVICE: cpu
+  META_ARCHITECTURE: SSDDetector
+  NEG_POS_RATIO: 3
+  NUM_CLASSES: 11
+  PRIORS:
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+    CLIP: True
+    FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
+    MAX_SIZES: [60, 111, 162, 213, 264, 315]
+    MIN_SIZES: [30, 60, 111, 162, 213, 264]
+    STRIDES: [8, 16, 32, 64, 100, 300]
+  SIZE_VARIANCE: 0.2
+  THRESHOLD: 0.5
+OUTPUT_DIR: outputs/basic
+SOLVER:
+  BATCH_SIZE: 8
+  GAMMA: 0.1
+  LR: 0.002
+  LR_STEPS: [80000, 100000]
+  MAX_ITER: 1000
+  MOMENTUM: 0.9
+  WARMUP_FACTOR: 0.3333333333333333
+  WARMUP_ITERS: 500
+  WEIGHT_DECAY: 0.0005
+TEST:
+  BATCH_SIZE: 10
+  CONFIDENCE_THRESHOLD: 0.01
+  MAX_PER_CLASS: -1
+  MAX_PER_IMAGE: 100
+  NMS_THRESHOLD: 0.45
+2021-04-01 17:41:38,379 SSD.trainer INFO: Loading checkpoint from outputs/basic\model_final.pth
+2021-04-01 17:41:38,394 SSD.trainer INFO: Loading optimizer from outputs/basic\model_final.pth
+2021-04-01 17:41:38,394 SSD.trainer INFO: Loading scheduler from outputs/basic\model_final.pth
+2021-04-01 17:41:38,579 SSD.trainer INFO: Start training ...
+2021-04-01 17:41:51,269 SSD.trainer INFO: Saving checkpoint to outputs/basic\model_final.pth
+2021-04-01 17:41:51,277 SSD.trainer INFO: Total training time: 0:00:12 (0.0120 s / it)
+2021-04-01 17:41:51,277 SSD INFO: Start evaluating...
+2021-04-01 17:41:51,330 SSD.inference INFO: Evaluating mnist_detection_val dataset(10 images):
+2021-04-01 17:43:21,848 SSD.inference INFO: mAP: 0.1373
+0               : 0.1686
+1               : 0.0544
+2               : 0.0458
+3               : 0.4103
+4               : 0.0748
+5               : 0.0165
+6               : 0.0379
+7               : 0.0532
+8               : 0.2439
+9               : 0.2676
+

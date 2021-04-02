@@ -4,7 +4,7 @@ import os
 import torch
 from torch.nn.parallel import DistributedDataParallel
 
-from ssd.utils.model_zoo import cache_url
+from SSD.ssd.utils.model_zoo import cache_url
 
 
 class CheckPointer:

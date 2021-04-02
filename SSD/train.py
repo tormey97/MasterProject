@@ -5,17 +5,17 @@ import os
 import torch
 import torch.distributed as dist
 
-from ssd.engine.inference import do_evaluation
-from ssd.config import cfg
-from ssd.data.build import make_data_loader
-from ssd.engine.trainer import do_train
-from ssd.modeling.detector import build_detection_model
-from ssd.solver.build import make_optimizer, make_lr_scheduler
-from ssd.utils import dist_util, mkdir
-from ssd.utils.checkpoint import CheckPointer
-from ssd.utils.dist_util import synchronize
-from ssd.utils.logger import setup_logger
-from ssd.utils.misc import str2bool
+from SSD.ssd.engine.inference import do_evaluation
+from SSD.ssd.config import cfg
+from SSD.ssd.data.build import make_data_loader
+from SSD.ssd.engine.trainer import do_train
+from SSD.ssd.modeling.detector import build_detection_model
+from SSD.ssd.solver.build import make_optimizer, make_lr_scheduler
+from SSD.ssd.utils import dist_util, mkdir
+from SSD.ssd.utils.checkpoint import CheckPointer
+from SSD.ssd.utils.dist_util import synchronize
+from SSD.ssd.utils.logger import setup_logger
+from SSD.ssd.utils.misc import str2bool
 
 
 def train(cfg, args):

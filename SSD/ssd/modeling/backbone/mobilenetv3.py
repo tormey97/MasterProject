@@ -13,8 +13,8 @@ arXiv preprint arXiv:1905.02244.
 import torch.nn as nn
 import math
 
-from ssd.modeling import registry
-from ssd.utils.model_zoo import load_state_dict_from_url
+from SSD.ssd.modeling import registry
+from SSD.ssd.utils.model_zoo import load_state_dict_from_url
 
 model_urls = {
     'mobilenet_v3': 'https://github.com/d-li14/mobilenetv3.pytorch/raw/master/pretrained/mobilenetv3-large-1cd25616.pth',

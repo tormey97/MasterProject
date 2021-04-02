@@ -4,7 +4,7 @@ import numpy as np
 import xml.etree.ElementTree as ET
 from PIL import Image
 
-from ssd.structures.container import Container
+from SSD.ssd.structures.container import Container
 
 
 class VOCDataset(torch.utils.data.Dataset):

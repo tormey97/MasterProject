@@ -5,11 +5,11 @@ import torch
 import torch.utils.data
 from tqdm import tqdm
 
-from ssd.data.build import make_data_loader
-from ssd.data.datasets.evaluation import evaluate
+from SSD.ssd.data.build import make_data_loader
+from SSD.ssd.data.datasets.evaluation import evaluate
 
-from ssd.utils import dist_util, mkdir
-from ssd.utils.dist_util import synchronize, is_main_process
+from SSD.ssd.utils import dist_util, mkdir
+from SSD.ssd.utils.dist_util import synchronize, is_main_process
 
 
 def _accumulate_predictions_from_multiple_gpus(predictions_per_gpu):

@@ -1,6 +1,6 @@
 from torch.utils.data import ConcatDataset
 
-from ssd.config.path_catlog import DatasetCatalog
+from SSD.ssd.config.path_catlog import DatasetCatalog
 from .voc import VOCDataset
 from .coco import COCODataset
 from .mnist import MNISTDetection

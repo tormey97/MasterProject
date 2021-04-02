@@ -1,4 +1,4 @@
-from ssd.modeling import registry
+from SSD.ssd.modeling import registry
 from .efficient_net import EfficientNet
 
 __all__ = ['efficient_net_b3', 'EfficientNet']

@@ -9,7 +9,7 @@ import collections
 import torch
 from torch import nn
 from torch.nn import functional as F
-from ssd.utils.model_zoo import load_state_dict_from_url
+from SSD.ssd.utils.model_zoo import load_state_dict_from_url
 
 ########################################################################
 ############### HELPERS FUNCTIONS FOR MODEL ARCHITECTURE ###############
