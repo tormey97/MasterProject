@@ -3,10 +3,17 @@ MODEL:
     BACKBONE:
         NAME: 'basic'
         PRETRAINED: False
-        OUT_CHANNELS: [16, 16, 16, 16, 16, 16]
+        OUT_CHANNELS: [128, 128, 128, 128, 128, 128]
         INPUT_CHANNELS: 3
+    PRIORS:
+        FEATURE_MAPS: [8, 4, 2, 1]
+        STRIDES: [64, 100, 200, 300]
+        MIN_SIZES: [111, 162, 213, 264]
+        MAX_SIZES: [162, 213, 264, 315]
+        ASPECT_RATIOS: [[2, 3], [2, 3], [2, 3], [2, 3]]
+        BOXES_PER_LOCATION: [6, 6, 6, 6]
 INPUT:
-    IMAGE_SIZE: 300
+    IMAGE_SIZE: 60
 DATASETS:
     TRAIN: ("mnist_detection_train", "mnist_detection_val")
     TEST: ("mnist_detection_val", )
@@ -15,4 +22,4 @@ SOLVER:
     GAMMA: 0.1
     BATCH_SIZE: 1
     LR: 2e-3
-OUTPUT_DIR: 'outputs/basic'
+OUTPUT_DIR: 'outputs/basic2'

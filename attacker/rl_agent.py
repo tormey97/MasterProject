@@ -110,6 +110,7 @@ class Actor(DeepActorCriticNetwork):
             )
             fn = 1 / (np.sqrt(self.hidden_layers[i-1][0].weight.data.size()[0]))
             nn.init.uniform(self.input_layer[0].weight.data, -fn, fn)
+            nn.init.uniform(self.input_layer[0].bias.data, -fn, fn)
 
         self.output_layer = nn.Sequential(  # the Q-value estimator
             nn.Linear(
@@ -149,7 +150,7 @@ class Critic(DeepActorCriticNetwork):
                 in_features=self.input_features,
                 out_features=self.hidden_features[0]
             ),
-            #nn.BatchNorm1d(self.hidden_features[0]),
+            nn.BatchNorm1d(self.hidden_features[0]),
             nn.ReLU(),
         )
 
@@ -163,12 +164,13 @@ class Critic(DeepActorCriticNetwork):
                         in_features=self.hidden_features[i - 1],
                         out_features=self.hidden_features[i]
                     ),
-                    #nn.BatchNorm1d(self.hidden_features[i]),
+                    nn.BatchNorm1d(self.hidden_features[i]),
                     nn.ReLU()
                 )
             )
             fn = 1 / (np.sqrt(self.hidden_layers[i - 1][0].weight.data.size()[0]))
             nn.init.uniform(self.input_layer[0].weight.data, -fn, fn)
+            nn.init.uniform(self.input_layer[0].bias.data, -fn, fn)
 
         self.output_layer = nn.Sequential(  # the Q-value estimator
             nn.Linear(
@@ -400,10 +402,10 @@ class RLAgent:
             actor_state_dict[name] = tau * actor_state_dict[name].clone() + \
                                      (1 - tau) * target_actor_state_dict[name].clone()
 
-        self.critic_target.load_state_dict(critic_state_dict)
-        self.actor_target.load_state_dict(actor_state_dict)
-        # self.target_critic.load_state_dict(critic_state_dict, strict=False)
-        # self.target_actor.load_state_dict(actor_state_dict, strict=False)
+        self.critic_target.load_state_dict(critic_state_dict, strict=False)
+        self.actor_target.load_state_dict(actor_state_dict, strict=False)
+        self.critic_target.load_state_dict(critic_state_dict, strict=False)
+        self.actor_target.load_state_dict(actor_state_dict, strict=False)
 
     def save_checkpoint(self):
         self.actor_net.save_checkpoint()
@@ -439,7 +441,6 @@ class Environment:
         return RLAgent(environment=self, kernel_size=KERNEL_SIZE, in_channels=self.in_channels)
 
     def calculate_map(self):
-        return 0
         preds = self.obj_detector(torch.Tensor([self.image.detach().numpy()]).to("cpu"), targets=self.targets) #TODO device
 
         prec, rec = calc_detection_voc_prec_rec([preds[0]["boxes"].detach().numpy()],
@@ -500,7 +501,7 @@ class Environment:
 
         regions = []
         i = 0
-        pixels_per_region = 5000
+        pixels_per_region = 30
         pixel_amount = self.image.shape[1] * self.image.shape[2]
         region = []
         while i < pixel_amount:

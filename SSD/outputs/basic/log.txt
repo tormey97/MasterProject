@@ -2806,3 +2806,244 @@ TEST:
 8               : 0.2439
 9               : 0.2676
 
+2021-04-05 00:27:18,038 SSD INFO: Using 1 GPUs
+2021-04-05 00:27:18,039 SSD INFO: Namespace(config_file='./configs/mnist.yaml', distributed=False, eval_step=2500, local_rank=0, log_step=10, num_gpus=1, opts=[], save_step=2500, skip_test=False, use_tensorboard=True)
+2021-04-05 00:27:18,039 SSD INFO: Loaded configuration file ./configs/mnist.yaml
+2021-04-05 00:27:18,039 SSD INFO: 
+MODEL:
+    NUM_CLASSES: 11
+    BACKBONE:
+        NAME: 'vgg'
+        PRETRAINED: False
+        OUT_CHANNELS: [16, 16, 16, 16, 16, 16]
+        INPUT_CHANNELS: 3
+    PRIORS:
+        FEATURE_MAPS: [8, 4, 2, 1]
+        STRIDES: [64, 100, 200, 300]
+        MIN_SIZES: [111, 162, 213, 264]
+        MAX_SIZES: [162, 213, 264, 315]
+        ASPECT_RATIOS: [[2, 3], [2, 3], [2, 3], [2, 3]]
+        BOXES_PER_LOCATION: [6, 6, 6, 6]
+INPUT:
+    IMAGE_SIZE: 60
+DATASETS:
+    TRAIN: ("mnist_detection_train", "mnist_detection_val")
+    TEST: ("mnist_detection_val", )
+SOLVER:
+    MAX_ITER: 1000
+    GAMMA: 0.1
+    BATCH_SIZE: 1
+    LR: 2e-3
+OUTPUT_DIR: 'outputs/basic'
+2021-04-05 00:27:18,040 SSD INFO: Running with config:
+DATASETS:
+  TEST: ('mnist_detection_val',)
+  TRAIN: ('mnist_detection_train', 'mnist_detection_val')
+DATA_LOADER:
+  NUM_WORKERS: 1
+  PIN_MEMORY: True
+INPUT:
+  IMAGE_SIZE: 60
+  PIXEL_MEAN: [123, 117, 104]
+MODEL:
+  BACKBONE:
+    INPUT_CHANNELS: 3
+    NAME: vgg
+    OUT_CHANNELS: (16, 16, 16, 16, 16, 16)
+    PRETRAINED: False
+  BOX_HEAD:
+    NAME: SSDBoxHead
+    PREDICTOR: SSDBoxPredictor
+  CENTER_VARIANCE: 0.1
+  DEVICE: cpu
+  META_ARCHITECTURE: SSDDetector
+  NEG_POS_RATIO: 3
+  NUM_CLASSES: 11
+  PRIORS:
+    ASPECT_RATIOS: [[2, 3], [2, 3], [2, 3], [2, 3]]
+    BOXES_PER_LOCATION: [6, 6, 6, 6]
+    CLIP: True
+    FEATURE_MAPS: [8, 4, 2, 1]
+    MAX_SIZES: [162, 213, 264, 315]
+    MIN_SIZES: [111, 162, 213, 264]
+    STRIDES: [64, 100, 200, 300]
+  SIZE_VARIANCE: 0.2
+  THRESHOLD: 0.5
+OUTPUT_DIR: outputs/basic
+SOLVER:
+  BATCH_SIZE: 1
+  GAMMA: 0.1
+  LR: 0.002
+  LR_STEPS: [80000, 100000]
+  MAX_ITER: 1000
+  MOMENTUM: 0.9
+  WARMUP_FACTOR: 0.3333333333333333
+  WARMUP_ITERS: 500
+  WEIGHT_DECAY: 0.0005
+TEST:
+  BATCH_SIZE: 10
+  CONFIDENCE_THRESHOLD: 0.01
+  MAX_PER_CLASS: -1
+  MAX_PER_IMAGE: 100
+  NMS_THRESHOLD: 0.45
+2021-04-05 00:27:31,127 SSD INFO: Using 1 GPUs
+2021-04-05 00:27:31,127 SSD INFO: Namespace(config_file='./configs/mnist.yaml', distributed=False, eval_step=2500, local_rank=0, log_step=10, num_gpus=1, opts=[], save_step=2500, skip_test=False, use_tensorboard=True)
+2021-04-05 00:27:31,127 SSD INFO: Loaded configuration file ./configs/mnist.yaml
+2021-04-05 00:27:31,127 SSD INFO: 
+MODEL:
+    NUM_CLASSES: 11
+    BACKBONE:
+        NAME: 'basic'
+        PRETRAINED: False
+        OUT_CHANNELS: [16, 16, 16, 16, 16, 16]
+        INPUT_CHANNELS: 3
+    PRIORS:
+        FEATURE_MAPS: [8, 4, 2, 1]
+        STRIDES: [64, 100, 200, 300]
+        MIN_SIZES: [111, 162, 213, 264]
+        MAX_SIZES: [162, 213, 264, 315]
+        ASPECT_RATIOS: [[2, 3], [2, 3], [2, 3], [2, 3]]
+        BOXES_PER_LOCATION: [6, 6, 6, 6]
+INPUT:
+    IMAGE_SIZE: 60
+DATASETS:
+    TRAIN: ("mnist_detection_train", "mnist_detection_val")
+    TEST: ("mnist_detection_val", )
+SOLVER:
+    MAX_ITER: 1000
+    GAMMA: 0.1
+    BATCH_SIZE: 1
+    LR: 2e-3
+OUTPUT_DIR: 'outputs/basic'
+2021-04-05 00:27:31,128 SSD INFO: Running with config:
+DATASETS:
+  TEST: ('mnist_detection_val',)
+  TRAIN: ('mnist_detection_train', 'mnist_detection_val')
+DATA_LOADER:
+  NUM_WORKERS: 1
+  PIN_MEMORY: True
+INPUT:
+  IMAGE_SIZE: 60
+  PIXEL_MEAN: [123, 117, 104]
+MODEL:
+  BACKBONE:
+    INPUT_CHANNELS: 3
+    NAME: basic
+    OUT_CHANNELS: (16, 16, 16, 16, 16, 16)
+    PRETRAINED: False
+  BOX_HEAD:
+    NAME: SSDBoxHead
+    PREDICTOR: SSDBoxPredictor
+  CENTER_VARIANCE: 0.1
+  DEVICE: cpu
+  META_ARCHITECTURE: SSDDetector
+  NEG_POS_RATIO: 3
+  NUM_CLASSES: 11
+  PRIORS:
+    ASPECT_RATIOS: [[2, 3], [2, 3], [2, 3], [2, 3]]
+    BOXES_PER_LOCATION: [6, 6, 6, 6]
+    CLIP: True
+    FEATURE_MAPS: [8, 4, 2, 1]
+    MAX_SIZES: [162, 213, 264, 315]
+    MIN_SIZES: [111, 162, 213, 264]
+    STRIDES: [64, 100, 200, 300]
+  SIZE_VARIANCE: 0.2
+  THRESHOLD: 0.5
+OUTPUT_DIR: outputs/basic
+SOLVER:
+  BATCH_SIZE: 1
+  GAMMA: 0.1
+  LR: 0.002
+  LR_STEPS: [80000, 100000]
+  MAX_ITER: 1000
+  MOMENTUM: 0.9
+  WARMUP_FACTOR: 0.3333333333333333
+  WARMUP_ITERS: 500
+  WEIGHT_DECAY: 0.0005
+TEST:
+  BATCH_SIZE: 10
+  CONFIDENCE_THRESHOLD: 0.01
+  MAX_PER_CLASS: -1
+  MAX_PER_IMAGE: 100
+  NMS_THRESHOLD: 0.45
+2021-04-05 00:27:31,159 SSD.trainer INFO: Loading checkpoint from outputs/basic\model_final.pth
+2021-04-05 00:28:09,897 SSD INFO: Using 1 GPUs
+2021-04-05 00:28:09,897 SSD INFO: Namespace(config_file='./configs/mnist.yaml', distributed=False, eval_step=2500, local_rank=0, log_step=10, num_gpus=1, opts=[], save_step=2500, skip_test=False, use_tensorboard=True)
+2021-04-05 00:28:09,897 SSD INFO: Loaded configuration file ./configs/mnist.yaml
+2021-04-05 00:28:09,897 SSD INFO: 
+MODEL:
+    NUM_CLASSES: 11
+    BACKBONE:
+        NAME: 'basic2'
+        PRETRAINED: False
+        OUT_CHANNELS: [16, 16, 16, 16, 16, 16]
+        INPUT_CHANNELS: 3
+    PRIORS:
+        FEATURE_MAPS: [8, 4, 2, 1]
+        STRIDES: [64, 100, 200, 300]
+        MIN_SIZES: [111, 162, 213, 264]
+        MAX_SIZES: [162, 213, 264, 315]
+        ASPECT_RATIOS: [[2, 3], [2, 3], [2, 3], [2, 3]]
+        BOXES_PER_LOCATION: [6, 6, 6, 6]
+INPUT:
+    IMAGE_SIZE: 60
+DATASETS:
+    TRAIN: ("mnist_detection_train", "mnist_detection_val")
+    TEST: ("mnist_detection_val", )
+SOLVER:
+    MAX_ITER: 1000
+    GAMMA: 0.1
+    BATCH_SIZE: 1
+    LR: 2e-3
+OUTPUT_DIR: 'outputs/basic'
+2021-04-05 00:28:09,897 SSD INFO: Running with config:
+DATASETS:
+  TEST: ('mnist_detection_val',)
+  TRAIN: ('mnist_detection_train', 'mnist_detection_val')
+DATA_LOADER:
+  NUM_WORKERS: 1
+  PIN_MEMORY: True
+INPUT:
+  IMAGE_SIZE: 60
+  PIXEL_MEAN: [123, 117, 104]
+MODEL:
+  BACKBONE:
+    INPUT_CHANNELS: 3
+    NAME: basic2
+    OUT_CHANNELS: (16, 16, 16, 16, 16, 16)
+    PRETRAINED: False
+  BOX_HEAD:
+    NAME: SSDBoxHead
+    PREDICTOR: SSDBoxPredictor
+  CENTER_VARIANCE: 0.1
+  DEVICE: cpu
+  META_ARCHITECTURE: SSDDetector
+  NEG_POS_RATIO: 3
+  NUM_CLASSES: 11
+  PRIORS:
+    ASPECT_RATIOS: [[2, 3], [2, 3], [2, 3], [2, 3]]
+    BOXES_PER_LOCATION: [6, 6, 6, 6]
+    CLIP: True
+    FEATURE_MAPS: [8, 4, 2, 1]
+    MAX_SIZES: [162, 213, 264, 315]
+    MIN_SIZES: [111, 162, 213, 264]
+    STRIDES: [64, 100, 200, 300]
+  SIZE_VARIANCE: 0.2
+  THRESHOLD: 0.5
+OUTPUT_DIR: outputs/basic
+SOLVER:
+  BATCH_SIZE: 1
+  GAMMA: 0.1
+  LR: 0.002
+  LR_STEPS: [80000, 100000]
+  MAX_ITER: 1000
+  MOMENTUM: 0.9
+  WARMUP_FACTOR: 0.3333333333333333
+  WARMUP_ITERS: 500
+  WEIGHT_DECAY: 0.0005
+TEST:
+  BATCH_SIZE: 10
+  CONFIDENCE_THRESHOLD: 0.01
+  MAX_PER_CLASS: -1
+  MAX_PER_IMAGE: 100
+  NMS_THRESHOLD: 0.45

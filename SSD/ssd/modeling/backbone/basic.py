@@ -21,8 +21,8 @@ class BasicModel(torch.nn.Module):
         image_channels = cfg.MODEL.BACKBONE.INPUT_CHANNELS
         self.output_feature_shape = cfg.MODEL.PRIORS.FEATURE_MAPS
         self.sizes = [38,19,10,5,3,1]
-        self.filters_per_size = [None, 8, 8, 8, 8, 8]
-        num_filters = 4
+        self.filters_per_size = [None, 16, 16, 16, 32, 8, 8]
+        num_filters = 32
         self.feature_maps = nn.ModuleList()
         self.feature_maps.append(
             nn.Sequential(
@@ -74,7 +74,7 @@ class BasicModel(torch.nn.Module):
 
             )
         )
-        for i in range(1, len(self.sizes)):
+        for i in range(1, len(self.output_feature_shape)):
             conv_stride = 1
             conv_padding = 0
             if i < len(self.sizes) - 1:
