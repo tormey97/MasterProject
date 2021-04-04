@@ -210,7 +210,7 @@ def calc_detection_voc_prec_rec(
             pred_bbox_l = pred_bbox[pred_mask_l]
             pred_score_l = pred_score[pred_mask_l]
             # sort by score
-            order = pred_score_l.argsort()[::-1]
+            order = pred_score_l.argsort()#[::-1]
             pred_bbox_l = pred_bbox_l[order]
             pred_score_l = pred_score_l[order]
 
@@ -257,6 +257,7 @@ def calc_detection_voc_prec_rec(
             pred_bboxes, pred_labels, pred_scores,
             gt_bboxes, gt_labels, gt_difficults):
         if next(iter_, None) is not None:
+            pass
             raise ValueError('Length of input iterables need to be same.')
 
     n_fg_class = max(n_pos.keys()) + 1

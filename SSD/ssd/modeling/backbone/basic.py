@@ -22,7 +22,7 @@ class BasicModel(torch.nn.Module):
         self.output_feature_shape = cfg.MODEL.PRIORS.FEATURE_MAPS
         self.sizes = [38,19,10,5,3,1]
         self.filters_per_size = [None, 8, 8, 8, 8, 8]
-        num_filters = 8
+        num_filters = 4
         self.feature_maps = nn.ModuleList()
         self.feature_maps.append(
             nn.Sequential(

@@ -86,11 +86,11 @@ def dataset_exists(dirpath: pathlib.Path, num_images):
 
 def load_dataset(dirpath: pathlib.Path,
                  is_train: bool,
-                 max_digit_size: int = 100,
-                 min_digit_size: int = 15,
-                 imsize: int =300,
+                 max_digit_size: int = 10,
+                 min_digit_size: int = 5,
+                 imsize: int =30,
                  max_digits_per_image: int = 20):
-    num_images = 100 if is_train else 10 #TODO set
+    num_images = 5 if is_train else 1 #TODO set
     X_train, Y_train, X_test, Y_test = mnist.load()
     X, Y = X_train, Y_train
     if not is_train:
