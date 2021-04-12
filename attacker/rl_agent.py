@@ -437,6 +437,8 @@ class Environment:
         self.image = None  # current image TODO make tuple with correct labels
         self.attack_sequence = []
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        if torch.cuda.is_available():
+            self.obj_detector.cuda()
 
     def initialize_rl_agent(self):
         return RLAgent(environment=self, kernel_size=KERNEL_SIZE, in_channels=self.in_channels)
