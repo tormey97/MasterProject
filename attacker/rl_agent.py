@@ -441,7 +441,7 @@ class Environment:
         return RLAgent(environment=self, kernel_size=KERNEL_SIZE, in_channels=self.in_channels)
 
     def calculate_map(self):
-        preds = self.obj_detector(torch.Tensor([self.image.detach().numpy()]).to("cpu"), targets=self.targets) #TODO device
+        preds = self.obj_detector(torch.Tensor([self.image.detach().numpy()]).to(self.device), targets=self.targets) #TODO device
 
         prec, rec = calc_detection_voc_prec_rec([preds[0]["boxes"].detach().numpy()],
                                                 [preds[0]["labels"].detach().numpy()],
