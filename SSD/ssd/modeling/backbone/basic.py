@@ -111,8 +111,8 @@ class BasicModel(torch.nn.Module):
 
             )
             self.feature_maps.append(layer)
-
-
+            self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+            self.to(self.device)
 
     def forward(self, x):
         """
