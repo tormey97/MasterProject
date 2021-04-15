@@ -1,0 +1,38 @@
+MODEL:
+    NUM_CLASSES: 5
+    BACKBONE:
+        NAME: 'resnet18'
+        PRETRAINED: True
+        OUT_CHANNELS: [128, 256, 512, 128, 256, 128]
+        INPUT_CHANNELS: 3
+    PRIORS:
+        FEATURE_MAPS: [80, 40, 20, 10, 5, 3]
+        STRIDES: [[8, 8], [16, 16], [32, 32], [64, 64], [128, 120], [214, 360]]
+        MIN_SIZES: [[30, 30], [60, 60], [111, 111], [162, 162], [213, 213], [264, 264]]
+        MAX_SIZES: [[60, 60], [111, 111], [162, 162], [213, 213], [264, 264], [315, 315]]
+        BOXES_PER_LOCATION: [2, 6, 6, 6, 4, 4]
+        ASPECT_RATIOS: [[], [2, 3], [2, 3], [2, 3], [2], [2]]
+INPUT:
+    IMAGE_SIZE: 640
+DATASETS:
+    TRAIN: ("rdd2020_train",)
+    TEST: ("rdd2020_val", )
+SOLVER:
+    MAX_ITER: 120000
+    GAMMA: 0.1
+    BATCH_SIZE: 16
+    LR: 1e-3
+OUTPUT_DIR: 'outputs/resnet_rdd_5'
+
+#cfg.MODEL.PRIORS.FEATURE_MAPS = [[38, 38], [19, 19], [10, 10], [5, 5], [3, 3], [1, 1]]
+# X, Y
+#cfg.MODEL.PRIORS.STRIDES = [[8, 8], [16, 16], [32, 32], [64, 64], [100, 100], [300, 300]]
+# X, Y
+#cfg.MODEL.PRIORS.MIN_SIZES = [[30, 30], [60, 60], [111, 111], [162, 162], [213, 213], [264, 264]]
+# X, Y
+#cfg.MODEL.PRIORS.MAX_SIZES = [[60, 60], [111, 111], [162, 162], [213, 213], [264, 264], [315, 315]]
+
+#cfg.MODEL.PRIORS.ASPECT_RATIOS = [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+# When has 1 aspect ratio, every location has 4 boxes, 2 ratio 6 boxes.
+# #boxes = 2 + #ratio * 2
+#cfg.MODEL.PRIORS.BOXES_PER_LOCATION = [4, 6, 6, 6, 4, 4]  # number of boxes per feature map location

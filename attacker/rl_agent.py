@@ -444,7 +444,7 @@ class Environment:
         return RLAgent(environment=self, kernel_size=KERNEL_SIZE, in_channels=self.in_channels)
 
     def calculate_map(self):
-        preds = self.obj_detector(torch.Tensor([self.image.detach().numpy()]).to("cpu"), targets=self.targets) #TODO device
+        preds = self.obj_detector(torch.Tensor([self.image.detach().numpy()]).to("cuda"), targets=self.targets) #TODO device
 
         prec, rec = calc_detection_voc_prec_rec([preds[0]["boxes"].detach().numpy()],
                                                 [preds[0]["labels"].detach().numpy()],
@@ -494,6 +494,7 @@ class Environment:
             new = self.image[i][pixel].item()
             diffs.append(new_value - old)
         return sum(diffs)
+
     def attack_image(self):
         """
         Performs the attack on the image.
