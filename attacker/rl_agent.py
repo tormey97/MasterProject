@@ -94,6 +94,7 @@ class Actor(DeepActorCriticNetwork):
             #nn.BatchNorm1d(self.hidden_features[0]),
             nn.ReLU(),
         )
+        self.input_layer.to("cuda")
 
         f1 = 1 / (np.sqrt(self.input_layer[0].weight.data.size()[0]))
         nn.init.uniform(self.input_layer[0].weight.data, -f1, f1)
