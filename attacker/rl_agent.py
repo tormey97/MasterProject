@@ -446,9 +446,9 @@ class Environment:
     def calculate_map(self):
         preds = self.obj_detector(torch.Tensor([self.image.detach().numpy()]).to("cuda"), targets=self.targets) #TODO device
 
-        prec, rec = calc_detection_voc_prec_rec([preds[0]["boxes"].detach().numpy()],
-                                                [preds[0]["labels"].detach().numpy()],
-                                                [preds[0]["scores"].detach().numpy()],
+        prec, rec = calc_detection_voc_prec_rec([preds[0]["boxes"].detach().to("cpu").numpy()],
+                                                [preds[0]["labels"].detach().to("cpu").numpy()],
+                                                [preds[0]["scores"].detach().to("cpu").numpy()],
                                                 [self.annotation[0]],
                                                 [self.annotation[1]],
                                                 None,
