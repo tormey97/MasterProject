@@ -59,12 +59,13 @@ class DeepActorCriticNetwork(nn.Module):
         self.hidden_features = hidden_features
         self.hidden_layers = nn.ModuleList()
         self.l2_decay = l2_decay
+        self.to("cuda")
 
         self.initialize_model()  # abstract method
 
         self.optimizer = optim.Adam(self.parameters(), lr=learning_rate)
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-        self.to(self.device)
+        self.to("cuda")
 
     @abc.abstractmethod
     def initialize_model(self):
