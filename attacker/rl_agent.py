@@ -519,11 +519,11 @@ class Environment:
                 region = []
 
         ap = None
-        for region in tqdm(regions):
+        for region in regions:
             ap = self.attack_region(region, ap)
 
         # whole image is attacked. Now, we give the agent the delayed rewards
-        for operation in tqdm(self.attack_sequence):
+        for operation in self.attack_sequence:
             for i in range(len(operation["region"])):
                 self.agent.after_step(old_state=operation["old_states"][i], new_state=operation["new_states"][i], action=operation["actions"][i], reward=operation["rewards"][i])
 
