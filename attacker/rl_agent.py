@@ -519,6 +519,7 @@ class Environment:
         ap = None
         for region in regions:
             ap = self.attack_region(region, ap)
+            break #TODO remove
 
         # whole image is attacked. Now, we give the agent the delayed rewards
         for operation in self.attack_sequence:

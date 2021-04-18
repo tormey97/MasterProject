@@ -1,7 +1,7 @@
 from SSD.ssd.modeling.anchors.prior_box import PriorBox
 from .target_transform import SSDTargetTransform
 from .transforms import *
-
+import albumentations as A
 
 def build_transforms(cfg, is_train=True):
     if is_train:
@@ -14,6 +14,10 @@ def build_transforms(cfg, is_train=True):
             ToPercentCoords(),
             Resize(cfg.INPUT.IMAGE_SIZE),
             SubtractMeans(cfg.INPUT.PIXEL_MEAN),
+            RandomContrast(),
+            RandomBrightness(),
+            RandomHue(),
+            RandomSaturation(),
             ToTensor(),
         ]
     else:
