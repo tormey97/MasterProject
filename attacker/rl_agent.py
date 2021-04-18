@@ -568,7 +568,6 @@ class Environment:
             actions.append(action.cpu())
             differences.append(difference)
             time2 = time.time() - time1
-            pass
 
         print("Attack finished")
         print("Calcing map")
