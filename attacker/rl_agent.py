@@ -475,6 +475,7 @@ class Environment:
         bottom_boundary = pixel[1] + dist
 
         kernel = np.zeros((kernel_size, kernel_size, IN_CHANNELS))
+        # TODO make FASTER
         for x in range(left_boundary, right_boundary):
             for y in range(top_boundary, bottom_boundary):
                 if x < 0 or x >= self.image.shape[1] or y < 0 or y >= self.image.shape[2]:
