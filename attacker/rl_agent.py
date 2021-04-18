@@ -333,7 +333,7 @@ class RLAgent:
         self.replay_buffer.record_transition(old_state, new_state, action, reward, done)
         self.learn()
 
-    def choose_action(self, state) -> int:
+    def choose_action(self, state):
         '''
         Gives the highest-valued action or a random exploring action
         State is a kernel observation. So not the whole image.
@@ -458,8 +458,6 @@ class Environment:
         with torch.no_grad():
             ap = calc_detection_voc_ap(prec, rec, use_07_metric=False)
 
-        #result = self.obj_detector(self.image)
-        #TODO call normal ap func, return that
         return np.nan_to_num(ap).mean()
 
     def image_to_state(self):
@@ -561,13 +559,12 @@ class Environment:
             time1 = time.time()
 
             old_state = self.get_state(pixel, self.agent.kernel_size)
-            old_states.append(old_state)
+            old_states.append(old_state.cpu())
             action = self.agent.choose_action(old_state)
-
             difference = self.attack_pixel(action, pixel)
             new_state = self.get_state(pixel, self.agent.kernel_size)
-            new_states.append(new_state)
-            actions.append(action)
+            new_states.append(new_state.cpu())
+            actions.append(action.cpu())
             differences.append(difference)
             time2 = time.time() - time1
             pass
@@ -586,7 +583,7 @@ class Environment:
                 "actions": actions
             }
 
-        #self.propagate_reward_spatially(operation)
+        self.propagate_reward_spatially(operation)
         for i in range(len(region)):
             operation["rewards"][i] -= abs(differences[i])
         self.attack_sequence.append(operation)
