@@ -73,7 +73,7 @@ _C.DATA_LOADER.PIN_MEMORY = True
 # Solver
 # ---------------------------------------------------------------------------- #
 _C.SOLVER = CN()
-# train configs
+# train attacker_configs
 _C.SOLVER.MAX_ITER = 120000
 _C.SOLVER.LR_STEPS = [80000, 100000]
 _C.SOLVER.GAMMA = 0.1

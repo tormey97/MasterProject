@@ -40,6 +40,15 @@ Need to calculate AP for SSD
 give reward correctly
 some variables are hardcoded, should be configurable
 '''
+
+
+'''
+* Use PPO?
+* Laplacian operator on image to detect important pixels
+* Saliency map on image
+* "Autoencoder" type attack, where image is reduced in dimensions -> given as input to RL agent -> outputs 10 
+    values -> fed into NN that gives width * height outputs (image transform)
+'''
 class DeepActorCriticNetwork(nn.Module):
     __metaclass__ = abc.ABCMeta
 
@@ -520,7 +529,6 @@ class Environment:
         ap = None
         for region in regions:
             ap = self.attack_region(region, ap)
-            break #TODO remove
 
         # whole image is attacked. Now, we give the agent the delayed rewards
         for operation in self.attack_sequence:
@@ -573,7 +581,7 @@ class Environment:
         print("Attack finished")
         print("Calcing map")
         ap_after = self.calculate_map()
-        print("Map calced")
+        print("Map calced: ", ap_after)
         reward = ap_after - ap_before
         kernel_center = self.agent.kernel_size // 2
         operation = {
