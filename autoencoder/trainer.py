@@ -1,7 +1,11 @@
 from utils.torch_utils import get_device
 from autoencoder.models.autoencoder import Autoencoder
+from autoencoder.models.test_enc import Autoencoder as at
+from autoencoder.models.test_cnv import ConvAutoencoder
 from data_management.checkpoint import CheckPointer
 from data_management.datasets.image_dataset import ImageDataset
+from data_management.datasets.pascal_voc import VocDataset
+
 import logging
 import torch
 from torchvision import datasets
@@ -15,7 +19,8 @@ import cv2
 import os
 
 def save_decod_img(img, epoch):
-    img = img.view(img.size(0), 1, 32, 32)
+    print(img.shape)
+    img = img.view(img.size(0), 3, 256, 256)
     save_image(img, './MNIST_Out_Images/Autoencoder_image{}.png'.format(epoch))
 
 def make_dir():
@@ -37,10 +42,10 @@ def do_train(
     logger.info("Start training ...")
     make_dir()
     model.train()
-    criterion = torch.nn.MSELoss()
+    criterion = torch.nn.BCELoss()
 
-    for i in range(0, 200):
-        for iteration, (images, _) in enumerate(data_loader):
+    for i in range(0, 10000):
+        for iteration, (images) in enumerate(data_loader):
 
             iteration += 1
             arguments["iteration"] = iteration
@@ -49,18 +54,17 @@ def do_train(
             optimizer.zero_grad()
             reconstructed_images=model(images)
 
-            if iteration % 500 == 0:
-                save_decod_img(reconstructed_images.cpu().data, i)
+            if iteration % 3 == 0:
+                save_decod_img(images.cpu().data, str(iteration) + "gud")
+                save_decod_img(reconstructed_images.cpu().data, str(i)+"_"+(str(iteration)))
 
-            loss = criterion(images.view(images.size(0), -1), reconstructed_images.view(reconstructed_images.size(0), -1))
-            loss.backward()
+
+            loss = criterion(reconstructed_images, images),
+            loss[0].backward()
 
             optimizer.step()
 
             print(iteration, loss)
-
-        if i % 5 == 0:
-            save_decod_img(reconstructed_images.cpu().data, i)
 
 
 def start_train(cfg): 
@@ -87,12 +91,13 @@ def start_train(cfg):
 
     optimizer = optimizers[cfg.SOLVER.WHICH_OPTIMIZER]()
     transform = transforms.Compose([
+        transforms.ToPILImage(),
         transforms.Resize(cfg.IMAGE_SIZE),
         transforms.ToTensor(),
     ])
     trainset, testset = None, None
 
-    if True:
+    if False:
         trainset = datasets.FashionMNIST(
             root='./datasetss',
             train=True,
@@ -109,7 +114,20 @@ def start_train(cfg):
     elif False:
         trainset = ImageDataset(transform=transform)
         testset = ImageDataset(transform=transform)
+    elif cfg.DATASET_NAME == "voc":
+        trainset = VocDataset(
+            download=True,
+            root='../datasets/Voc',
+            transform=transform,
+            image_set="train"
+        )
 
+        testset = VocDataset(
+            download=True,
+            root='../datasets/Voc',
+            transform=transform,
+            image_set="val"
+        )
     elif cfg.DATASET_NAME == "coco":
         trainset = datasets.CocoDetection(
             root='../datasets/Coco',

@@ -2,17 +2,17 @@ from yacs.config import CfgNode as CN
 
 cfg = CN()
 cfg.MODEL = CN()
-cfg.IMAGE_SIZE = [32, 32]
-cfg.IMAGE_CHANNELS = 1
-cfg.ENCODING_SIZE = 32
+cfg.IMAGE_SIZE = [256, 256]
+cfg.IMAGE_CHANNELS = 3
+cfg.ENCODING_SIZE = 8
 
 cfg.ENCODER = CN()
-cfg.ENCODER.FC_OUT_FEATURES = [256, 128]
-cfg.ENCODER.CNV_OUT_CHANNELS = [128, 64, 64]
+cfg.ENCODER.FC_OUT_FEATURES = [512, 256, 128, 64, 32, 16]
+cfg.ENCODER.CNV_OUT_CHANNELS = [256, 128, 64, 32, 16, 8]
 
 cfg.DECODER = CN()
-cfg.DECODER.FC_OUT_FEATURES = [64, 128]
-cfg.DECODER.CNV_OUT_CHANNELS = [64, 64, 128]
+cfg.DECODER.FC_OUT_FEATURES = [16, 32, 64, 128, 256, 512]
+cfg.DECODER.CNV_OUT_CHANNELS = [16, 32, 64, 128, 256, 256]
 
 cfg.SOLVER = CN()
 # train configs
@@ -20,7 +20,7 @@ cfg.SOLVER.MAX_ITER = 120000
 cfg.SOLVER.N_SCHEDULE_STEPS = 240
 cfg.SOLVER.GAMMA = 0.1
 cfg.SOLVER.BATCH_SIZE = 32
-cfg.SOLVER.LR = 1e-3
+cfg.SOLVER.LR = 0.1
 cfg.SOLVER.MOMENTUM = 0.9
 cfg.SOLVER.WEIGHT_DECAY = 5e-4
 cfg.SOLVER.DO_USE_LR_DECAY = True
@@ -36,4 +36,4 @@ cfg.MODEL_SAVE_STEP = 500 # Save checkpoint every save_step
 cfg.LOG_STEP = 10 # Print logs every log_stepPrint logs every log_step
 cfg.OUTPUT_DIR = "autoencoder_outputs"
 cfg.BATCH_SIZE = 8
-cfg.DATASET_NAME = "coco"
+cfg.DATASET_NAME = "voc"
