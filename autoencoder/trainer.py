@@ -19,7 +19,6 @@ import cv2
 import os
 
 def save_decod_img(img, epoch):
-    print(img.shape)
     img = img.view(img.size(0), 3, 256, 256)
     save_image(img, './MNIST_Out_Images/Autoencoder_image{}.png'.format(epoch))
 
@@ -54,17 +53,15 @@ def do_train(
             optimizer.zero_grad()
             reconstructed_images=model(images)
 
-            if iteration % 3 == 0:
+            loss = criterion(reconstructed_images, images),
+            if iteration % 50 == 0:
+                print("ITERATION: ", iteration, "LOSS: ", loss)
                 save_decod_img(images.cpu().data, str(iteration) + "gud")
                 save_decod_img(reconstructed_images.cpu().data, str(i)+"_"+(str(iteration)))
-
-
-            loss = criterion(reconstructed_images, images),
             loss[0].backward()
 
             optimizer.step()
 
-            print(iteration, loss)
 
 
 def start_train(cfg): 
