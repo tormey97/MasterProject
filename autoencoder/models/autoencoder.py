@@ -1,6 +1,8 @@
 import torch
 from torch import nn
-
+import torch.nn.functional as F
+import cv2
+import numpy as np
 ENC_CLAYERS = 3
 DEC_CLAYERS = 3
 
@@ -18,6 +20,8 @@ class Autoencoder(nn.Module):
 
         # Convolutional layers (Feature extraction)
         encoder_conv_layers = []
+        self.image_channels = cfg.IMAGE_CHANNELS
+        self.batch_size = cfg.BATCH_SIZE
         for i in range(0, len(cfg.ENCODER.CNV_OUT_CHANNELS)):
             in_channels = cfg.IMAGE_CHANNELS
             out_channels = cfg.ENCODER.CNV_OUT_CHANNELS[i]
@@ -34,7 +38,7 @@ class Autoencoder(nn.Module):
                 kernel_size=MAXPOOL_KERNEL_SIZE  # Could need to be a tuple if images are non-square
             )
             relu = nn.ReLU()
-            self.encoder_conv_layers.append(
+            encoder_conv_layers.append(
                 nn.Sequential(
                     convolutional_layer,
                     maxpool,
@@ -45,22 +49,26 @@ class Autoencoder(nn.Module):
         self.feature_extractor = nn.ModuleList(encoder_conv_layers)
 
         # Convert to fully connected layers
-        fc_in_features = cfg.ENCODER.CNV_OUT_CHANNELS[-1] * 4 * 4  # TODO
+        batch_size = self.batch_size
+        self.final_conv_x = cfg.IMAGE_SIZE[0] // 2 ** len(cfg.ENCODER.CNV_OUT_CHANNELS)
+        self.final_conv_y = cfg.IMAGE_SIZE[0] // 2 ** len(cfg.ENCODER.CNV_OUT_CHANNELS)
+        self.final_channels = cfg.ENCODER.CNV_OUT_CHANNELS[-1]
+        self.fc_in_features = batch_size * self.final_conv_x * self.final_conv_y * self.final_channels
 
         # Fully connected layers (Encoding)
-        self.encoder_fc_layer_1 = nn.Linear(
-            in_features=fc_in_features,
+        encoder_fc_layer_1 = nn.Linear(
+            in_features=self.fc_in_features,
             out_features=cfg.ENCODER.FC_OUT_FEATURES[0]
         )
 
         self.encoder_fc_layers = nn.ModuleList(
-            [self.encoder_layer_1]
+            [encoder_fc_layer_1]
         )
         for i in range(1, len(cfg.ENCODER.FC_OUT_FEATURES)):
             out_features = cfg.ENCODER.FC_OUT_FEATURES[i]
-            if i == len(cfg.ENCODER.FC_OUT_FEATURES):
+            if i == len(cfg.ENCODER.FC_OUT_FEATURES) - 1:
                 out_features = cfg.ENCODING_SIZE
-            self.encoder_layers.append(
+            self.encoder_fc_layers.append(
                 nn.Linear(
                     in_features=cfg.ENCODER.FC_OUT_FEATURES[i - 1],
                     out_features=out_features
@@ -79,10 +87,13 @@ class Autoencoder(nn.Module):
             [self.decoder_fc_layer_1]
         )
         for i in range(1, len(cfg.DECODER.FC_OUT_FEATURES)):
+            out_features = cfg.DECODER.FC_OUT_FEATURES[i]
+            if i == len(cfg.ENCODER.FC_OUT_FEATURES) - 1:
+                out_features = self.fc_in_features
             self.decoder_fc_layers.append(
                 nn.Linear(
                     in_features=cfg.DECODER.FC_OUT_FEATURES[i - 1],
-                    out_features=cfg.DECODER.FC_OUT_FEATURES[i]
+                    out_features=out_features
                 )
             )
 
@@ -90,7 +101,12 @@ class Autoencoder(nn.Module):
 
         decoder_conv_layers = []
         for i in range(0, DEC_CLAYERS):
-            in_channels = cfg.DECODER.FC_OUT_FEATURES[-1]
+            
+            in_channels = cfg.DECODER.FC_OUT_FEATURES[-1] # TODO REMOVE
+            if i == 0:
+                in_channels = cfg.ENCODER.CNV_OUT_CHANNELS[-1]
+            else:
+                in_channels = cfg.DECODER.CNV_OUT_CHANNELS[i-1]
             out_channels = cfg.DECODER.CNV_OUT_CHANNELS[i]
             if i == DEC_CLAYERS - 1:
                 out_channels = cfg.IMAGE_CHANNELS
@@ -100,16 +116,12 @@ class Autoencoder(nn.Module):
                 out_channels=out_channels,
                 kernel_size=2,
                 stride=2,
-                padding=1,
-            )
-            maxpool = nn.MaxPool2d(
-                kernel_size=MAXPOOL_KERNEL_SIZE  # Could need to be a tuple if images are non-square
+                padding=0,
             )
             relu = nn.ReLU()
-            self.encoder_conv_layers.append(
+            decoder_conv_layers.append(
                 nn.Sequential(
                     convolutional_layer,
-                    maxpool,
                     relu
                 )
             )
@@ -117,13 +129,24 @@ class Autoencoder(nn.Module):
         self.decoder = nn.ModuleList(decoder_conv_layers)
 
     def encode(self, image):
-        features = self.feature_extractor(image)
-        encoding = self.encoder_fc_layers(features)
+        for layer in self.feature_extractor:
+            image = layer(image)
+
+        image = image.view(-1, self.fc_in_features)
+        for layer in self.encoder_fc_layers:
+            image = layer(image)
+
+        encoding = image
         return encoding
 
     def decode(self, encoding):
-        fc_result = self.decoder_fc_layers(encoding)
-        decoded = self.decoder(fc_result)
+        for layer in self.decoder_fc_layers:
+            encoding = layer(encoding)
+
+        encoding = encoding.view(self.batch_size, self.final_channels, self.final_conv_x, self.final_conv_y)
+        for layer in self.decoder:
+            encoding = layer(encoding)
+        decoded = encoding
         return decoded
 
     def forward(self, image):

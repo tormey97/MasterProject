@@ -1,11 +1,11 @@
 import torch
 from torch import nn
 import argparse
-from .configs.defaults import cfg
+from autoencoder.configs.defaults import cfg
 import pathlib
 from data_management.logger import setup_logger
-from .inference import do_evaluation
-from .trainer import start_train
+from autoencoder.inference import do_evaluation
+from autoencoder.trainer import start_train
 from torchvision import datasets
 
 def get_parser():
