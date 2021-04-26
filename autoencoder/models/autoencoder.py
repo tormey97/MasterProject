@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 
 
-KERNEL_SIZE = 3
+KERNEL_SIZE = 5
 MAXPOOL_KERNEL_SIZE = 2
 
 
@@ -32,7 +32,8 @@ class Autoencoder(nn.Module):
                 in_channels=in_channels,
                 out_channels=out_channels,
                 kernel_size=KERNEL_SIZE,
-                padding=1,
+                padding=2,
+                stride=2,
             )
             maxpool = nn.MaxPool2d(
                 kernel_size=MAXPOOL_KERNEL_SIZE  # Could need to be a tuple if images are non-square
@@ -40,6 +41,8 @@ class Autoencoder(nn.Module):
             encoder_conv_layers.append(
                 nn.Sequential(
                     convolutional_layer,
+                    nn.BatchNorm2d(out_channels),
+                    nn.Dropout2d(p=0.05),
                     maxpool,
                 )
             )
@@ -103,7 +106,7 @@ class Autoencoder(nn.Module):
         decoder_conv_layers = []
         DEC_CLAYERS = len(cfg.DECODER.CNV_OUT_CHANNELS)
         for i in range(0, DEC_CLAYERS):
-            
+
             in_channels = cfg.DECODER.FC_OUT_FEATURES[-1] # TODO REMOVE
             if i == 0:
                 in_channels = cfg.ENCODER.CNV_OUT_CHANNELS[-1]
@@ -120,12 +123,17 @@ class Autoencoder(nn.Module):
                 stride=2,
                 padding=0,
             )
+            torch.nn.init.xavier_uniform(convolutional_layer.weight)
             relu = nn.ReLU()
             if i == DEC_CLAYERS - 1:
                 relu = nn.Sigmoid()
             decoder_conv_layers.append(
                 nn.Sequential(
                     convolutional_layer,
+                    nn.Upsample(
+                        mode="bilinear",
+                        scale_factor=2
+                    ),
                     relu
                 )
             )
@@ -134,15 +142,18 @@ class Autoencoder(nn.Module):
 
     def encode(self, image):
 
+        encoding_layer_outputs = []
         for layer in self.feature_extractor:
             image = layer(image)
+            if True: # TODO configure regularization / feature visualization
+                encoding_layer_outputs.append(image)
         """
         image = image.view(image.size(0), self.fc_in_features // image.size(0))
         for layer in self.encoder_fc_layers:
             image = layer(image)"""
 
         encoding = image
-        return encoding
+        return encoding, encoding_layer_outputs
 
     def decode(self, encoding):
         """ for layer in self.decoder_fc_layers:
@@ -150,12 +161,17 @@ class Autoencoder(nn.Module):
         print(encoding.shape)
         encoding = encoding.view(self.batch_size, self.image_channels, self.final_conv_x, self.final_conv_y)
         """
+        decoding_layer_outputs = []
         for layer in self.decoder:
             encoding = layer(encoding)
-            print(encoding.shape)
+            if True: # TODO configure regularization / feature visualization
+                decoding_layer_outputs.append(encoding)
 
         decoded = encoding
-        return decoded
+        return decoded, decoding_layer_outputs
 
     def forward(self, image):
-        return self.decode(self.encode(image))
+        encoding, encoding_layer_outputs = self.encode(image)
+        # return the decoding as well as decoding_layer_outputs and encoding_layer_outputs for regularization purposes
+        decoded, decoding_layer_outputs = self.decode(encoding)
+        return decoded, decoding_layer_outputs, encoding_layer_outputs

@@ -28,12 +28,17 @@ cfg.SOLVER.SCHEDULER_STEPSIZE = 500
 cfg.SOLVER.WARMUP_UNTIL = 500
 cfg.SOLVER.WARMUP = False
 cfg.SOLVER.WHICH_OPTIMIZER = "SGD" # Can be "Adam"
+cfg.SOLVER.L1_REGULARIZATION_FACTOR = 0.00008
+
+cfg.VISUALIZATION = CN()
+
+cfg.VISUALIZATION.VISUALIZE_ITER = 50 # visualize every N iterations
 
 cfg.TEST = CN()
 cfg.TEST.BATCH_SIZE = 10
 cfg.EVAL_STEP = 2000 # Evaluate dataset every eval_step, disabled when eval_step < 0
 cfg.MODEL_SAVE_STEP = 500 # Save checkpoint every save_step
-cfg.LOG_STEP = 10 # Print logs every log_stepPrint logs every log_step
+cfg.LOG_STEP = 5 # Print logs every log_stepPrint logs every log_step
 cfg.OUTPUT_DIR = "autoencoder_outputs"
 cfg.BATCH_SIZE = 8
 cfg.DATASET_NAME = "voc"

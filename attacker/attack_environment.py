@@ -13,19 +13,21 @@ import copy
 import time
 from tqdm import tqdm
 from SSD.ssd.modeling.detector.ssd_detector import SSDDetector
-from SSD.ssd.config import cfg
-from SSD.ssd.utils.logger import setup_logger
-from SSD.ssd.utils import dist_util
-from SSD.ssd.utils.dist_util import synchronize
-from SSD.ssd.data.build import make_data_loader
-from SSD.ssd.data.datasets.evaluation.voc.eval_detection_voc import *
 
-class AttackEnvironment(gym.Env):
+
+def create_object_detector(cfg):
+
+    pass
+
+
+class AttackEnvironment(gym.Env, cfg):
     def __init__(self):
         super().__init__()
         self.current_image = None
         self.current_step = 0
         self.obj_detector = None #TODO
+        self.autoencoder = None
+        self.data_loader = None # Loads the data.
 
     def calculate_map(self):
         pass

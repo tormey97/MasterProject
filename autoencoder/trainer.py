@@ -18,15 +18,35 @@ import cv2
 
 import os
 
-def save_decod_img(img, epoch):
-    img = img.view(img.size(0), 3, 256, 256)
-    save_image(img, './MNIST_Out_Images/Autoencoder_image{}.png'.format(epoch))
+MAX_FILTERS_TO_VISUALIZE = 10
+def save_decod_img(img, epoch, cfg, w=None, h=None):
+    if w is None or h is None:
+        w = cfg.IMAGE_SIZE[0]
+        h = cfg.IMAGE_SIZE[1]
+    chan = img.size(1)
+    if len(img.shape) > 2 and img.size(1) != cfg.IMAGE_CHANNELS:
+        chan = [i for i in range(img.size(1))]
+    # convolutional filter visualization
+    if type(chan) == list:
+        visualized = 0
+        for r in np.rollaxis(img.detach().cpu().numpy(), 1):
+            visualized += 1
+            if visualized >= MAX_FILTERS_TO_VISUALIZE:
+                break
+            save_image(torch.Tensor(r), './autoenc_out/{}Autoencoder_image.png'.format(epoch))
+    else:
+        img = img.view(img.size(0), chan, w, h)
+        save_image(img, './autoenc_out/Autoencoder_image{}.png'.format(epoch))
+
 
 def make_dir():
     image_dir = 'MNIST_Out_Images'
     if not os.path.exists(image_dir):
         os.makedirs(image_dir)
 
+def visualize_layer_chain(recon_img, target_img, enc_outputs, dec_outputs, cfg):
+    # TODO show activations
+    pass
 
 def do_train(
         cfg,
@@ -43,21 +63,44 @@ def do_train(
     model.train()
     criterion = torch.nn.BCELoss()
 
+    last_log = 0
+    idx_since_last_log = 0
     for i in range(0, 10000):
         for iteration, (images) in enumerate(data_loader):
 
+            idx_since_last_log += 1
             iteration += 1
             arguments["iteration"] = iteration
 
+            # Convert to cuda
             images = images.to(get_device())
-            optimizer.zero_grad()
-            reconstructed_images=model(images)
 
-            loss = criterion(reconstructed_images, images),
-            if iteration % 50 == 0:
-                print("ITERATION: ", iteration, "LOSS: ", loss)
-                save_decod_img(images.cpu().data, str(iteration) + "gud")
-                save_decod_img(reconstructed_images.cpu().data, str(i)+"_"+(str(iteration)))
+            # Run batch on model
+            reconstructed_images, dec_outputs, enc_outputs = model(images)
+
+            # -------- L1 Regularization -------- #
+            added_loss = 0
+            if cfg.SOLVER.L1_REGULARIZATION_FACTOR > 0:
+                l1_enc = sum([torch.norm(output) for output in enc_outputs])
+               # l1_dec = sum([torch.norm(output) for output in dec_outputs])
+                added_loss += cfg.SOLVER.L1_REGULARIZATION_FACTOR * (l1_enc)
+            optimizer.zero_grad()
+
+            # Calculate loss
+            loss = criterion(reconstructed_images, images) + added_loss,
+
+            # Print
+            if iteration == 0 or idx_since_last_log - last_log  == 3000:
+                last_log = iteration
+                print("ITERATION: ", iteration, "LOSS: ", loss, "ENC_LOSS: ", added_loss)
+                save_decod_img(images.cpu().data, "RECONSTRUCTION" + str(iteration) + "gud", cfg)
+                save_decod_img(reconstructed_images.cpu().data, "TARGET" + str(i)+"_"+(str(iteration)), cfg)
+                # Visualizing output features
+                for i in range(len(enc_outputs)):
+                    save_decod_img(enc_outputs[i],"ENCODING" + str(iteration) + "_" + str(i) + "_" + "enc", cfg, w=enc_outputs[i].shape[2], h=enc_outputs[i].shape[3])
+                    save_decod_img(dec_outputs[i],"DECODING" + str(iteration) + "_" + str(i) + "_" + "dec", cfg, w=dec_outputs[i].shape[2],
+                                   h=dec_outputs[i].shape[3])
+
             loss[0].backward()
 
             optimizer.step()
