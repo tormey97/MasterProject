@@ -33,7 +33,8 @@ def save_decod_img(img, epoch, cfg, w=None, h=None):
             visualized += 1
             if visualized >= MAX_FILTERS_TO_VISUALIZE:
                 break
-            save_image(torch.Tensor(r), './autoenc_out/{}Autoencoder_image.png'.format(epoch))
+            if get_device() == "cpu":
+                save_image(torch.Tensor(r), './autoenc_out/{}Autoencoder_image.png'.format(epoch))
     else:
         img = img.view(img.size(0), chan, w, h)
         save_image(img, './autoenc_out/Autoencoder_image{}.png'.format(epoch))
@@ -90,7 +91,7 @@ def do_train(
             loss = criterion(reconstructed_images, images) + added_loss,
 
             # Print
-            if iteration == 0 or idx_since_last_log - last_log  == 3000:
+            if iteration == 0 or idx_since_last_log - last_log  == 2000:
                 last_log = iteration
                 print("ITERATION: ", iteration, "LOSS: ", loss, "ENC_LOSS: ", added_loss)
                 save_decod_img(images.cpu().data, "RECONSTRUCTION" + str(iteration) + "gud", cfg)
