@@ -66,7 +66,7 @@ def do_train(
 
     last_log = 0
     idx_since_last_log = 0
-    for i in range(0, 10000):
+    for epoch in range(0, 10000):
         for iteration, (images) in enumerate(data_loader):
 
             idx_since_last_log += 1
@@ -91,15 +91,15 @@ def do_train(
             loss = criterion(reconstructed_images, images) + added_loss,
 
             # Print
-            if iteration == 0 or idx_since_last_log - last_log  == 2000:
+            if iteration == 0 or idx_since_last_log - last_log  == 1000:
                 last_log = iteration
                 print("ITERATION: ", iteration, "LOSS: ", loss, "ENC_LOSS: ", added_loss)
-                save_decod_img(images.cpu().data, "RECONSTRUCTION" + str(iteration) + "gud", cfg)
-                save_decod_img(reconstructed_images.cpu().data, "TARGET" + str(i)+"_"+(str(iteration)), cfg)
+                save_decod_img(images.cpu().data, "TARGET" + str(iteration) + "gud", cfg)
+                save_decod_img(reconstructed_images.cpu().data, "RECONSTRUCTION" + str(epoch)+"_"+(str(iteration)), cfg)
                 # Visualizing output features
                 for i in range(len(enc_outputs)):
-                    save_decod_img(enc_outputs[i],"ENCODING" + str(iteration) + "_" + str(i) + "_" + "enc", cfg, w=enc_outputs[i].shape[2], h=enc_outputs[i].shape[3])
-                    save_decod_img(dec_outputs[i],"DECODING" + str(iteration) + "_" + str(i) + "_" + "dec", cfg, w=dec_outputs[i].shape[2],
+                    save_decod_img(enc_outputs[i],"ENCODING" + str(epoch) + "_" + str(iteration) + "_" + str(i) + "_" + "enc", cfg, w=enc_outputs[i].shape[2], h=enc_outputs[i].shape[3])
+                    save_decod_img(dec_outputs[i],"DECODING" + str(epoch) + "_" +  str(iteration) + "_" + str(i) + "_" + "dec", cfg, w=dec_outputs[i].shape[2],
                                    h=dec_outputs[i].shape[3])
 
             loss[0].backward()
