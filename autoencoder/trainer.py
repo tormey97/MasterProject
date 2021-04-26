@@ -63,13 +63,12 @@ def do_train(
     make_dir()
     model.train()
     criterion = torch.nn.BCELoss()
-
-    last_log = 0
-    idx_since_last_log = 0
+    iteration = arguments["iteration"]
     for epoch in range(0, 10000):
-        for iteration, (images) in enumerate(data_loader):
+        last_log = 0
 
-            idx_since_last_log += 1
+        for i, (images) in enumerate(data_loader):
+
             iteration += 1
             arguments["iteration"] = iteration
 
@@ -89,11 +88,16 @@ def do_train(
 
             # Calculate loss
             loss = criterion(reconstructed_images, images) + added_loss,
+            loss[0].backward()
+
+            optimizer.step()
 
             # Print
-            if iteration == 0 or idx_since_last_log - last_log  == 1000:
+            if iteration == 0 or iteration - last_log >= cfg.LOG_STEP:
                 last_log = iteration
-                print("ITERATION: ", iteration, "LOSS: ", loss, "ENC_LOSS: ", added_loss)
+                logger.info("ITERATION: ", iteration, "LOSS: ", loss, "ENC_LOSS: ", added_loss)
+                print("_ITERATION: ", iteration, "LOSS: ", loss, "ENC_LOSS: ", added_loss)
+
                 save_decod_img(images.cpu().data, "TARGET" + str(iteration) + "gud", cfg)
                 save_decod_img(reconstructed_images.cpu().data, "RECONSTRUCTION" + str(epoch)+"_"+(str(iteration)), cfg)
                 # Visualizing output features
@@ -102,9 +106,9 @@ def do_train(
                     save_decod_img(dec_outputs[i],"DECODING" + str(epoch) + "_" +  str(iteration) + "_" + str(i) + "_" + "dec", cfg, w=dec_outputs[i].shape[2],
                                    h=dec_outputs[i].shape[3])
 
-            loss[0].backward()
-
-            optimizer.step()
+            if iteration % cfg.MODEL.SAVE_STEP == 0:
+                print("SAVING MODEL AT ITERATION ", iteration)
+                checkpointer.save("model_{:06d}".format(iteration), **arguments)
 
 
 
@@ -138,7 +142,7 @@ def start_train(cfg):
     ])
     trainset, testset = None, None
 
-    if False:
+    if cfg.DATASET_NAME == "mnist_fashion":
         trainset = datasets.FashionMNIST(
             root='./datasetss',
             train=True,
@@ -151,8 +155,7 @@ def start_train(cfg):
             download=True,
             transform=transform
         )
-
-    elif False:
+    elif cfg.DATASET_NAME == "test":
         trainset = ImageDataset(transform=transform)
         testset = ImageDataset(transform=transform)
     elif cfg.DATASET_NAME == "voc":
@@ -202,7 +205,6 @@ def start_train(cfg):
     arguments.update(extra_checkpoint_data)
 
     max_iter = cfg.SOLVER.MAX_ITER
-    #train_loader = make_data_loader(cfg, is_train=True, max_iter=max_iter, start_iter=arguments['iteration'])
 
     model = do_train(
         cfg, model, train_loader, optimizer,

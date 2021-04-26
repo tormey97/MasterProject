@@ -1,4 +1,6 @@
 IMAGE_SIZE: [256, 256]
+MODEL:
+  SAVE_STEP: 5
 ENCODER:
   CNV_OUT_CHANNELS: [256, 3]
 
@@ -10,8 +12,7 @@ SOLVER:
   LR: 0.2
   WHICH_OPTIMIZER: "SGD"
 
-LOG_STEP: 500
-BATCH_SIZE: 16
-DATASET_NAME: "voc"
-
-OUTPUT_DIR: "autoencoder_outputs/2_layers_lr_02_256to3_256x256"
+LOG_STEP: 10
+BATCH_SIZE: 1
+DATASET_NAME: "test"
+OUTPUT_DIR: "autoencoder_outputs/test"

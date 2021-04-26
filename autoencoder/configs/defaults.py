@@ -2,6 +2,7 @@ from yacs.config import CfgNode as CN
 
 cfg = CN()
 cfg.MODEL = CN()
+cfg.MODEL.SAVE_STEP = 5000
 cfg.IMAGE_SIZE = [256, 256]
 cfg.IMAGE_CHANNELS = 3
 cfg.ENCODING_SIZE = 8

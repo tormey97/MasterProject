@@ -48,71 +48,25 @@ class Autoencoder(nn.Module):
             )
 
         self.feature_extractor = nn.ModuleList(encoder_conv_layers)
+        self.feature_extractor.append(nn.AvgPool2d(
+            kernel_size=MAXPOOL_KERNEL_SIZE,
 
-        # Convert to fully connected layers
-        batch_size = self.batch_size
-        self.final_conv_x = cfg.IMAGE_SIZE[0] // 2 ** len(cfg.ENCODER.CNV_OUT_CHANNELS)
-        self.final_conv_y = cfg.IMAGE_SIZE[0] // 2 ** len(cfg.ENCODER.CNV_OUT_CHANNELS)
-        self.final_channels = cfg.ENCODER.CNV_OUT_CHANNELS[-1]
-        self.fc_in_features = batch_size * self.final_conv_x * self.final_conv_y * self.final_channels
-
-        # Fully connected layers (Encoding)
-        encoder_fc_layer_1 = nn.Linear(
-            in_features=self.fc_in_features // batch_size,
-            out_features=cfg.ENCODER.FC_OUT_FEATURES[0]
-        )
-
-        self.encoder_fc_layers = nn.ModuleList(
-            [encoder_fc_layer_1]
-        )
-        for i in range(1, len(cfg.ENCODER.FC_OUT_FEATURES)):
-            out_features = cfg.ENCODER.FC_OUT_FEATURES[i]
-            if i == len(cfg.ENCODER.FC_OUT_FEATURES) - 1:
-                out_features = cfg.ENCODING_SIZE
-            self.encoder_fc_layers.append(
-                nn.Linear(
-                    in_features=cfg.ENCODER.FC_OUT_FEATURES[i - 1],
-                    out_features=out_features
-                )
-            )
-
-
-
-        # ------------------ DECODER ------------------ #
-        self.decoder_fc_layer_1 = nn.Linear(
-            in_features=cfg.ENCODING_SIZE,
-            out_features=cfg.DECODER.FC_OUT_FEATURES[0]
-        )
-
-        self.decoder_fc_layers = nn.ModuleList(
-            [self.decoder_fc_layer_1]
-        )
-        for i in range(1, len(cfg.DECODER.FC_OUT_FEATURES)):
-            out_features = cfg.DECODER.FC_OUT_FEATURES[i]
-            if i == len(cfg.ENCODER.FC_OUT_FEATURES) - 1:
-                out_features = cfg.IMAGE_SIZE[0] * cfg.IMAGE_SIZE[1]
-            self.decoder_fc_layers.append(
-                nn.Linear(
-                    in_features=cfg.DECODER.FC_OUT_FEATURES[i - 1],
-                    out_features=out_features
-                ),
-            )
-            self.decoder_fc_layers.append(
-                nn.ReLU(),
-            )
-
-        # Deconvolutional layers
-
+        ))
+        # ------------------ DECODER ------------------
         decoder_conv_layers = []
+        decoder_conv_layers.append(nn.Upsample(
+            mode="bilinear",
+            scale_factor=2
+        ))
         DEC_CLAYERS = len(cfg.DECODER.CNV_OUT_CHANNELS)
         for i in range(0, DEC_CLAYERS):
+            # First layer takes in encoding
+            in_channels = cfg.ENCODER.CNV_OUT_CHANNELS[-1]
+            if i != 0:
+                in_channels = cfg.DECODER.CNV_OUT_CHANNELS[i - 1]
 
-            in_channels = cfg.DECODER.FC_OUT_FEATURES[-1] # TODO REMOVE
-            if i == 0:
-                in_channels = cfg.ENCODER.CNV_OUT_CHANNELS[-1]
-            else:
-                in_channels = cfg.DECODER.CNV_OUT_CHANNELS[i-1]
             out_channels = cfg.DECODER.CNV_OUT_CHANNELS[i]
+            # Last layer should return an RGB or greyscale image
             if i == DEC_CLAYERS - 1:
                 out_channels = cfg.IMAGE_CHANNELS
 
@@ -127,18 +81,21 @@ class Autoencoder(nn.Module):
             relu = nn.ReLU()
             if i == DEC_CLAYERS - 1:
                 relu = nn.Sigmoid()
+            upsample = nn.Upsample(
+                        mode="bilinear",
+                        scale_factor=2
+                    )
+
             decoder_conv_layers.append(
                 nn.Sequential(
                     convolutional_layer,
-                    nn.Upsample(
-                        mode="bilinear",
-                        scale_factor=2
-                    ),
-                    relu
+                    upsample,
+                    relu,
                 )
             )
 
         self.decoder = nn.ModuleList(decoder_conv_layers)
+
 
     def encode(self, image):
 
@@ -147,20 +104,10 @@ class Autoencoder(nn.Module):
             image = layer(image)
             if True: # TODO configure regularization / feature visualization
                 encoding_layer_outputs.append(image)
-        """
-        image = image.view(image.size(0), self.fc_in_features // image.size(0))
-        for layer in self.encoder_fc_layers:
-            image = layer(image)"""
-
         encoding = image
         return encoding, encoding_layer_outputs
 
     def decode(self, encoding):
-        """ for layer in self.decoder_fc_layers:
-            encoding = layer(encoding)
-        print(encoding.shape)
-        encoding = encoding.view(self.batch_size, self.image_channels, self.final_conv_x, self.final_conv_y)
-        """
         decoding_layer_outputs = []
         for layer in self.decoder:
             encoding = layer(encoding)
