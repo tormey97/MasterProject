@@ -35,7 +35,7 @@ class Autoencoder(nn.Module):
                 out_channels=out_channels,
                 kernel_size=KERNEL_SIZE,
                 padding=2,
-                stride=2,
+                stride=1,
             )
             maxpool = nn.MaxPool2d(
                 kernel_size=MAXPOOL_KERNEL_SIZE,  # Could need to be a tuple if images are non-square
@@ -98,10 +98,6 @@ class Autoencoder(nn.Module):
             decoder_conv_layers.append(
                 nn.Sequential(
                     convolutional_layer,
-                    nn.Upsample(
-                        scale_factor=2,
-                        mode="bilinear"
-                    ),
                     relu,
                 )
             )
