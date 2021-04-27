@@ -3,6 +3,8 @@ from yacs.config import CfgNode as CN
 cfg = CN()
 cfg.MODEL = CN()
 cfg.MODEL.SAVE_STEP = 5000
+cfg.MODEL.AVGPOOL_ENCODING = False
+cfg.MODEL.AVG_POOL_COUNT = 1
 cfg.IMAGE_SIZE = [256, 256]
 cfg.IMAGE_CHANNELS = 3
 cfg.ENCODING_SIZE = 8
@@ -30,7 +32,7 @@ cfg.SOLVER.WARMUP_UNTIL = 500
 cfg.SOLVER.WARMUP = False
 cfg.SOLVER.WHICH_OPTIMIZER = "SGD" # Can be "Adam"
 cfg.SOLVER.L1_REGULARIZATION_FACTOR = 0.00008
-
+cfg.SOLVER.LOSS_FUNCTION = "BCE"
 cfg.VISUALIZATION = CN()
 
 cfg.VISUALIZATION.VISUALIZE_ITER = 50 # visualize every N iterations

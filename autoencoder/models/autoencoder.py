@@ -19,6 +19,8 @@ class Autoencoder(nn.Module):
 
         # Convolutional layers (Feature extraction)
         encoder_conv_layers = []
+        encoder_max_pools = []
+        self.cfg = cfg
         self.image_channels = cfg.IMAGE_CHANNELS
         self.batch_size = cfg.BATCH_SIZE
         self.image_size = cfg.IMAGE_SIZE
@@ -36,28 +38,27 @@ class Autoencoder(nn.Module):
                 stride=2,
             )
             maxpool = nn.MaxPool2d(
-                kernel_size=MAXPOOL_KERNEL_SIZE  # Could need to be a tuple if images are non-square
+                kernel_size=MAXPOOL_KERNEL_SIZE,  # Could need to be a tuple if images are non-square
+                return_indices=True
             )
             encoder_conv_layers.append(
                 nn.Sequential(
                     convolutional_layer,
                     nn.BatchNorm2d(out_channels),
                     nn.Dropout2d(p=0.05),
-                    maxpool,
                 )
+            )
+            encoder_max_pools.append(
+                maxpool
             )
 
         self.feature_extractor = nn.ModuleList(encoder_conv_layers)
-        self.feature_extractor.append(nn.AvgPool2d(
-            kernel_size=MAXPOOL_KERNEL_SIZE,
+        self.encoder_maxpools = nn.ModuleList(encoder_max_pools)
 
-        ))
         # ------------------ DECODER ------------------
         decoder_conv_layers = []
-        decoder_conv_layers.append(nn.Upsample(
-            mode="bilinear",
-            scale_factor=2
-        ))
+        decoder_unpooling = []
+
         DEC_CLAYERS = len(cfg.DECODER.CNV_OUT_CHANNELS)
         for i in range(0, DEC_CLAYERS):
             # First layer takes in encoding
@@ -77,48 +78,71 @@ class Autoencoder(nn.Module):
                 stride=2,
                 padding=0,
             )
-            torch.nn.init.xavier_uniform(convolutional_layer.weight)
+
+            if i == DEC_CLAYERS - 1:
+                torch.nn.init.uniform_(convolutional_layer.weight, -2, 2)
+            else:
+                torch.nn.init.xavier_uniform_(convolutional_layer.weight)
+
             relu = nn.ReLU()
             if i == DEC_CLAYERS - 1:
-                relu = nn.Sigmoid()
-            upsample = nn.Upsample(
-                        mode="bilinear",
-                        scale_factor=2
+                if cfg.SOLVER.LOSS_FUNCTION == "BCE":
+                    relu = nn.Sigmoid()
+                else:
+                    relu = nn.Sigmoid()
+
+            unpool = nn.MaxUnpool2d(
+                        kernel_size=MAXPOOL_KERNEL_SIZE,
                     )
 
             decoder_conv_layers.append(
                 nn.Sequential(
                     convolutional_layer,
-                    upsample,
+                    nn.Upsample(
+                        scale_factor=2,
+                        mode="bilinear"
+                    ),
                     relu,
                 )
             )
+            decoder_unpooling.append(
+                unpool
+            )
 
         self.decoder = nn.ModuleList(decoder_conv_layers)
-
+        self.decoder_unpooling = nn.ModuleList(decoder_unpooling)
 
     def encode(self, image):
 
         encoding_layer_outputs = []
-        for layer in self.feature_extractor:
+        pooling_indices = []
+        for i, layer in enumerate(self.feature_extractor):
             image = layer(image)
             if True: # TODO configure regularization / feature visualization
                 encoding_layer_outputs.append(image)
+            image, indices = self.encoder_maxpools[i](image)
+           # pooling_indices.append(indices)
+        for i in range(self.cfg.MODEL.AVG_POOL_COUNT):
+            image = F.avg_pool2d(image, 2)
         encoding = image
-        return encoding, encoding_layer_outputs
 
-    def decode(self, encoding):
+        pooling_indices.reverse()
+        return encoding, encoding_layer_outputs, pooling_indices
+
+    def decode(self, encoding, pooling_indices):
         decoding_layer_outputs = []
-        for layer in self.decoder:
+        for i in range(self.cfg.MODEL.AVG_POOL_COUNT):
+            encoding = F.upsample_bilinear(encoding, scale_factor=2)
+        for i, layer in enumerate(self.decoder):
+            # encoding = self.decoder_unpooling[i](encoding, pooling_indices[i])
             encoding = layer(encoding)
             if True: # TODO configure regularization / feature visualization
                 decoding_layer_outputs.append(encoding)
-
         decoded = encoding
         return decoded, decoding_layer_outputs
 
     def forward(self, image):
-        encoding, encoding_layer_outputs = self.encode(image)
+        encoding, encoding_layer_outputs, pooling_indices = self.encode(image)
         # return the decoding as well as decoding_layer_outputs and encoding_layer_outputs for regularization purposes
-        decoded, decoding_layer_outputs = self.decode(encoding)
+        decoded, decoding_layer_outputs = self.decode(encoding, pooling_indices)
         return decoded, decoding_layer_outputs, encoding_layer_outputs

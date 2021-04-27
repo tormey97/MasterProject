@@ -34,7 +34,8 @@ def save_decod_img(img, epoch, cfg, w=None, h=None):
             if visualized >= MAX_FILTERS_TO_VISUALIZE:
                 break
             if get_device() == "cpu":
-                save_image(torch.Tensor(r), './autoenc_out/{}Autoencoder_image.png'.format(epoch))
+                pass
+                #save_image(torch.Tensor(r), './autoenc_out/{}Autoencoder_image.png'.format(epoch))
     else:
         img = img.view(img.size(0), chan, w, h)
         save_image(img, './autoenc_out/Autoencoder_image{}.png'.format(epoch))
@@ -62,7 +63,9 @@ def do_train(
     logger.info("Start training ...")
     make_dir()
     model.train()
-    criterion = torch.nn.BCELoss()
+    criterion = torch.nn.MSELoss()
+    if cfg.SOLVER.LOSS_FUNCTION == "BCE":
+        criterion = torch.nn.BCELoss()
     iteration = arguments["iteration"]
     for epoch in range(0, 10000):
         last_log = 0
@@ -82,7 +85,7 @@ def do_train(
             added_loss = 0
             if cfg.SOLVER.L1_REGULARIZATION_FACTOR > 0:
                 l1_enc = sum([torch.norm(output) for output in enc_outputs])
-               # l1_dec = sum([torch.norm(output) for output in dec_outputs])
+                #l1_dec = sum([torch.norm(output) for output in dec_outputs])
                 added_loss += cfg.SOLVER.L1_REGULARIZATION_FACTOR * (l1_enc)
             optimizer.zero_grad()
 
@@ -102,6 +105,7 @@ def do_train(
                 save_decod_img(reconstructed_images.cpu().data, "RECONSTRUCTION" + str(epoch)+"_"+(str(iteration)), cfg)
                 # Visualizing output features
                 for i in range(len(enc_outputs)):
+                    pass
                     save_decod_img(enc_outputs[i],"ENCODING" + str(epoch) + "_" + str(iteration) + "_" + str(i) + "_" + "enc", cfg, w=enc_outputs[i].shape[2], h=enc_outputs[i].shape[3])
                     save_decod_img(dec_outputs[i],"DECODING" + str(epoch) + "_" +  str(iteration) + "_" + str(i) + "_" + "dec", cfg, w=dec_outputs[i].shape[2],
                                    h=dec_outputs[i].shape[3])
