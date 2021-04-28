@@ -11,7 +11,7 @@ import numpy as np
 
 class VocDataset(VOCDetection):
     def __init__(self, root="~/data/pascal_voc", image_set="train", download=True, transform=None):
-        super().__init__(root=root, image_set=image_set, download=True, transform=transform)
+        super().__init__(root=root, image_set=image_set, download=download, transform=transform)
         self.transform = transform
 
     def __getitem__(self, i):
