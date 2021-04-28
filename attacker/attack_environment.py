@@ -15,19 +15,26 @@ import time
 from tqdm import tqdm
 from SSD.ssd.modeling.detector.ssd_detector import SSDDetector
 from data_management.checkpoint import CheckPointer
-
+from SSD.ssd.utils.checkpoint import CheckPointer as SSDCheckPointer
 import autoencoder.models.autoencoder as enc
 from gym.spaces.box import Box
 from gym.spaces.tuple import Tuple
 
 from SSD.ssd.data.datasets.evaluation.voc.eval_detection_voc import *
 
+import SSD.ssd.data.transforms as detection_transforms
+import SSD.ssd.data.transforms.target_transform as target_transforms
+from SSD.ssd.data.transforms.transforms import Resize, ToCV2Image, ToTensor
+
+from PIL import Image
+from vizer.draw import draw_boxes
+from SSD.ssd.data.datasets import COCODataset, VOCDataset
 
 
 def create_target(cfg):
     model = SSDDetector(cfg)
-    checkpointer = CheckPointer(model, save_dir=cfg.OUTPUT_DIR)
-    checkpointer.load(use_latest=True)
+    checkpointer = SSDCheckPointer(model, save_dir=cfg.OUTPUT_DIR)
+    checkpointer.load('https://github.com/lufficc/SSD/releases/download/1.2/vgg_ssd300_voc0712.pth', use_latest=False)
     return model
 
 
@@ -63,14 +70,54 @@ class AttackEnvironment(gym.Env):
         self.action_space = Box(-1, 1, [48])  # TODO configurable
         self.observation_space = Box(-1, 1, [48])
 
-    def calculate_map(self, image):
-        preds = self.target(image, targets=self.image_data[1]) #TODO device
+        self.step_ctr = 0
 
-        prec, rec = calc_detection_voc_prec_rec([preds[0]["boxes"].detach().to("cpu").numpy()],
-                                                [preds[0]["labels"].detach().to("cpu").numpy()],
-                                                [preds[0]["scores"].detach().to("cpu").numpy()],
-                                                [self.annotations[1][0]],
-                                                [self.annotations[1][1]],
+    def calculate_map(self, image):
+        transform = detection_transforms.Compose([
+            detection_transforms.ToCV2Image(),
+            detection_transforms.ConvertFromInts(),
+            detection_transforms.ToPercentCoords(),
+            detection_transforms.Resize(300),
+            ToTensor(),
+        ])
+
+        transform2 = detection_transforms.Compose([
+            detection_transforms.ToCV2Image(),
+            detection_transforms.ConvertFromInts(),
+            detection_transforms.ToPercentCoords(),
+            detection_transforms.Resize(160),
+            detection_transforms.ToAbsoluteCoords(),
+            ToTensor(),
+        ])
+
+        image = image[0]
+        boxes = self.image_data[1]["boxes"][0]
+        labels = self.image_data[1]["labels"][0]
+        _, gt_boxes, gt_labels = transform2(image, self.annotations[1][0], self.annotations[1][1])
+
+        image, boxes, labels = transform(image, boxes, labels)
+
+        targets = {'boxes': boxes, 'labels': labels}
+        preds = self.target(image.unsqueeze(0), targets=targets)[0] #TODO device
+
+
+        pred_boxes = preds["boxes"].detach().to("cpu").numpy()
+        pred_labels = preds["labels"].detach().to("cpu").numpy()
+        pred_scores = preds["scores"].detach().to("cpu").numpy()
+        indices = pred_scores > 0.9
+        pred_boxes = pred_boxes[indices]
+        pred_labels = pred_labels[indices]
+        pred_scores = pred_scores[indices]
+        cv2image = image.detach().cpu().numpy().transpose((1, 2, 0)).astype(np.uint8)
+
+        drawn_image = draw_boxes(cv2image, pred_boxes, pred_labels, pred_scores, VOCDataset.class_names).astype(np.uint8)
+        Image.fromarray(drawn_image).save(os.path.join("justtosee", str(self.step_ctr) + "asdfdg.jpg"))
+        self.step_ctr += 1
+        prec, rec = calc_detection_voc_prec_rec([pred_boxes],
+                                                [pred_labels],
+                                                [pred_scores],
+                                                [gt_boxes],
+                                                [gt_labels],
                                                 None,
                                                 iou_thresh=0.5)
 
@@ -79,19 +126,22 @@ class AttackEnvironment(gym.Env):
 
         return np.nan_to_num(ap).mean()
 
-    def calculate_reward(self, perturbed_image, original_image):
+    def calculate_reward(self, perturbed_image, original_image, perturbation):
 
-        map1 = self.calculate_map(perturbed_image)
-        map2 = self.calculate_map(original_image)
+        map_perturbed = self.calculate_map(perturbed_image)
+        map_orig = self.calculate_map(original_image.detach())
 
         performance_reduction_factor = self.attacker_cfg.REWARD.PERFORMANCE_REDUCTION_FACTOR
         delta_factor = self.attacker_cfg.REWARD.DELTA_FACTOR
-        reward = performance_reduction_factor * (map1 - map2) - delta_factor * torch.norm(perturbed_image - original_image).detach().cpu().numpy()
-        print(map1, map2)
+        diff = np.linalg.norm(perturbation)
+        reward = performance_reduction_factor * (map_orig - map_perturbed) - delta_factor * diff
+        print(map_perturbed, map_orig)
+        print(reward)
         return reward
 
     def apply_transformation(self, delta):
-        return self.image + delta
+        perturbed_image = (self.image + delta * 255) / 2
+        return perturbed_image
 
     # override
     def step(self, action):
@@ -99,13 +149,14 @@ class AttackEnvironment(gym.Env):
         perturbed_encoding = self.encoding.flatten() + action
 
         # decode the perturbed encoding to generate a transformation
+        reconstruction, _ = self.encoder_decoder.decode(torch.Tensor(self.encoding), self.encoding_pooling_output)
         perturbation_transformation, _ = self.encoder_decoder.decode(torch.Tensor(perturbed_encoding.reshape(1, 3, 4, 4)), self.encoding_pooling_output)
-
+        perturbation_transformation = perturbation_transformation - reconstruction
         # perturb the current image
         perturbed_image = self.apply_transformation(perturbation_transformation)
 
         # calculate reward based on perturbed image
-        reward = self.calculate_reward(self.image, perturbed_image)
+        reward = self.calculate_reward(self.image, perturbed_image, perturbation_transformation.detach().cpu().numpy())
         done = True  # Done is always true, we consider one episode as one image
         return perturbed_encoding.flatten(), reward, done, {}
 

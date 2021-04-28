@@ -1,5 +1,6 @@
 MODEL:
   NUM_CLASSES: 21
+  DEVICE: "cpu"
   BOX_HEAD:
     PREDICTOR: 'SSDLiteBoxPredictor'
   BACKBONE:
