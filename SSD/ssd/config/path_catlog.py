@@ -21,19 +21,19 @@ class DatasetCatalog:
             "split": "test"
         },
         'voc_2012_train': {
-            "data_dir": "VOC2012",
+            "data_dir": "Voc/VOCdevkit/VOC2012",
             "split": "train"
         },
         'voc_2012_val': {
-            "data_dir": "VOC2012",
+            "data_dir": "Voc/VOCdevkit/VOC2012",
             "split": "val"
         },
         'voc_2012_trainval': {
-            "data_dir": "VOC2012",
+            "data_dir": "Voc/VOCdevkit/VOC2012",
             "split": "trainval"
         },
         'voc_2012_test': {
-            "data_dir": "VOC2012",
+            "data_dir": "Voc/VOCdevkit/VOC2012",
             "split": "test"
         },
         'coco_2014_valminusminival': {
