@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import cv2
 import numpy as np
 
-
+import math
 KERNEL_SIZE = 5
 MAXPOOL_KERNEL_SIZE = 2
 
@@ -24,6 +24,14 @@ class Autoencoder(nn.Module):
         self.image_channels = cfg.IMAGE_CHANNELS
         self.batch_size = cfg.BATCH_SIZE
         self.image_size = cfg.IMAGE_SIZE
+
+        self.layer_image_sizes = np.zeros((len(cfg.ENCODER.CNV_OUT_CHANNELS) + 1, 2), dtype=int)
+        self.layer_image_sizes[0] = np.array(cfg.IMAGE_SIZE)
+        for i in range(1, self.layer_image_sizes.shape[0]):
+            # for each halving, round up
+            self.layer_image_sizes[i] = np.ceil(self.layer_image_sizes[i - 1] / 2)
+            self.layer_image_sizes[i] = np.ceil(self.layer_image_sizes[i] / 2)
+
         for i in range(0, len(cfg.ENCODER.CNV_OUT_CHANNELS)):
             in_channels = cfg.IMAGE_CHANNELS
             out_channels = cfg.ENCODER.CNV_OUT_CHANNELS[i]
@@ -60,6 +68,7 @@ class Autoencoder(nn.Module):
         decoder_unpooling = []
 
         DEC_CLAYERS = len(cfg.DECODER.CNV_OUT_CHANNELS)
+
         for i in range(0, DEC_CLAYERS):
             # First layer takes in encoding
             in_channels = cfg.ENCODER.CNV_OUT_CHANNELS[-1]
@@ -95,12 +104,13 @@ class Autoencoder(nn.Module):
                         kernel_size=MAXPOOL_KERNEL_SIZE,
                     )
 
+            upsample_to = self.layer_image_sizes[-(i + 2)]
             decoder_conv_layers.append(
                 nn.Sequential(
                     convolutional_layer,
                     nn.Upsample(
                         mode="bilinear",
-                        scale_factor=2
+                        size=(upsample_to[0], upsample_to[1])
                     ),
                     relu,
                 )

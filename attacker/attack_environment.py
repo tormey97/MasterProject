@@ -67,8 +67,8 @@ class AttackEnvironment(gym.Env):
         self.encoding = None
         self.encoding_pooling_output = None
 
-        self.action_space = Box(-1, 1, [48])  # TODO configurable
-        self.observation_space = Box(-1, 1, [48])
+        self.action_space = Box(-1, 1, [75])  # TODO configurable
+        self.observation_space = Box(-1, 1, [75])
 
         self.step_ctr = 0
 
@@ -76,42 +76,35 @@ class AttackEnvironment(gym.Env):
         transform = detection_transforms.Compose([
             detection_transforms.ToCV2Image(),
             detection_transforms.ConvertFromInts(),
-            detection_transforms.ToPercentCoords(),
-            detection_transforms.Resize(300),
             ToTensor(),
         ])
-
-        transform2 = detection_transforms.Compose([
-            detection_transforms.ToCV2Image(),
-            detection_transforms.ConvertFromInts(),
-            detection_transforms.ToPercentCoords(),
-            detection_transforms.Resize(160),
-            detection_transforms.ToAbsoluteCoords(),
-            ToTensor(),
-        ])
-
         image = image[0]
         boxes = self.image_data[1]["boxes"][0]
         labels = self.image_data[1]["labels"][0]
-        _, gt_boxes, gt_labels = transform2(image, self.annotations[1][0], self.annotations[1][1])
+
+        _, gt_boxes, gt_labels = (image, self.annotations[1][0], self.annotations[1][1])
 
         image, boxes, labels = transform(image, boxes, labels)
 
-        targets = {'boxes': boxes, 'labels': labels}
+        targets = {'boxes': boxes.detach().cpu().numpy(), 'labels': labels.detach().cpu().numpy()}
         preds = self.target(image.unsqueeze(0), targets=targets)[0] #TODO device
 
+        preds = preds.resize((self.img_info['width'], self.img_info['height']))
 
-        pred_boxes = preds["boxes"].detach().to("cpu").numpy()
-        pred_labels = preds["labels"].detach().to("cpu").numpy()
-        pred_scores = preds["scores"].detach().to("cpu").numpy()
-        indices = pred_scores > 0.9
+        pred_boxes = preds["boxes"].detach().cpu().numpy()
+        pred_labels = preds["labels"].detach().cpu().numpy()
+        pred_scores = preds["scores"].detach().cpu().numpy()
+        indices = pred_scores > 0.3
         pred_boxes = pred_boxes[indices]
         pred_labels = pred_labels[indices]
         pred_scores = pred_scores[indices]
-        cv2image = image.detach().cpu().numpy().transpose((1, 2, 0)).astype(np.uint8)
 
+
+        # Quickly visualize image
+        cv2image = image.detach().cpu().numpy().transpose((1, 2, 0)).astype(np.uint8)
         drawn_image = draw_boxes(cv2image, pred_boxes, pred_labels, pred_scores, VOCDataset.class_names).astype(np.uint8)
         Image.fromarray(drawn_image).save(os.path.join("justtosee", str(self.step_ctr) + "asdfdg.jpg"))
+
         self.step_ctr += 1
         prec, rec = calc_detection_voc_prec_rec([pred_boxes],
                                                 [pred_labels],
@@ -126,31 +119,39 @@ class AttackEnvironment(gym.Env):
 
         return np.nan_to_num(ap).mean()
 
-    def calculate_reward(self, perturbed_image, original_image, perturbation):
+    def calculate_reward(self, original_image, perturbed_image, perturbation):
 
-        map_perturbed = self.calculate_map(perturbed_image)
+        map_perturbed = self.calculate_map(perturbed_image.detach())
         map_orig = self.calculate_map(original_image.detach())
 
         performance_reduction_factor = self.attacker_cfg.REWARD.PERFORMANCE_REDUCTION_FACTOR
         delta_factor = self.attacker_cfg.REWARD.DELTA_FACTOR
         diff = np.linalg.norm(perturbation)
-        reward = performance_reduction_factor * (map_orig - map_perturbed) - delta_factor * diff
-        print(map_perturbed, map_orig)
-        print(reward)
+        diff2 = torch.norm(original_image - perturbed_image).detach().numpy()
+        addon = 0
+        if map_orig > 0 and map_orig - map_perturbed == 0:
+            addon = -5
+        reward = addon + performance_reduction_factor * (map_perturbed - map_orig) - (delta_factor ** 8) * diff2
+        if self.step_ctr % 5 == 0:
+            print("DIFF: ", diff)
+            print("DIFF2: ", diff2)
+            print("REWARD: ", reward)
+            print("MAP_ORIG: ", map_orig)
+            print("MAP_PERTURBED: ", map_perturbed)
         return reward
 
     def apply_transformation(self, delta):
-        perturbed_image = (self.image + delta * 255) / 2
+        perturbed_image = self.image + delta * 255
         return perturbed_image
 
     # override
     def step(self, action):
         # get perturbed encoding by applying action
-        perturbed_encoding = self.encoding.flatten() + action
+        perturbed_encoding = action
 
         # decode the perturbed encoding to generate a transformation
         reconstruction, _ = self.encoder_decoder.decode(torch.Tensor(self.encoding), self.encoding_pooling_output)
-        perturbation_transformation, _ = self.encoder_decoder.decode(torch.Tensor(perturbed_encoding.reshape(1, 3, 4, 4)), self.encoding_pooling_output)
+        perturbation_transformation, _ = self.encoder_decoder.decode(torch.Tensor(perturbed_encoding.reshape(1, 3, 5, 5)), self.encoding_pooling_output)
         perturbation_transformation = perturbation_transformation - reconstruction
         # perturb the current image
         perturbed_image = self.apply_transformation(perturbation_transformation)
@@ -173,6 +174,8 @@ class AttackEnvironment(gym.Env):
             self.dataset_iterable = enumerate(self.data_loader)
             i, values = next(self.dataset_iterable)
         self.annotations = self.data_loader.dataset.get_annotation(i)
+        self.img_info = self.data_loader.dataset.get_img_info(i)
+
         self.image_data = values
         self.image = values[0]
         self.encoding = self.encoder_decoder.encode(self.image)[0].detach().cpu().numpy()

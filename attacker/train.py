@@ -23,6 +23,7 @@ from data_management.datasets.voc_detection import VOCDataset
 from torch.utils.data import DataLoader
 
 from SSD.ssd.data.transforms.transforms import *
+from SSD.ssd.data.transforms import build_target_transform
 
 
 def get_parser():
@@ -57,16 +58,18 @@ def get_parser():
 def start_train(attacker_cfg, encoder_cfg, target_cfg):
 
     transform = Compose([
-        Resize(encoder_cfg.IMAGE_SIZE[0]),
+        Resize(target_cfg.INPUT.IMAGE_SIZE),
         ToTensor(),
     ])
+
+    target_transform = build_target_transform(target_cfg)
 
     # trainset = ImageDataset(transform=Transform)
     trainset = VOCDataset(
         data_dir='./datasets/Voc/VOCdevkit/VOC2012',
         transform=transform,
         split="train",
-        target_transform=[],
+        target_transform=target_transform,
         keep_difficult=True
     )
 
