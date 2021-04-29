@@ -1,0 +1,1 @@
+autoencoder_outputs/1layer300x300/model_045000.pth

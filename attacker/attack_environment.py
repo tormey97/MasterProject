@@ -101,7 +101,7 @@ class AttackEnvironment(gym.Env):
 
 
         # Quickly visualize image
-        if self.step_ctr % 10 == 0:
+        if self.step_ctr % 100 == 0:
             cv2image = image.detach().cpu().numpy().transpose((1, 2, 0)).astype(np.uint8)
             drawn_image = draw_boxes(cv2image, pred_boxes, pred_labels, pred_scores, VOCDataset.class_names).astype(np.uint8)
             Image.fromarray(drawn_image).save(os.path.join("justtosee", str(self.step_ctr) + name + ".jpg"))
@@ -121,8 +121,8 @@ class AttackEnvironment(gym.Env):
 
     def calculate_reward(self, original_image, perturbed_image, perturbation):
 
-        map_perturbed = self.calculate_map(perturbed_image.detach(), "perturbed")
-        map_orig = self.calculate_map(original_image.detach(), "original")
+        map_perturbed, pred_probabilities, gt_probabilities = self.calculate_map(perturbed_image.detach(), "perturbed")
+        map_orig, pred_probabilities, gt_probabilities = self.calculate_map(original_image.detach(), "original")
 
         performance_reduction_factor = self.attacker_cfg.REWARD.PERFORMANCE_REDUCTION_FACTOR
         delta_factor = self.attacker_cfg.REWARD.DELTA_FACTOR
