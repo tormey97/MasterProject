@@ -25,6 +25,7 @@ from torch.utils.data import DataLoader
 from SSD.ssd.data.transforms.transforms import *
 from SSD.ssd.data.transforms import build_target_transform
 
+import os
 
 def get_parser():
     parser = argparse.ArgumentParser(description='Attacker')
@@ -85,9 +86,16 @@ def start_train(attacker_cfg, encoder_cfg, target_cfg):
     # the noise objects for DDPG
     n_actions = np.prod(env.action_space.shape)
     action_noise = OrnsteinUhlenbeckActionNoise(mean=np.zeros(env.action_space.shape), sigma=float(0.5) * np.ones(env.action_space.shape))
+    folder = attacker_cfg.OUTPUT_DIR
 
-    attacker = DDPG(MlpPolicy, env, verbose=1, action_noise=action_noise)
-    attacker.learn(attacker_cfg.TRAIN.MAX_EPISODES)
+    if os.path.exists(folder + "/" + attacker_cfg.OUTPUT_FILE):
+        attacker = DDPG.load(folder + "/" + attacker_cfg.OUTPUT_FILE)
+        attacker.set_env(env)
+    else:
+        attacker = DDPG(MlpPolicy, env, verbose=1, action_noise=action_noise, tensorboard_log="./logs/progress_tensorboard/")
+    for i in range(attacker_cfg.TRAIN.SAVE_AMOUNT):
+        attacker.learn(attacker_cfg.TRAIN.SAVE_STEP)
+        attacker.save(folder + "/" + attacker_cfg.OUTPUT_FILE)
 
 
 
