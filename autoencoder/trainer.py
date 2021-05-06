@@ -1,5 +1,6 @@
 from utils.torch_utils import get_device
 from autoencoder.models.autoencoder import Autoencoder
+from autoencoder.models.gan import Network as GANEncoder
 from autoencoder.models.test_enc import Autoencoder as at
 from autoencoder.models.test_cnv import ConvAutoencoder
 from data_management.checkpoint import CheckPointer
@@ -66,6 +67,11 @@ def do_train(
     criterion = torch.nn.MSELoss()
     if cfg.SOLVER.LOSS_FUNCTION == "BCE":
         criterion = torch.nn.BCELoss()
+
+    if cfg.MODEL.MODEL_NAME == "gan":
+        gen_optim = torch.optim.Adam(model.encoder_generator.parameters(), lr=0.001)
+        disc_optim = torch.optim.Adam(model.discriminator.parameters(), lr=0.001)
+
     iteration = arguments["iteration"]
     for epoch in range(0, 10000):
         last_log = 0
@@ -79,47 +85,81 @@ def do_train(
             images = images.to(get_device())
 
             # Run batch on model
-            reconstructed_images, dec_outputs, enc_outputs = model(images)
+            if cfg.MODEL.MODEL_NAME == "gan":
+                reconstructed_images, encoding = model.encoder_generator(images)
+                discriminator_rec = model.discriminator(reconstructed_images)
+                discriminator_real = model.discriminator(images)
 
-            # -------- L1 Regularization -------- #
-            added_loss = 0
-            if cfg.SOLVER.L1_REGULARIZATION_FACTOR > 0:
-                l1_enc = sum([torch.norm(output) for output in enc_outputs])
-                #l1_dec = sum([torch.norm(output) for output in dec_outputs])
-                added_loss += cfg.SOLVER.L1_REGULARIZATION_FACTOR * (l1_enc)
-            optimizer.zero_grad()
+                disc_loss_real = torch.nn.BCELoss()(discriminator_real, torch.ones_like(discriminator_real))
+                disc_loss_rec = 3 * torch.nn.BCELoss()(discriminator_rec, torch.zeros_like(discriminator_rec))
 
-            # Calculate loss
-            loss = criterion(reconstructed_images, images) + added_loss,
-            loss[0].backward()
+                disc_loss = disc_loss_real + disc_loss_rec
 
-            optimizer.step()
+                gen_loss = torch.nn.BCELoss()(discriminator_rec, torch.ones_like(discriminator_rec))
 
-            # Print
-            if iteration == 0 or iteration - last_log >= cfg.LOG_STEP:
-                last_log = iteration
-                logger.info("ITERATION: ", iteration, "LOSS: ", loss, "ENC_LOSS: ", added_loss)
-                print("_ITERATION: ", iteration, "LOSS: ", loss, "ENC_LOSS: ", added_loss)
+                distortion_penalty = 5 * torch.nn.MSELoss()(reconstructed_images, images)
+                gen_loss += distortion_penalty
 
+                gen_optim.zero_grad()
+                disc_optim.zero_grad()
+
+                gen_loss.backward(retain_graph=True)
+                disc_loss.backward()
+
+                gen_optim.step()
+                disc_optim.step()
+                print(gen_loss)
+                print(disc_loss, disc_loss_real, disc_loss_rec)
                 save_decod_img(images.cpu().data, "TARGET" + str(iteration) + "gud", cfg)
-                save_decod_img(reconstructed_images.cpu().data, "RECONSTRUCTION" + str(epoch)+"_"+(str(iteration)), cfg)
-                # Visualizing output features
-                for i in range(len(enc_outputs)):
-                    pass
-                    save_decod_img(enc_outputs[i],"ENCODING" + str(epoch) + "_" + str(iteration) + "_" + str(i) + "_" + "enc", cfg, w=enc_outputs[i].shape[2], h=enc_outputs[i].shape[3])
-                    save_decod_img(dec_outputs[i],"DECODING" + str(epoch) + "_" +  str(iteration) + "_" + str(i) + "_" + "dec", cfg, w=dec_outputs[i].shape[2],
-                                   h=dec_outputs[i].shape[3])
+                save_decod_img(reconstructed_images.cpu().data, "RECONSTRUCTION" + str(epoch) + "_" + (str(iteration)),
+                               cfg)
+                #generator loss:
 
-            if iteration % cfg.MODEL.SAVE_STEP == 0:
-                print("SAVING MODEL AT ITERATION ", iteration)
-                checkpointer.save("model_{:06d}".format(iteration), **arguments)
+            elif cfg.MODEL.MODEL_NAME == "autoencoder":
+                reconstructed_images, dec_outputs, enc_outputs = model(images)
+
+                # -------- L1 Regularization -------- #
+                added_loss = 0
+                if cfg.SOLVER.L1_REGULARIZATION_FACTOR > 0:
+                    l1_enc = sum([torch.norm(output) for output in enc_outputs])
+                    #l1_dec = sum([torch.norm(output) for output in dec_outputs])
+                    added_loss += cfg.SOLVER.L1_REGULARIZATION_FACTOR * (l1_enc)
+                optimizer.zero_grad()
+
+                # Calculate loss
+                loss = criterion(reconstructed_images, images) + added_loss,
+                loss[0].backward()
+
+                optimizer.step()
+
+                # Print
+                if iteration == 0 or iteration - last_log >= cfg.LOG_STEP:
+                    last_log = iteration
+                    logger.info("ITERATION: ", iteration, "LOSS: ", loss, "ENC_LOSS: ", added_loss)
+                    print("_ITERATION: ", iteration, "LOSS: ", loss, "ENC_LOSS: ", added_loss)
+
+                    save_decod_img(images.cpu().data, "TARGET" + str(iteration) + "gud", cfg)
+                    save_decod_img(reconstructed_images.cpu().data, "RECONSTRUCTION" + str(epoch)+"_"+(str(iteration)), cfg)
+                    # Visualizing output features
+                    for i in range(len(enc_outputs)):
+                        pass
+                        save_decod_img(enc_outputs[i],"ENCODING" + str(epoch) + "_" + str(iteration) + "_" + str(i) + "_" + "enc", cfg, w=enc_outputs[i].shape[2], h=enc_outputs[i].shape[3])
+                        save_decod_img(dec_outputs[i],"DECODING" + str(epoch) + "_" +  str(iteration) + "_" + str(i) + "_" + "dec", cfg, w=dec_outputs[i].shape[2],
+                                       h=dec_outputs[i].shape[3])
+
+                if iteration % cfg.MODEL.SAVE_STEP == 0:
+                    print("SAVING MODEL AT ITERATION ", iteration)
+                    checkpointer.save("model_{:06d}".format(iteration), **arguments)
 
 
 
 def start_train(cfg): 
     logger = logging.getLogger('SSD.trainer')
-
-    model = Autoencoder(cfg=cfg)
+    models = {
+        "autoencoder": Autoencoder,
+        "gan": GANEncoder
+    }
+    model = models[cfg.MODEL.MODEL_NAME](cfg=cfg)
     model.train()
     model.to(get_device())
 

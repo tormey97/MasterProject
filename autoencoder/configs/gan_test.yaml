@@ -1,4 +1,4 @@
-IMAGE_SIZE: [300, 300]
+IMAGE_SIZE: [128, 128]
 MODEL:
   SAVE_STEP: 1000
   AVGPOOL_ENCODING: True
@@ -18,7 +18,7 @@ DECODER:
   CNV_OUT_CHANNELS: [300, 1]
 
 LOG_STEP: 500
-BATCH_SIZE: 8
+BATCH_SIZE: 2
 DATASET_NAME: "test"
 
-OUTPUT_DIR: "autoencoder_outputs/1layer300x300"
+OUTPUT_DIR: "autoencoder_outputs/gan1"
