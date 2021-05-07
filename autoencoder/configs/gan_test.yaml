@@ -19,6 +19,6 @@ DECODER:
 
 LOG_STEP: 500
 BATCH_SIZE: 8
-DATASET_NAME: "test"
+DATASET_NAME: "voc"
 
 OUTPUT_DIR: "autoencoder_outputs/gan1"
