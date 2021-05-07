@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+import numpy as np
 import torch.nn.functional as F
 # need:
 # encoder - encodes an image down to some size.
@@ -33,8 +34,9 @@ class EncoderGenerator(nn.Module):
 
     def forward(self, x):
         encoding = self.encoder(x)
-        recon = self.generator(encoding)
-        return recon, encoding
+        quantized = self.quantizer(encoding)
+        recon = self.generator(quantized)
+        return recon, encoding, quantized
 
     def make_encoder(self):
         block1 = conv_block(self.in_channels, self.f[0], 7, 1, 3)
@@ -51,6 +53,34 @@ class EncoderGenerator(nn.Module):
             block5,
             block6
         )
+
+    def quantizer(self, x: torch.Tensor):
+        # quantizer discretizes the encoding to (-2, -1, 0, 1, 2)
+        centers = np.array([-2, -1, 0, 1, 2])
+        # create a vector for each value with the distance to centers, then take the index of centers with the smallest
+        def to_center(z_i):
+            diffs = torch.abs(z_i - torch.Tensor(centers))
+            wtf = torch.argmin(
+                diffs
+            )
+            return centers[wtf]
+
+        def to_soft(z_i):
+            tensor_centers = torch.Tensor(centers)
+            zhat_i = sum([c_j * torch.exp(-1 * torch.abs(z_i - c_j)) / sum([torch.exp(-1 * torch.abs(z_i - c_l))for c_l in tensor_centers] )
+                      for c_j in tensor_centers])
+            return zhat_i
+
+        w_hard = x.detach().clone().apply_(
+            lambda x: to_center(x)
+        )
+        w_soft = x.detach().clone().apply_(
+            lambda z_i: to_soft(z_i)
+        )
+
+        w_return = (w_hard - w_soft).detach() + w_soft
+        return w_return
+
 
     def make_generator(self):
         def residual_block(num_filters, stride, kernel_size, actv):
@@ -87,7 +117,7 @@ class EncoderGenerator(nn.Module):
                 kernel_size=kernel_size,
                 padding=padding
             )
-            nn.init.xavier_uniform_(transpose.weight)
+            nn.init.xavier_uniform_(transpose.weight, 2)
             return nn.Sequential(
                 transpose,
                 actv()
@@ -135,7 +165,7 @@ class Network(nn.Module):
         super().__init__()
         self.cfg = cfg
         self.in_channels = 3
-        self.C = 8
+        self.C = 3
         self.f = [60, 120, 240, 480, 960, self.C]
         self.encoder_generator = EncoderGenerator(cfg, self.f, self.C, self.in_channels)
         self.discriminator = self.make_discriminator()
@@ -164,5 +194,5 @@ class Network(nn.Module):
         return self.discriminator(x)
 
     def forward(self, x):
-        generated, enc = self.encoder_generator.forward(x)
-        return generated, self.discriminator(generated), enc
+        generated, enc, quantized_enc = self.encoder_generator.forward(x)
+        return generated, self.discriminator(generated), enc, quantized_enc

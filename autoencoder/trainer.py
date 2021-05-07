@@ -69,8 +69,8 @@ def do_train(
         criterion = torch.nn.BCELoss()
 
     if cfg.MODEL.MODEL_NAME == "gan":
-        gen_optim = torch.optim.Adam(model.encoder_generator.parameters(), lr=0.001)
-        disc_optim = torch.optim.Adam(model.discriminator.parameters(), lr=0.001)
+        gen_optim = torch.optim.Adam(model.encoder_generator.parameters(), lr=0.0001)
+        disc_optim = torch.optim.Adam(model.discriminator.parameters(), lr=0.0001)
 
     iteration = arguments["iteration"]
     for epoch in range(0, 10000):
@@ -86,18 +86,25 @@ def do_train(
 
             # Run batch on model
             if cfg.MODEL.MODEL_NAME == "gan":
-                reconstructed_images, encoding = model.encoder_generator(images)
+                reconstructed_images, encoding, quantized = model.encoder_generator(images)
                 discriminator_rec = model.discriminator(reconstructed_images)
                 discriminator_real = model.discriminator(images)
 
-                disc_loss_real = torch.nn.BCELoss()(discriminator_real, torch.ones_like(discriminator_real))
-                disc_loss_rec = 3 * torch.nn.BCELoss()(discriminator_rec, torch.zeros_like(discriminator_rec))
+                #disc_loss_real = torch.nn.BCELoss()(discriminator_real, torch.ones_like(discriminator_real))
+                #disc_loss_rec = torch.nn.BCELoss()(discriminator_rec, torch.zeros_like(discriminator_rec))
+                disc_loss_real = torch.square(discriminator_real - 1.)
+                disc_loss_rec = torch.square(discriminator_rec)
+                """
+                self.D_loss = tf.reduce_mean(tf.square(D_x - 1.)) + tf.reduce_mean(tf.square(D_Gz))
+            self.G_loss = tf.reduce_mean(tf.square(D_Gz - 1.))
+                """
+                disc_loss = torch.mean(disc_loss_real + disc_loss_rec)
 
-                disc_loss = disc_loss_real + disc_loss_rec
+                #gen_loss = torch.nn.BCELoss()(discriminator_rec, torch.ones_like(discriminator_rec))
 
-                gen_loss = torch.nn.BCELoss()(discriminator_rec, torch.ones_like(discriminator_rec))
+                gen_loss = torch.mean(torch.square(discriminator_rec - 1.))
 
-                distortion_penalty = 5 * torch.nn.MSELoss()(reconstructed_images, images)
+                distortion_penalty = 10 * torch.nn.MSELoss()(reconstructed_images, images)
                 gen_loss += distortion_penalty
 
                 gen_optim.zero_grad()
@@ -108,11 +115,11 @@ def do_train(
 
                 gen_optim.step()
                 disc_optim.step()
-                print(gen_loss)
-                print(disc_loss, disc_loss_real, disc_loss_rec)
-                save_decod_img(images.cpu().data, "TARGET" + str(iteration) + "gud", cfg)
-                save_decod_img(reconstructed_images.cpu().data, "RECONSTRUCTION" + str(epoch) + "_" + (str(iteration)),
-                               cfg)
+                print(gen_loss, disc_loss)
+                if iteration % 2 == 0:
+                    save_decod_img(images.cpu().data, "TARGET" + str(iteration) + "gud", cfg)
+                    save_decod_img(reconstructed_images.cpu().data, "RECONSTRUCTION" + str(epoch) + "_" + (str(iteration)),
+                                   cfg)
                 #generator loss:
 
             elif cfg.MODEL.MODEL_NAME == "autoencoder":
