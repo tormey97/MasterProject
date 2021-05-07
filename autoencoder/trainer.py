@@ -69,8 +69,8 @@ def do_train(
         criterion = torch.nn.BCELoss()
 
     if cfg.MODEL.MODEL_NAME == "gan":
-        gen_optim = torch.optim.Adam(model.encoder_generator.parameters(), lr=0.0001)
-        disc_optim = torch.optim.Adam(model.discriminator.parameters(), lr=0.0001)
+        gen_optim = optimizer[0]
+        disc_optim = optimizer[1]
 
     iteration = arguments["iteration"]
     for epoch in range(0, 10000):
@@ -103,7 +103,6 @@ def do_train(
                 #gen_loss = torch.nn.BCELoss()(discriminator_rec, torch.ones_like(discriminator_rec))
 
                 gen_loss = torch.mean(torch.square(discriminator_rec - 1.))
-
                 distortion_penalty = 10 * torch.nn.MSELoss()(reconstructed_images, images)
                 gen_loss += distortion_penalty
 
@@ -116,7 +115,7 @@ def do_train(
                 gen_optim.step()
                 disc_optim.step()
                 print(gen_loss, disc_loss)
-                if iteration % 2 == 0:
+                if iteration % 20 == 0:
                     save_decod_img(images.cpu().data, "TARGET" + str(iteration) + "gud", cfg)
                     save_decod_img(reconstructed_images.cpu().data, "RECONSTRUCTION" + str(epoch) + "_" + (str(iteration)),
                                    cfg)
@@ -154,13 +153,16 @@ def do_train(
                         save_decod_img(dec_outputs[i],"DECODING" + str(epoch) + "_" +  str(iteration) + "_" + str(i) + "_" + "dec", cfg, w=dec_outputs[i].shape[2],
                                        h=dec_outputs[i].shape[3])
 
-                if iteration % cfg.MODEL.SAVE_STEP == 0:
-                    print("SAVING MODEL AT ITERATION ", iteration)
-                    checkpointer.save("model_{:06d}".format(iteration), **arguments)
+            if iteration % cfg.MODEL.SAVE_STEP == 0:
+                print("SAVING MODEL AT ITERATION ", iteration)
+                if type(checkpointer) == "dict":
+                    for i in checkpointer:
+                        checkpointer[i].save("model_{:06d}".format(iteration), **arguments)
+                else:
+                    checkpointer.save("{}_{:06d}".format(i, iteration), **arguments)
 
 
-
-def start_train(cfg): 
+def start_train(cfg):
     logger = logging.getLogger('SSD.trainer')
     models = {
         "autoencoder": Autoencoder,
@@ -185,7 +187,8 @@ def start_train(cfg):
         )
     }
 
-    optimizer = optimizers[cfg.SOLVER.WHICH_OPTIMIZER]()
+    if cfg.MODEL.MODEL_NAME != "gan":
+        optimizer = optimizers[cfg.SOLVER.WHICH_OPTIMIZER]()
     transform = transforms.Compose([
         transforms.ToPILImage(),
         transforms.Resize(cfg.IMAGE_SIZE),
@@ -249,11 +252,25 @@ def start_train(cfg):
 
     arguments = {"iteration": 0}
     save_to_disk = True
-    checkpointer = CheckPointer(
-        model, optimizer, cfg.OUTPUT_DIR, save_to_disk, logger,
-    )
-    extra_checkpoint_data = checkpointer.load()
-    arguments.update(extra_checkpoint_data)
+    if cfg.MODEL.MODEL_NAME == "gan":
+        disc_optim = torch.optim.Adam(params=model.discriminator.parameters(), lr=cfg.SOLVER.LR)
+        gen_optim = torch.optim.Adam(params=model.encoder_generator.parameters(), lr=cfg.SOLVER.LR)
+        checkpointer = {
+            "discriminator": CheckPointer(
+                model, disc_optim, cfg.OUTPUT_DIR, save_to_disk, logger,
+            ),
+            "generator": CheckPointer(
+                model, gen_optim, cfg.OUTPUT_DIR, save_to_disk, logger,
+            )
+        }
+        optimizer = [disc_optim, gen_optim]
+    else:
+        checkpointer = CheckPointer(
+            model, optimizer, cfg.OUTPUT_DIR, save_to_disk, logger,
+        )
+    if cfg.MODEL.MODEL_NAME != "gan":
+        extra_checkpoint_data = checkpointer.load()
+        arguments.update(extra_checkpoint_data)
 
     max_iter = cfg.SOLVER.MAX_ITER
 
