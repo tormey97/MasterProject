@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 import numpy as np
+from utils.torch_utils import get_device
 import torch.nn.functional as F
 # need:
 # encoder - encodes an image down to some size.
@@ -71,14 +72,19 @@ class EncoderGenerator(nn.Module):
                       for c_j in tensor_centers])
             return zhat_i
 
-        w_hard = x.detach().cpu().clone().apply_(
+        x_copy = x.clone().detach().cpu()
+        w_hard = x_copy.clone().apply_(
             lambda x: to_center(x)
         )
-        x.cpu().apply_(
-            lambda z_i: to_soft(z_i)
-        )
 
-        w_return = (w_hard - x).detach() + x
+        w_soft_ = x_copy.clone().apply_(
+            lambda z_i: z_i - to_soft(z_i)
+        )
+        if get_device() == "cuda":
+            w_soft_.cuda()
+            w_hard.cuda()
+
+        w_return = (w_hard - (x + w_soft_)).detach() + (x + w_soft_)
         return w_return
 
 
