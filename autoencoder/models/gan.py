@@ -71,14 +71,14 @@ class EncoderGenerator(nn.Module):
                       for c_j in tensor_centers])
             return zhat_i
 
-        w_hard = x.detach().clone().apply_(
+        w_hard = x.detach().cpu().clone().apply_(
             lambda x: to_center(x)
         )
-        w_soft = x.detach().clone().apply_(
+        x.cpu().apply_(
             lambda z_i: to_soft(z_i)
         )
 
-        w_return = (w_hard - w_soft).detach() + w_soft
+        w_return = (w_hard - x).detach() + x
         return w_return
 
 
