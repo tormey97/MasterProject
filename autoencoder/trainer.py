@@ -155,11 +155,11 @@ def do_train(
 
             if iteration % cfg.MODEL.SAVE_STEP == 0:
                 print("SAVING MODEL AT ITERATION ", iteration)
-                if type(checkpointer) == "dict":
+                if cfg.MODEL.MODEL_NAME != "gan":
                     for i in checkpointer:
-                        checkpointer[i].save("model_{:06d}".format(iteration), **arguments)
+                        checkpointer[i].save("{}_{:06d}".format(i, iteration), **arguments)
                 else:
-                    checkpointer.save("{}_{:06d}".format(i, iteration), **arguments)
+                    checkpointer.save("model_{:06d}".format(iteration), **arguments)
 
 
 def start_train(cfg):
