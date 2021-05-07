@@ -20,5 +20,5 @@ DECODER:
 LOG_STEP: 500
 BATCH_SIZE: 4
 DATASET_NAME: "voc"
-
+MODEL_SAVE_STEP: 5
 OUTPUT_DIR: "autoencoder_outputs/gan1"
