@@ -80,12 +80,9 @@ class EncoderGenerator(nn.Module):
         w_soft_ = x_copy.clone().apply_(
             lambda z_i: z_i - to_soft(z_i)
         )
-        print(get_device())
         if get_device() == "cuda":
-            w_soft_.cuda()
-            w_hard.cuda()
-            x_copy.cuda()
-            print("should be cuda")
+            w_soft_ = w_soft_.cuda()
+            w_hard = w_hard.cuda()
 
         w_return = (w_hard - (x + w_soft_)).detach() + (x + w_soft_)
         return w_return
