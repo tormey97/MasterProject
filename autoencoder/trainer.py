@@ -187,8 +187,6 @@ def start_train(cfg):
         )
     }
 
-    if cfg.MODEL.MODEL_NAME != "gan":
-        optimizer = optimizers[cfg.SOLVER.WHICH_OPTIMIZER]()
     transform = transforms.Compose([
         transforms.ToPILImage(),
         transforms.Resize(cfg.IMAGE_SIZE),
@@ -257,20 +255,24 @@ def start_train(cfg):
         gen_optim = torch.optim.Adam(params=model.encoder_generator.parameters(), lr=cfg.SOLVER.LR)
         checkpointer = {
             "discriminator": CheckPointer(
-                model, disc_optim, cfg.OUTPUT_DIR, save_to_disk, logger,
+                model.discriminator, disc_optim, cfg.OUTPUT_DIR, save_to_disk, logger, last_checkpoint_name="disc_chkpt.txt"
             ),
             "generator": CheckPointer(
-                model, gen_optim, cfg.OUTPUT_DIR, save_to_disk, logger,
+                model.encoder_generator, gen_optim, cfg.OUTPUT_DIR, save_to_disk, logger, last_checkpoint_name="gen_chkpt.txt"
             )
         }
         optimizer = [disc_optim, gen_optim]
     else:
+        optimizer = optimizers[cfg.SOLVER.WHICH_OPTIMIZER]()
         checkpointer = CheckPointer(
             model, optimizer, cfg.OUTPUT_DIR, save_to_disk, logger,
         )
     if cfg.MODEL.MODEL_NAME != "gan":
         extra_checkpoint_data = checkpointer.load()
-        arguments.update(extra_checkpoint_data)
+    else:
+        extra_checkpoint_data = checkpointer["discriminator"].load()
+        checkpointer["generator"].load()
+    arguments.update(extra_checkpoint_data)
 
     max_iter = cfg.SOLVER.MAX_ITER
 

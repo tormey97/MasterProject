@@ -4,7 +4,6 @@ import torch
 
 
 class CheckPointer:
-    _last_checkpoint_name = 'last_checkpoint.txt'
 
     def __init__(self,
                  model,
@@ -12,7 +11,9 @@ class CheckPointer:
                  save_dir="",
                  save_to_disk=None,
                  logger=None,
-                 scheduler=None,):
+                 scheduler=None,
+                 last_checkpoint_name="last_checkpoint.txt"):
+        self._last_checkpoint_name = last_checkpoint_name
         self.model = model
         self.optimizer = optimizer
         self.scheduler = scheduler
