@@ -17,6 +17,7 @@ from SSD.ssd.modeling.detector.ssd_detector import SSDDetector
 from data_management.checkpoint import CheckPointer
 from SSD.ssd.utils.checkpoint import CheckPointer as SSDCheckPointer
 import autoencoder.models.autoencoder as enc
+from autoencoder.models.gan import Network as GanEncoder
 from gym.spaces.box import Box
 from gym.spaces.tuple import Tuple
 
@@ -40,9 +41,27 @@ def create_target(cfg):
 
 
 def create_encoder(cfg):
-    model = enc.Autoencoder(cfg)
-    checkpointer = CheckPointer(model, save_dir=cfg.OUTPUT_DIR)
-    checkpointer.load(use_latest=True)
+    if cfg.MODEL.MODEL_NAME == "autoencoder":
+        model = enc.Autoencoder(cfg)
+        checkpointer = CheckPointer(model, save_dir=cfg.OUTPUT_DIR)
+        checkpointer.load(use_latest=True)
+    elif cfg.MODEL.MODEL_NAME == "gan":
+        model = GanEncoder(cfg)
+        checkpointer = {
+            "discriminator": CheckPointer(
+                model.discriminator, save_dir=cfg.OUTPUT_DIR,
+                last_checkpoint_name="disc_chkpt.txt"
+            ),
+            "generator": CheckPointer(
+                model.encoder_generator, save_dir=cfg.OUTPUT_DIR,
+                last_checkpoint_name="gen_chkpt.txt"
+            )
+        }
+        checkpointer["discriminator"].load()
+        checkpointer["generator"].load()
+    else:
+        raise NotImplementedError("Encoder type not implemented")
+
     return model
 
 

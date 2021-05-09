@@ -39,6 +39,28 @@ class EncoderGenerator(nn.Module):
         recon = self.generator(quantized)
         return recon, encoding, quantized
 
+    def encode(self, x):
+        return self.encoder(x)
+
+    def reconstruct_from_encoding(self, encoding):
+        """
+        attacker modifies unquantized encoding
+        :param encoding:
+        :return:
+        """
+        quantized = self.quantizer(encoding)
+        recon = self.generator(quantized)
+        return recon, quantized,
+
+    def reconstruct_from_quantized_encoding(self, quantized):
+        """
+        attacker modifies the quantized encoding
+        :param quantized:
+        :return:
+        """
+        recon = self.generator(quantized)
+        return recon
+
     def make_encoder(self):
         block1 = conv_block(self.in_channels, self.f[0], 7, 1, 3)
         block2 = conv_block(self.f[0], self.f[1], 3, 2, 1)
@@ -198,14 +220,19 @@ class Network(nn.Module):
     def encgen_forward(self, x):
         return self.encoder_generator(x)
 
-    def enc_forward(self, x):
-        return self.encoder(x)
 
     def gen_forward(self, x):
         return self.generator(x)
 
     def disc_forward(self, x):
         return self.discriminator(x)
+
+    def encode(self, x):
+        return self.encoder_generator.encode(x)
+
+    def decode(self, encoding):
+        recon, quantized = self.encoder_generator.reconstruct_from_encoding(encoding)
+        return recon, quantized
 
     def forward(self, x):
         generated, enc, quantized_enc = self.encoder_generator.forward(x)
