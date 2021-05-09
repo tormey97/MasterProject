@@ -43,6 +43,7 @@ cfg.TEST.BATCH_SIZE = 10
 cfg.EVAL_STEP = 2000 # Evaluate dataset every eval_step, disabled when eval_step < 0
 cfg.MODEL_SAVE_STEP = 500 # Save checkpoint every save_step
 cfg.LOG_STEP = 5 # Print logs every log_stepPrint logs every log_step
+cfg.DRAW_STEP = 20
 cfg.OUTPUT_DIR = "autoencoder_outputs"
 cfg.BATCH_SIZE = 8
 cfg.DATASET_NAME = "test"

@@ -165,15 +165,10 @@ class EncoderGenerator(nn.Module):
             actv_out
         )
 
-
-class Network(nn.Module):
-    def __init__(self, cfg):
+class Discriminator(nn.Module):
+    def __init__(self, cfg, in_channels):
         super().__init__()
-        self.cfg = cfg
-        self.in_channels = 3
-        self.C = 3
-        self.f = [60, 120, 240, 480, 960, self.C]
-        self.encoder_generator = EncoderGenerator(cfg, self.f, self.C, self.in_channels)
+        self.in_channels = in_channels
         self.discriminator = self.make_discriminator()
 
     def make_discriminator(self, actv=nn.LeakyReLU):
@@ -186,6 +181,19 @@ class Network(nn.Module):
         out = nn.Conv2d(in_channels=d_f[3], out_channels=d_f[4], kernel_size=4, stride=1, padding=0)
         actv = nn.Sigmoid()
         return nn.Sequential(c1, c2, c3, c4, out, actv)
+
+    def forward(self, x):
+        return self.discriminator(x)
+
+class Network(nn.Module):
+    def __init__(self, cfg):
+        super().__init__()
+        self.cfg = cfg
+        self.in_channels = 3
+        self.C = 3
+        self.f = [60, 120, 240, 480, 960, self.C]
+        self.encoder_generator = EncoderGenerator(cfg, self.f, self.C, self.in_channels)
+        self.discriminator = Discriminator(cfg, self.in_channels)
 
     def encgen_forward(self, x):
         return self.encoder_generator(x)

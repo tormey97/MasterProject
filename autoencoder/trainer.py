@@ -115,7 +115,7 @@ def do_train(
                 gen_optim.step()
                 disc_optim.step()
                 print(gen_loss, disc_loss)
-                if iteration % 20 == 0:
+                if iteration % cfg.DRAW_STEP == 0:
                     save_decod_img(images.cpu().data, "TARGET" + str(iteration) + "gud", cfg)
                     save_decod_img(reconstructed_images.cpu().data, "RECONSTRUCTION" + str(epoch) + "_" + (str(iteration)),
                                    cfg)
@@ -190,6 +190,13 @@ def start_train(cfg):
     transform = transforms.Compose([
         transforms.ToPILImage(),
         transforms.Resize(cfg.IMAGE_SIZE),
+        transforms.RandomApply(
+            [transforms.RandomCrop(cfg.IMAGE_SIZE[0] - 64)],
+            p=0.4
+        ),
+        transforms.Resize(cfg.IMAGE_SIZE),
+        transforms.RandomHorizontalFlip(),
+        transforms.ColorJitter(0.3, 0.2, 0.6, 0.05),
         transforms.ToTensor(),
     ])
     trainset, testset = None, None
@@ -271,6 +278,7 @@ def start_train(cfg):
         extra_checkpoint_data = checkpointer.load()
     else:
         extra_checkpoint_data = checkpointer["discriminator"].load()
+        print(extra_checkpoint_data)
         checkpointer["generator"].load()
     arguments.update(extra_checkpoint_data)
 
