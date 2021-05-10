@@ -18,8 +18,8 @@ DECODER:
   CNV_OUT_CHANNELS: [300, 1]
 
 LOG_STEP: 500
-BATCH_SIZE: 8
+BATCH_SIZE: 16
 DATASET_NAME: "voc"
 MODEL_SAVE_STEP: 500
 DRAW_STEP: 20
-OUTPUT_DIR: "autoencoder_outputs/gan2"
+OUTPUT_DIR: "autoencoder_outputs/gan4_Cis1"

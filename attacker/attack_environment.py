@@ -162,8 +162,8 @@ class AttackEnvironment(gym.Env):
         self.encoding = None
         self.encoding_pooling_output = None
 
-        self.action_space = Box(-1, 1, [361])  # TODO configurable
-        self.observation_space = Box(-1, 1, [361])
+        self.action_space = Box(-1, 1, [361*3])  # TODO configurable
+        self.observation_space = Box(-1, 1, [361*3])
 
         self.step_ctr = 0
 

@@ -39,7 +39,7 @@ def save_decod_img(img, epoch, cfg, w=None, h=None):
                 #save_image(torch.Tensor(r), './autoenc_out/{}Autoencoder_image.png'.format(epoch))
     else:
         img = img.view(img.size(0), chan, w, h)
-        save_image(img, './autoenc_out/Autoencoder_image{}.png'.format(epoch))
+        save_image(img, './autoenc2_out/Autoencoder_image{}.png'.format(epoch))
 
 
 def make_dir():

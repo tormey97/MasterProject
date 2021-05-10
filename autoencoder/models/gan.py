@@ -145,7 +145,7 @@ class EncoderGenerator(nn.Module):
                 kernel_size=kernel_size,
                 padding=padding
             )
-            nn.init.xavier_uniform_(transpose.weight, 1)
+            nn.init.xavier_uniform_(transpose.weight, 3)
             return nn.Sequential(
                 transpose,
                 actv()
@@ -212,7 +212,7 @@ class Network(nn.Module):
         super().__init__()
         self.cfg = cfg
         self.in_channels = 3
-        self.C = 3
+        self.C = 1
         self.f = [60, 120, 240, 480, 960, self.C]
         self.encoder_generator = EncoderGenerator(cfg, self.f, self.C, self.in_channels)
         self.discriminator = Discriminator(cfg, self.in_channels)
