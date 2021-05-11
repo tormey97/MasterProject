@@ -6,7 +6,12 @@ from autoencoder.models.test_cnv import ConvAutoencoder
 from data_management.checkpoint import CheckPointer
 from data_management.datasets.image_dataset import ImageDataset
 from data_management.datasets.pascal_voc import VocDataset
-
+from data_management.datasets.voc_detection import VOCDataset as VOCDetection
+from vizer.draw import draw_boxes
+from SSD.ssd.data.transforms import build_target_transform
+import SSD.ssd.data.transforms as detection_transforms
+import PIL as Image
+from attacker.attack_environment import create_target
 import logging
 import torch
 from torchvision import datasets
@@ -18,6 +23,7 @@ import numpy as np
 import cv2
 
 import os
+
 
 MAX_FILTERS_TO_VISUALIZE = 10
 def save_decod_img(img, epoch, cfg, w=None, h=None):
@@ -58,7 +64,8 @@ def do_train(
         optimizer,
         checkpointer,
         arguments,
-        args
+        args,
+        target_cfg=None
     ):
     logger = logging.getLogger("SSD.trainer")
     logger.info("Start training ...")
@@ -68,15 +75,19 @@ def do_train(
     if cfg.SOLVER.LOSS_FUNCTION == "BCE":
         criterion = torch.nn.BCELoss()
 
-    if cfg.MODEL.MODEL_NAME == "gan":
+    if cfg.MODEL.MODEL_NAME == "gan" or cfg.MODEL.MODEL_NAME == "gan_object_detector":
         gen_optim = optimizer[0]
         disc_optim = optimizer[1]
+
+    if cfg.MODEL.MODEL_NAME == "gan_object_detector":
+        target = create_target(target_cfg)
+        target.train()
 
     iteration = arguments["iteration"]
     for epoch in range(0, 10000):
         last_log = 0
 
-        for i, (images) in enumerate(data_loader):
+        for i, (images, targets, _) in enumerate(data_loader):
 
             iteration += 1
             arguments["iteration"] = iteration
@@ -121,6 +132,51 @@ def do_train(
                                    cfg)
                 #generator loss:
 
+            elif cfg.MODEL.MODEL_NAME == "gan_object_detector":
+                perturbations, encoding, quantized = model.encoder_generator(images)
+                perturbations = torch.nn.functional.interpolate(perturbations, size=(300, 300), mode='bilinear')
+                perturbed_images = perturbations * 255 + images
+
+                loss_dict_original = target(images, targets=targets)
+                loss_dict_perturbed = target(perturbed_images, targets=targets)
+
+                discriminator_rec = model.discriminator(perturbed_images)
+                discriminator_real = model.discriminator(images)
+
+                disc_loss_real = torch.square(discriminator_real - 1.)
+                disc_loss_rec = torch.square(discriminator_rec)
+
+                disc_loss = 2 * torch.mean(disc_loss_real + disc_loss_rec)
+                gen_loss = torch.mean(torch.square(discriminator_rec - 1.))
+
+                performance_degradation_loss = (loss_dict_original["cls_loss"] + loss_dict_original["reg_loss"]) - (loss_dict_perturbed["cls_loss"] + loss_dict_perturbed["reg_loss"])
+                gen_loss += torch.exp(-1 * performance_degradation_loss)
+
+                gen_optim.zero_grad()
+                disc_optim.zero_grad()
+
+                gen_loss.backward(retain_graph=True)
+                disc_loss.backward()
+
+                gen_optim.step()
+                disc_optim.step()
+                print(gen_loss, disc_loss)
+                def draw_image(image, name):
+                    cv2image = image.detach().cpu().numpy()[0].transpose((1, 2, 0)).astype(np.uint8)
+                    drawn_image = draw_boxes(cv2image, [], [], [],
+                                             VOCDetection.class_names).astype(np.uint8)
+                    Image.Image.fromarray(drawn_image).save(
+                        os.path.join("autoenc2_out", str(iteration) + name + ".jpg"))
+
+                if iteration % cfg.DRAW_STEP == 0:
+                    draw_image(perturbed_images, "perturbed")
+                    draw_image(images, "original")
+
+                    #save_decod_img(images.cpu().data, "TARGET" + str(iteration) + "gud", cfg)
+                    #save_decod_img(perturbed_images.cpu().data,
+                    #               "RECONSTRUCTION" + str(epoch) + "_" + (str(iteration)),
+                    #               cfg)
+
             elif cfg.MODEL.MODEL_NAME == "autoencoder":
                 reconstructed_images, dec_outputs, enc_outputs = model(images)
 
@@ -155,18 +211,19 @@ def do_train(
 
             if iteration % cfg.MODEL.SAVE_STEP == 0:
                 print("SAVING MODEL AT ITERATION ", iteration)
-                if cfg.MODEL.MODEL_NAME == "gan":
+                if cfg.MODEL.MODEL_NAME == "gan" or cfg.MODEL.MODEL_NAME == "gan_object_detector":
                     for i in checkpointer:
                         checkpointer[i].save("{}_{:06d}".format(i, iteration), **arguments)
                 else:
                     checkpointer.save("model_{:06d}".format(iteration), **arguments)
 
 
-def start_train(cfg):
+def start_train(cfg, target_cfg):
     logger = logging.getLogger('SSD.trainer')
     models = {
         "autoencoder": Autoencoder,
-        "gan": GANEncoder
+        "gan": GANEncoder,
+        "gan_object_detector": GANEncoder
     }
     model = models[cfg.MODEL.MODEL_NAME](cfg=cfg)
     model.train()
@@ -217,6 +274,28 @@ def start_train(cfg):
     elif cfg.DATASET_NAME == "test":
         trainset = ImageDataset(transform=transform)
         testset = ImageDataset(transform=transform)
+    elif cfg.DATASET_NAME =="voc_detection":
+        target_transform = build_target_transform(target_cfg)
+        transform = detection_transforms.Compose([
+            detection_transforms.Resize(target_cfg.INPUT.IMAGE_SIZE),
+            detection_transforms.ConvertFromInts(),
+            detection_transforms.ToTensor(),
+        ])
+
+        trainset = VOCDetection(
+            data_dir='./datasets/Voc/VOCdevkit/VOC2012',
+            transform=transform,
+            split="train",
+            target_transform=target_transform,
+            keep_difficult=True
+        )
+        testset = VOCDetection(
+            data_dir='./datasets/Voc/VOCdevkit/VOC2012',
+            transform=transform,
+            split="val",
+            target_transform=target_transform,
+            keep_difficult=True
+        )
     elif cfg.DATASET_NAME == "voc":
         trainset = VocDataset(
             download=True,
@@ -257,7 +336,7 @@ def start_train(cfg):
 
     arguments = {"iteration": 0}
     save_to_disk = True
-    if cfg.MODEL.MODEL_NAME == "gan":
+    if cfg.MODEL.MODEL_NAME == "gan" or cfg.MODEL.MODEL_NAME == "gan_object_detector":
         disc_optim = torch.optim.Adam(params=model.discriminator.parameters(), lr=cfg.SOLVER.LR)
         gen_optim = torch.optim.Adam(params=model.encoder_generator.parameters(), lr=cfg.SOLVER.LR)
         checkpointer = {
@@ -266,6 +345,9 @@ def start_train(cfg):
             ),
             "generator": CheckPointer(
                 model.encoder_generator, gen_optim, cfg.OUTPUT_DIR, save_to_disk, logger, last_checkpoint_name="gen_chkpt.txt"
+            ),
+            "encoder": CheckPointer (
+                model.encoder_generator.encoder, save_dir=cfg.OUTPUT_DIR, save_to_disk=save_to_disk, logger=logger, last_checkpoint_name="encoder_chkpt.txt"
             )
         }
         optimizer = [disc_optim, gen_optim]
@@ -274,7 +356,7 @@ def start_train(cfg):
         checkpointer = CheckPointer(
             model, optimizer, cfg.OUTPUT_DIR, save_to_disk, logger,
         )
-    if cfg.MODEL.MODEL_NAME != "gan":
+    if cfg.MODEL.MODEL_NAME != "gan" and cfg.MODEL.MODEL_NAME != "gan_object_detector":
         extra_checkpoint_data = checkpointer.load()
     else:
         extra_checkpoint_data = checkpointer["discriminator"].load()
@@ -286,6 +368,5 @@ def start_train(cfg):
 
     model = do_train(
         cfg, model, train_loader, optimizer,
-        checkpointer, arguments, None)
+        checkpointer, arguments, None, target_cfg)
     return model
-    pass

@@ -7,6 +7,7 @@ from data_management.logger import setup_logger
 from autoencoder.inference import do_evaluation
 from autoencoder.trainer import start_train
 from torchvision import datasets
+from SSD.ssd.config.defaults import _C as target_cfg
 
 def get_parser():
     parser = argparse.ArgumentParser(description='Autoencoder')
@@ -15,6 +16,13 @@ def get_parser():
         default="",
         metavar="FILE",
         help="path to config file",
+        type=str,
+    )
+    parser.add_argument(
+        "target_config",
+        default="",
+        metavar="FILE",
+        help="path to target config file",
         type=str,
     )
     parser.add_argument(
@@ -31,6 +39,8 @@ def main():
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
     cfg.freeze()
+    target_cfg.merge_from_file(args.target_config)
+    target_cfg.freeze()
     output_dir = pathlib.Path(cfg.OUTPUT_DIR)
     output_dir.mkdir(exist_ok=True, parents=True)
 
@@ -43,7 +53,7 @@ def main():
         logger.info(config_str)
     logger.info("Running with config:\n{}".format(cfg))
 
-    model = start_train(cfg)
+    model = start_train(cfg, target_cfg)
 
     logger.info('Start evaluating...')
     torch.cuda.empty_cache()  # speed up evaluating after training finished

@@ -21,6 +21,8 @@ from autoencoder.models.gan import Network as GanEncoder
 from gym.spaces.box import Box
 from gym.spaces.tuple import Tuple
 
+#from autoencoder.trainer import save_decod_img
+
 from SSD.ssd.data.datasets.evaluation.voc.eval_detection_voc import *
 
 import SSD.ssd.data.transforms as detection_transforms
@@ -41,6 +43,7 @@ def create_target(cfg):
 
 
 def create_encoder(cfg):
+    optimizers = []
     if cfg.MODEL.MODEL_NAME == "autoencoder":
         model = enc.Autoencoder(cfg)
         checkpointer = CheckPointer(model, save_dir=cfg.OUTPUT_DIR)
@@ -55,14 +58,22 @@ def create_encoder(cfg):
             "generator": CheckPointer(
                 model.encoder_generator, save_dir=cfg.OUTPUT_DIR,
                 last_checkpoint_name="gen_chkpt.txt"
+            ),
+            "encoder": CheckPointer(
+                model.encoder_generator.encoder, save_dir=cfg.OUTPUT_DIR, last_checkpoint_name="encoder_chkpt.txt"
             )
         }
         checkpointer["discriminator"].load()
-        checkpointer["generator"].load()
+        #checkpointer["generator"].load()
+        checkpointer["encoder"].load(use_latest=True)
+        gen_optimizer = torch.optim.Adam(model.encoder_generator.parameters(), lr=0.0002)
+        disc_optimizer = torch.optim.Adam(model.discriminator.parameters(), lr=0.0002)
+        optimizers.append(gen_optimizer)
+        optimizers.append(disc_optimizer)
     else:
         raise NotImplementedError("Encoder type not implemented")
 
-    return model
+    return model, optimizers
 
 
 def calculate_iou(prediction_box, gt_box):
@@ -77,7 +88,6 @@ def calculate_iou(prediction_box, gt_box):
         returns:
             float: value of the intersection of union for the two boxes.
     """
-    # YOUR CODE HERE
 
     xmin = 0
     ymin = 1
@@ -94,6 +104,7 @@ def calculate_iou(prediction_box, gt_box):
     gt_box_area = (gt_box[xmax] - gt_box[xmin]) * (gt_box[ymax] - gt_box[ymin])
     prediction_box_area = (prediction_box[xmax] - prediction_box[xmin]) * (prediction_box[ymax] - prediction_box[ymin])
     union = gt_box_area + prediction_box_area - intersection
+
 
     # Compute union
     iou = intersection / union
@@ -149,7 +160,7 @@ class AttackEnvironment(gym.Env):
 
         self.target = create_target(target_cfg)
         self.target.eval()
-        self.encoder_decoder = create_encoder(encoder_cfg)
+        self.encoder_decoder, self.optimizers = create_encoder(encoder_cfg)
         self.data_loader = data_loader
 
         self.dataset_iterable = enumerate(self.data_loader)
@@ -162,8 +173,8 @@ class AttackEnvironment(gym.Env):
         self.encoding = None
         self.encoding_pooling_output = None
 
-        self.action_space = Box(-1, 1, [361*3])  # TODO configurable
-        self.observation_space = Box(-1, 1, [361*3])
+        self.action_space = Box(-1, 1, [300])  # TODO configurable
+        self.observation_space = Box(-1, 1, [1083])
 
         self.step_ctr = 0
 
@@ -200,7 +211,7 @@ class AttackEnvironment(gym.Env):
         if self.step_ctr % 1 == 0:
             cv2image = image.detach().cpu().numpy().transpose((1, 2, 0)).astype(np.uint8)
             drawn_image = draw_boxes(cv2image, pred_boxes, pred_labels, pred_scores, VOCDataset.class_names).astype(np.uint8)
-            Image.fromarray(drawn_image).save(os.path.join("justtosee2", str(self.step_ctr) + name + ".jpg"))
+            Image.fromarray(drawn_image).save(os.path.join("justtosee", str(self.step_ctr) + name + ".jpg"))
 
         prec, rec = calc_detection_voc_prec_rec([pred_boxes],
                                                 [pred_labels],
@@ -234,7 +245,7 @@ class AttackEnvironment(gym.Env):
 
         return np.nan_to_num(ap).mean(), good_matches, pred_labels, pred_scores, gt_labels
 
-    def calculate_reward(self, original_image, perturbed_image, perturbation):
+    def calculate_class_reward(self, original_image, perturbed_image, perturbation):
 
         map_perturbed, perturbation_matches, perturbation_pred_labels, perturbation_pred_scores, _ = self.calculate_map(perturbed_image.detach(), "perturbed")
         map_orig, original_matches, original_pred_labels, original_pred_scores, gt_labels = self.calculate_map(original_image.detach(), "original")
@@ -283,14 +294,13 @@ class AttackEnvironment(gym.Env):
         performance_reduction_factor = self.attacker_cfg.REWARD.PERFORMANCE_REDUCTION_FACTOR
         delta_factor = self.attacker_cfg.REWARD.DELTA_FACTOR
         diff = np.linalg.norm(perturbation)
-        diff2 = torch.norm(original_image - perturbed_image).detach().numpy()
+
         addon = 0
         if map_orig > 0 and map_orig - map_perturbed == 0:
             addon = -5
-        reward = addon + performance_reduction_factor * (map_orig - map_perturbed) - (delta_factor) * diff2
+        reward = addon + performance_reduction_factor * (map_orig - map_perturbed)
         if self.step_ctr % 5 == 0:
             print("DIFF: ", diff)
-            print("DIFF2: ", diff2)
             print("REWARD: ", reward)
             print("CLS_REWARD: ", class_reward)
             print("MAP_ORIG: ", map_orig)
@@ -298,6 +308,8 @@ class AttackEnvironment(gym.Env):
         return class_reward
 
     def apply_transformation(self, delta):
+
+        delta = torch.nn.functional.interpolate(delta, size=(300, 300), mode='bilinear')
         perturbed_image = self.image + delta * 255
         return perturbed_image
 
@@ -305,19 +317,23 @@ class AttackEnvironment(gym.Env):
     def step(self, action):
         # get perturbed encoding by applying action
         perturbed_encoding = action
-
+        perturbed_encoding = torch.nn.functional.interpolate(torch.Tensor(perturbed_encoding).reshape(1, 3, 10, 10), (19, 19))
         # decode the perturbed encoding to generate a transformation
-        reconstruction, _ = self.encoder_decoder.decode(torch.Tensor(self.encoding), self.encoding_pooling_output)
-        perturbation_transformation, _ = self.encoder_decoder.decode(torch.Tensor(perturbed_encoding.reshape(1, 1, 19, 19)), self.encoding_pooling_output)
+        reconstruction, _ = self.encoder_decoder.decode(torch.Tensor([self.encoding]))
+        perturbation_transformation, _ = self.encoder_decoder.decode(torch.Tensor(perturbed_encoding))
+
         perturbation_transformation = perturbation_transformation - reconstruction
         # perturb the current image
         perturbed_image = self.apply_transformation(perturbation_transformation)
-
         # calculate reward based on perturbed image
-        reward = self.calculate_reward(self.image, perturbed_image, perturbation_transformation.detach().cpu().numpy())
+        class_reward = self.calculate_class_reward(self.image, perturbed_image, perturbation_transformation.detach().cpu().numpy())
+
+        perturbation_delta_loss = torch.nn.MSELoss()(self.image, perturbed_image).detach().numpy()
+        class_loss = torch.exp(torch.Tensor(-1 * class_reward))
+
         done = True  # Done is always true, we consider one episode as one image
         self.step_ctr += 1
-        return perturbed_encoding.flatten(), reward, done, {}
+        return perturbed_encoding.flatten(), class_reward, done, {}
 
     #override
     def reset(self):

@@ -4,7 +4,7 @@ cfg = CN()
 cfg.OUTPUT_DIR = "atk_outputs"
 cfg.OUTPUT_FILE = "output1.zip"
 cfg.REWARD = CN()
-cfg.REWARD.DELTA_FACTOR = 0.00001
+cfg.REWARD.DELTA_FACTOR = 0.001
 cfg.REWARD.PERFORMANCE_REDUCTION_FACTOR = 1500
 
 cfg.TRAIN = CN()
