@@ -145,7 +145,7 @@ class EncoderGenerator(nn.Module):
                 kernel_size=kernel_size,
                 padding=padding
             )
-            nn.init.xavier_uniform_(transpose.weight, 3)
+            nn.init.xavier_uniform_(transpose.weight, 1.5)
             return nn.Sequential(
                 transpose,
                 actv()

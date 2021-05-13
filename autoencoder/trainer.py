@@ -26,7 +26,7 @@ import os
 
 
 MAX_FILTERS_TO_VISUALIZE = 10
-def save_decod_img(img, epoch, cfg, w=None, h=None):
+def save_decod_img(img, epoch, cfg, w=None, h=None, range=None):
     if w is None or h is None:
         w = cfg.IMAGE_SIZE[0]
         h = cfg.IMAGE_SIZE[1]
@@ -45,7 +45,7 @@ def save_decod_img(img, epoch, cfg, w=None, h=None):
                 #save_image(torch.Tensor(r), './autoenc_out/{}Autoencoder_image.png'.format(epoch))
     else:
         img = img.view(img.size(0), chan, w, h)
-        save_image(img, './autoenc2_out/Autoencoder_image{}.png'.format(epoch))
+        save_image(img, './autoenc2_out/Autoencoder_image{}.png'.format(epoch), range=range)
 
 
 def make_dir():
@@ -135,7 +135,13 @@ def do_train(
             elif cfg.MODEL.MODEL_NAME == "gan_object_detector":
                 perturbations, encoding, quantized = model.encoder_generator(images)
                 perturbations = torch.nn.functional.interpolate(perturbations, size=(300, 300), mode='bilinear')
-                perturbed_images = perturbations * 255 + images
+                perturbations = perturbations
+                images = torch.divide(images, 255)
+                perturbed_images = torch.add(perturbations, images)
+
+                perturbed_images_np = perturbed_images.clone().detach().numpy()
+                images_np = images.clone().detach().numpy()
+                perturbations_np = perturbations.clone().detach().numpy()
 
                 loss_dict_original = target(images, targets=targets)
                 loss_dict_perturbed = target(perturbed_images, targets=targets)
@@ -147,10 +153,10 @@ def do_train(
                 disc_loss_rec = torch.square(discriminator_rec)
 
                 disc_loss = 2 * torch.mean(disc_loss_real + disc_loss_rec)
-                gen_loss = torch.mean(torch.square(discriminator_rec - 1.))
+                gen_loss = 5 * torch.mean(torch.square(discriminator_rec - 1.))
 
                 performance_degradation_loss = (loss_dict_original["cls_loss"] + loss_dict_original["reg_loss"]) - (loss_dict_perturbed["cls_loss"] + loss_dict_perturbed["reg_loss"])
-                gen_loss += torch.exp(-1 * performance_degradation_loss)
+                gen_loss += 3 * torch.nn.functional.sigmoid(torch.exp(-1 * performance_degradation_loss))
 
                 gen_optim.zero_grad()
                 disc_optim.zero_grad()
@@ -162,16 +168,19 @@ def do_train(
                 disc_optim.step()
                 print(gen_loss, disc_loss)
                 def draw_image(image, name):
-                    cv2image = image.detach().cpu().numpy()[0].transpose((1, 2, 0)).astype(np.uint8)
+                    cv2image = image.detach().cpu().numpy()[0].transpose((1, 2, 0))
                     drawn_image = draw_boxes(cv2image, [], [], [],
                                              VOCDetection.class_names).astype(np.uint8)
                     Image.Image.fromarray(drawn_image).save(
                         os.path.join("autoenc2_out", str(iteration) + name + ".jpg"))
 
-                if iteration % cfg.DRAW_STEP == 0:
-                    draw_image(perturbed_images, "perturbed")
-                    draw_image(images, "original")
+                def draw_image2(image, name):
+                    save_decod_img(image, str(iteration) + name, cfg=cfg, range=(0,255))
 
+                if iteration % cfg.DRAW_STEP == 0:
+                    draw_image2(perturbed_images.cpu().data, "perturbed")
+                    draw_image2(images.cpu().data, "original")
+                    draw_image2(perturbations.cpu().data, "perturbations")
                     #save_decod_img(images.cpu().data, "TARGET" + str(iteration) + "gud", cfg)
                     #save_decod_img(perturbed_images.cpu().data,
                     #               "RECONSTRUCTION" + str(epoch) + "_" + (str(iteration)),
