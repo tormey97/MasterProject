@@ -212,7 +212,7 @@ class Network(nn.Module):
         super().__init__()
         self.cfg = cfg
         self.in_channels = 3
-        self.C = 3
+        self.C = 1
         self.f = [60, 120, 240, 480, 960, self.C]
         self.encoder_generator = EncoderGenerator(cfg, self.f, self.C, self.in_channels)
         self.discriminator = Discriminator(cfg, self.in_channels)

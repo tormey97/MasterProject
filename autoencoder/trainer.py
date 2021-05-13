@@ -11,7 +11,6 @@ from vizer.draw import draw_boxes
 from SSD.ssd.data.transforms import build_target_transform
 import SSD.ssd.data.transforms as detection_transforms
 import PIL as Image
-from attacker.attack_environment import create_target
 import logging
 import torch
 from torchvision import datasets
@@ -21,31 +20,10 @@ from torchvision.utils import save_image
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
-
+from utils.entity_utils import create_target, create_encoder
+from utils.image_utils import save_decod_img
 import os
 
-
-MAX_FILTERS_TO_VISUALIZE = 10
-def save_decod_img(img, epoch, cfg, w=None, h=None, range=None):
-    if w is None or h is None:
-        w = cfg.IMAGE_SIZE[0]
-        h = cfg.IMAGE_SIZE[1]
-    chan = img.size(1)
-    if len(img.shape) > 2 and img.size(1) != cfg.IMAGE_CHANNELS:
-        chan = [i for i in range(img.size(1))]
-    # convolutional filter visualization
-    if type(chan) == list:
-        visualized = 0
-        for r in np.rollaxis(img.detach().cpu().numpy(), 1):
-            visualized += 1
-            if visualized >= MAX_FILTERS_TO_VISUALIZE:
-                break
-            if get_device() == "cpu":
-                pass
-                #save_image(torch.Tensor(r), './autoenc_out/{}Autoencoder_image.png'.format(epoch))
-    else:
-        img = img.view(img.size(0), chan, w, h)
-        save_image(img, './autoenc2_out/Autoencoder_image{}.png'.format(epoch), range=range)
 
 
 def make_dir():
@@ -155,6 +133,9 @@ def do_train(
 
                 performance_degradation_loss = (loss_dict_original["cls_loss"] + loss_dict_original["reg_loss"]) - (loss_dict_perturbed["cls_loss"] + loss_dict_perturbed["reg_loss"])
                 gen_loss += 3 * torch.nn.functional.sigmoid(torch.exp(-1 * performance_degradation_loss))
+
+                distortion_penalty = 2 * torch.nn.MSELoss()(perturbed_images, images)
+                gen_loss += distortion_penalty
 
                 gen_optim.zero_grad()
                 disc_optim.zero_grad()

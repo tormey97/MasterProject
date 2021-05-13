@@ -22,4 +22,4 @@ LOG_STEP: 1000
 BATCH_SIZE: 8
 DATASET_NAME: "voc"
 
-OUTPUT_DIR: "autoencoder_outputs/2_layers_lr_02_256to3_256x256_mse"
+OUTPUT_DIR: "autoencoder_outputs/2_layers_lr_02_256to3_256x256_mse1"

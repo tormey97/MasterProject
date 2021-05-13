@@ -1,84 +1,28 @@
 import gym
-import random
-import numpy as np
 import torch
-import torchvision
-import torch.nn as nn
+
 import torch.nn.functional as F
-import torch.optim as optim
 import torch.utils.data
 import os
-import abc
-import argparse
-import copy
-import time
-from tqdm import tqdm
-from SSD.ssd.modeling.detector.ssd_detector import SSDDetector
-from data_management.checkpoint import CheckPointer
-from SSD.ssd.utils.checkpoint import CheckPointer as SSDCheckPointer
-import autoencoder.models.autoencoder as enc
-from autoencoder.models.gan import Network as GanEncoder
-#from autoencoder.trainer import save_decod_img
-from gym.spaces.box import Box
-from gym.spaces.tuple import Tuple
 
-#from autoencoder.trainer import save_decod_img
+from gym.spaces.box import Box
+
 
 from SSD.ssd.data.datasets.evaluation.voc.eval_detection_voc import *
 
 import SSD.ssd.data.transforms as detection_transforms
-import SSD.ssd.data.transforms.target_transform as target_transforms
 from SSD.ssd.data.transforms.transforms import Resize, ToCV2Image, ToTensor
 
 from PIL import Image
 from vizer.draw import draw_boxes
 from SSD.ssd.data.datasets import COCODataset, VOCDataset
 
-from utils.torch_utils import get_device
+from utils.entity_utils import create_target, create_encoder
+from utils.image_utils import save_decod_img
 
 
 CONFIDENCE_THRESHOLD = 0.7 # TODO make configurable
 IOU_THRESHOLD = 0.2
-def create_target(cfg):
-    model = SSDDetector(cfg)
-    model.to(get_device())
-    checkpointer = SSDCheckPointer(model, save_dir=cfg.OUTPUT_DIR)
-    checkpointer.load('https://github.com/lufficc/SSD/releases/download/1.2/vgg_ssd300_voc0712.pth', use_latest=False)
-    return model
-
-
-def create_encoder(cfg):
-    optimizers = []
-    if cfg.MODEL.MODEL_NAME == "autoencoder":
-        model = enc.Autoencoder(cfg)
-        checkpointer = CheckPointer(model, save_dir=cfg.OUTPUT_DIR)
-        checkpointer.load(use_latest=True)
-    elif cfg.MODEL.MODEL_NAME == "gan":
-        model = GanEncoder(cfg)
-        checkpointer = {
-            "discriminator": CheckPointer(
-                model.discriminator, save_dir=cfg.OUTPUT_DIR,
-                last_checkpoint_name="disc_chkpt.txt"
-            ),
-            "generator": CheckPointer(
-                model.encoder_generator, save_dir=cfg.OUTPUT_DIR,
-                last_checkpoint_name="gen_chkpt.txt"
-            ),
-            "encoder": CheckPointer(
-                model.encoder_generator.encoder, save_dir=cfg.OUTPUT_DIR, last_checkpoint_name="encoder_chkpt.txt"
-            )
-        }
-        checkpointer["discriminator"].load()
-        #checkpointer["generator"].load()
-        checkpointer["encoder"].load(use_latest=True)
-        gen_optimizer = torch.optim.Adam(model.encoder_generator.parameters(), lr=0.0002)
-        disc_optimizer = torch.optim.Adam(model.discriminator.parameters(), lr=0.0002)
-        optimizers.append(gen_optimizer)
-        optimizers.append(disc_optimizer)
-    else:
-        raise NotImplementedError("Encoder type not implemented")
-
-    return model, optimizers
 
 
 def calculate_iou(prediction_box, gt_box):
@@ -179,8 +123,8 @@ class AttackEnvironment(gym.Env):
         self.encoding = None
         self.encoding_pooling_output = None
 
-        self.action_space = Box(-1, 1, [75])  # TODO configurable
-        self.observation_space = Box(-1, 1, [75])
+        self.action_space = Box(-1, 1, [361])  # TODO configurable
+        self.observation_space = Box(-1, 1, [361])
 
         self.step_ctr = 0
 
@@ -190,16 +134,16 @@ class AttackEnvironment(gym.Env):
             detection_transforms.ConvertFromInts(),
             ToTensor(),
         ])
-        image = image[0]
+        image_ = image[0]
         boxes = self.image_data[1]["boxes"][0]
         labels = self.image_data[1]["labels"][0]
 
-        _, gt_boxes, gt_labels = (image, self.annotations[1][0], self.annotations[1][1])
+        _, gt_boxes, gt_labels = (image_, self.annotations[1][0], self.annotations[1][1])
 
-        image, boxes, labels = transform(image, boxes, labels)
+        image_, boxes, labels = transform(image_, boxes, labels)
 
         targets = {'boxes': boxes.detach().cpu().numpy(), 'labels': labels.detach().cpu().numpy()}
-        preds = self.target(image.unsqueeze(0), targets=targets)[0] #TODO device
+        preds = self.target(image_.unsqueeze(0), targets=targets)[0] #TODO device
 
         preds = preds.resize((self.img_info['width'], self.img_info['height']))
 
@@ -215,14 +159,14 @@ class AttackEnvironment(gym.Env):
 
         # Quickly visualize image
         if self.step_ctr % 1 == 0:
-            cv2image = image.detach().cpu().numpy().transpose((1, 2, 0)).astype(np.uint8)
+            cv2image = image_.detach().cpu().numpy().transpose((1, 2, 0)).astype(np.uint8)
             drawn_image = draw_boxes(cv2image, pred_boxes, pred_labels, pred_scores, VOCDataset.class_names).astype(np.uint8)
             Image.fromarray(drawn_image).save(os.path.join("justtosee", str(self.step_ctr) + name + ".jpg"))
 
-            def draw_image2(image, name):
-                save_decod_img(image, str(self.step_ctr) + name, cfg=self.encoder_cfg, range=(0, 255))
+            def draw_image2(image, name2):
+                save_decod_img(image.cpu().data, str(self.step_ctr) + name2, cfg=self.encoder_cfg, range=(0, 255))
 
-            draw_image2(torch.divide(image, 255).cpu().data, "perturbed")
+            draw_image2(torch.divide(image, 255).cpu().data, name + "perturbedS")
         prec, rec = calc_detection_voc_prec_rec([pred_boxes],
                                                 [pred_labels],
                                                 [pred_scores],
@@ -315,7 +259,7 @@ class AttackEnvironment(gym.Env):
             print("CLS_REWARD: ", class_reward)
             print("MAP_ORIG: ", map_orig)
             print("MAP_PERTURBED: ", map_perturbed)
-        return class_reward
+        return class_reward + reward
 
     def apply_transformation(self, delta):
 
@@ -326,11 +270,11 @@ class AttackEnvironment(gym.Env):
     # override
     def step(self, action):
         # get perturbed encoding by applying action
-        perturbed_encoding = action.reshape(1, 3, 5, 5)
+        perturbed_encoding = action.reshape(1, 1, 19, 19)
         #perturbed_encoding = torch.nn.functional.interpolate(torch.Tensor(perturbed_encoding).reshape(1, 3, 10, 10), (19, 19))
         # decode the perturbed encoding to generate a transformation
-        reconstruction, _ = self.encoder_decoder.decode(torch.Tensor(self.encoding), None)
-        perturbation_transformation, _ = self.encoder_decoder.decode(torch.Tensor(perturbed_encoding), None)
+        reconstruction, _ = self.encoder_decoder.decode(torch.Tensor([self.encoding]))
+        perturbation_transformation, _ = self.encoder_decoder.decode(torch.Tensor(perturbed_encoding))
 
         perturbation_transformation = perturbation_transformation - reconstruction
         # perturb the current image
