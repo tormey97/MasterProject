@@ -38,6 +38,8 @@ class EncoderGenerator(nn.Module):
         encoding = self.encoder(x)
         if self.cfg.MODEL.QUANTIZE:
             quantized = self.quantizer(encoding)
+        else:
+            quantized = encoding
         recon = self.generator(quantized)
         return recon, encoding, quantized
 
