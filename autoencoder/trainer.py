@@ -139,10 +139,6 @@ def do_train(
                 images = torch.divide(images, 255)
                 perturbed_images = torch.add(perturbations, images)
 
-                perturbed_images_np = perturbed_images.clone().detach().numpy()
-                images_np = images.clone().detach().numpy()
-                perturbations_np = perturbations.clone().detach().numpy()
-
                 loss_dict_original = target(images, targets=targets)
                 loss_dict_perturbed = target(perturbed_images, targets=targets)
 
