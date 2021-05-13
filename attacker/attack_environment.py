@@ -33,10 +33,14 @@ from PIL import Image
 from vizer.draw import draw_boxes
 from SSD.ssd.data.datasets import COCODataset, VOCDataset
 
+from utils.torch_utils import get_device
+
+
 CONFIDENCE_THRESHOLD = 0.7 # TODO make configurable
 IOU_THRESHOLD = 0.2
 def create_target(cfg):
     model = SSDDetector(cfg)
+    model.to(get_device())
     checkpointer = SSDCheckPointer(model, save_dir=cfg.OUTPUT_DIR)
     checkpointer.load('https://github.com/lufficc/SSD/releases/download/1.2/vgg_ssd300_voc0712.pth', use_latest=False)
     return model
