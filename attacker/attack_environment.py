@@ -18,6 +18,7 @@ from data_management.checkpoint import CheckPointer
 from SSD.ssd.utils.checkpoint import CheckPointer as SSDCheckPointer
 import autoencoder.models.autoencoder as enc
 from autoencoder.models.gan import Network as GanEncoder
+#from autoencoder.trainer import save_decod_img
 from gym.spaces.box import Box
 from gym.spaces.tuple import Tuple
 
@@ -154,6 +155,7 @@ def get_all_box_matches(prediction_boxes: np.array, gt_boxes: np.ndarray, iou_th
     matched_pred_boxes = prediction_boxes[best_matches[argsorted][:, 0].astype(int)]
     return matched_pred_boxes, gt_boxes[match_filter][argsorted], all_matches
 
+MAX_FILTERS_TO_VISUALIZE = 10
 
 class AttackEnvironment(gym.Env):
     def __init__(self, attacker_cfg, target_cfg, encoder_cfg, data_loader: torch.utils.data.DataLoader):
@@ -177,8 +179,8 @@ class AttackEnvironment(gym.Env):
         self.encoding = None
         self.encoding_pooling_output = None
 
-        self.action_space = Box(-1, 1, [300])  # TODO configurable
-        self.observation_space = Box(-1, 1, [1083])
+        self.action_space = Box(-1, 1, [75])  # TODO configurable
+        self.observation_space = Box(-1, 1, [75])
 
         self.step_ctr = 0
 
@@ -217,6 +219,10 @@ class AttackEnvironment(gym.Env):
             drawn_image = draw_boxes(cv2image, pred_boxes, pred_labels, pred_scores, VOCDataset.class_names).astype(np.uint8)
             Image.fromarray(drawn_image).save(os.path.join("justtosee", str(self.step_ctr) + name + ".jpg"))
 
+            def draw_image2(image, name):
+                save_decod_img(image, str(self.step_ctr) + name, cfg=self.encoder_cfg, range=(0, 255))
+
+            draw_image2(torch.divide(image, 255).cpu().data, "perturbed")
         prec, rec = calc_detection_voc_prec_rec([pred_boxes],
                                                 [pred_labels],
                                                 [pred_scores],
@@ -320,11 +326,11 @@ class AttackEnvironment(gym.Env):
     # override
     def step(self, action):
         # get perturbed encoding by applying action
-        perturbed_encoding = action
-        perturbed_encoding = torch.nn.functional.interpolate(torch.Tensor(perturbed_encoding).reshape(1, 3, 10, 10), (19, 19))
+        perturbed_encoding = action.reshape(1, 3, 5, 5)
+        #perturbed_encoding = torch.nn.functional.interpolate(torch.Tensor(perturbed_encoding).reshape(1, 3, 10, 10), (19, 19))
         # decode the perturbed encoding to generate a transformation
-        reconstruction, _ = self.encoder_decoder.decode(torch.Tensor([self.encoding]))
-        perturbation_transformation, _ = self.encoder_decoder.decode(torch.Tensor(perturbed_encoding))
+        reconstruction, _ = self.encoder_decoder.decode(torch.Tensor(self.encoding), None)
+        perturbation_transformation, _ = self.encoder_decoder.decode(torch.Tensor(perturbed_encoding), None)
 
         perturbation_transformation = perturbation_transformation - reconstruction
         # perturb the current image
@@ -332,8 +338,8 @@ class AttackEnvironment(gym.Env):
         # calculate reward based on perturbed image
         class_reward = self.calculate_class_reward(self.image, perturbed_image, perturbation_transformation.detach().cpu().numpy())
 
-        perturbation_delta_loss = torch.nn.MSELoss()(self.image, perturbed_image).detach().numpy()
-        class_loss = torch.exp(torch.Tensor(-1 * class_reward))
+        #perturbation_delta_loss = torch.nn.MSELoss()(self.image, perturbed_image).detach().numpy()
+        #class_loss = torch.exp(torch.Tensor(-1 * class_reward))
 
         done = True  # Done is always true, we consider one episode as one image
         self.step_ctr += 1

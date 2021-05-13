@@ -94,7 +94,9 @@ def do_train(
 
             # Convert to cuda
             images = images.to(get_device())
-            targets = targets.to(get_device())
+            targets["boxes"] = targets["boxes"].to(get_device())
+            targets["labels"] = targets["labels"].to(get_device())
+
             # Run batch on model
             if cfg.MODEL.MODEL_NAME == "gan":
                 reconstructed_images, encoding, quantized = model.encoder_generator(images)
