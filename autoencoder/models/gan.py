@@ -26,6 +26,7 @@ def conv_block(in_channels, out_channels, kernel_size, stride, padding, activ=nn
 class EncoderGenerator(nn.Module):
     def __init__(self, cfg, f, C, in_channels):
         super().__init__()
+        self.cfg = cfg
         self.f = f
         self.C = C
         self.in_channels = in_channels
@@ -35,7 +36,8 @@ class EncoderGenerator(nn.Module):
 
     def forward(self, x):
         encoding = self.encoder(x)
-        quantized = self.quantizer(encoding)
+        if self.cfg.MODEL.QUANTIZE:
+            quantized = self.quantizer(encoding)
         recon = self.generator(quantized)
         return recon, encoding, quantized
 
@@ -145,7 +147,7 @@ class EncoderGenerator(nn.Module):
                 kernel_size=kernel_size,
                 padding=padding
             )
-            nn.init.xavier_uniform_(transpose.weight, 1.5)
+            nn.init.xavier_uniform_(transpose.weight)
             return nn.Sequential(
                 transpose,
                 actv()
@@ -212,7 +214,7 @@ class Network(nn.Module):
         super().__init__()
         self.cfg = cfg
         self.in_channels = 3
-        self.C = 1
+        self.C = cfg.MODEL.C
         self.f = [60, 120, 240, 480, 960, self.C]
         self.encoder_generator = EncoderGenerator(cfg, self.f, self.C, self.in_channels)
         self.discriminator = Discriminator(cfg, self.in_channels)
