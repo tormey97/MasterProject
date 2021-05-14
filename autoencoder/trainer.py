@@ -125,7 +125,7 @@ def do_train(
                 disc_loss = torch.mean(disc_loss_real + disc_loss_rec)
                 gen_loss = torch.square(discriminator_rec - 1.)
 
-                performance_degradation_loss = (loss_dict_perturbed["cls_loss"] + 0.1 * loss_dict_perturbed["reg_loss"]) - (loss_dict_original["cls_loss"] + 0.1 * loss_dict_original["reg_loss"])
+                performance_degradation_loss = (loss_dict_perturbed["cls_loss"] + 0 * loss_dict_perturbed["reg_loss"]) - (loss_dict_original["cls_loss"] + 0 * loss_dict_original["reg_loss"])
                 gen_loss += cfg.SOLVER.PERFORMANCE_DEGRADATION_FACTOR * torch.nn.functional.sigmoid(torch.exp(-1 * performance_degradation_loss))
 
                 hinge_loss = torch.norm(perturbations) - cfg.SOLVER.HINGE_LOSS_THRESHOLD
