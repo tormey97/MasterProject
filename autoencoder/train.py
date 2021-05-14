@@ -44,7 +44,7 @@ def main():
     output_dir = pathlib.Path(cfg.OUTPUT_DIR)
     output_dir.mkdir(exist_ok=True, parents=True)
 
-    logger = setup_logger("Autoencoder", output_dir)
+    logger = setup_logger("SSD.trainer", output_dir)
     logger.info(args)
 
     logger.info("Loaded configuration file {}".format(args.config_file))

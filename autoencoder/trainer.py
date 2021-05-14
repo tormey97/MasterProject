@@ -143,6 +143,16 @@ def do_train(
 
                 gen_optim.step()
                 disc_optim.step()
+                logger.info("============================================================================")
+                logger.info("gen_loss: {gen_loss} \n disc_loss: {disc_loss} \n perf_degradation: {perf_deg}, \n"
+                            " distortion_penalty: {distortion_penalty} \n, hinge_loss: {hinge_loss}, \n loss_dict_orig: {loss_dict_orig}"
+                            "\n loss dict perturbed: {loss_dict_perturbed} \n".format(gen_loss=gen_loss, disc_loss=disc_loss,
+                                                                                   perf_deg=performance_degradation_loss,
+                                                                                   distortion_penalty=distortion_penalty,
+                                                                                   hinge_loss=hinge_loss,
+                                                                                   loss_dict_orig=loss_dict_original,
+                                                                                   loss_dict_perturbed=loss_dict_perturbed))
+
                 print(gen_loss, disc_loss)
                 def draw_image(image, name):
                     cv2image = image.detach().cpu().numpy()[0].transpose((1, 2, 0))
@@ -158,10 +168,6 @@ def do_train(
                     draw_image2(perturbed_images.cpu().data, "perturbed")
                     draw_image2(images.cpu().data, "original")
                     draw_image2(perturbations.cpu().data, "perturbations")
-                    #save_decod_img(images.cpu().data, "TARGET" + str(iteration) + "gud", cfg)
-                    #save_decod_img(perturbed_images.cpu().data,
-                    #               "RECONSTRUCTION" + str(epoch) + "_" + (str(iteration)),
-                    #               cfg)
 
             elif cfg.MODEL.MODEL_NAME == "autoencoder":
                 reconstructed_images, dec_outputs, enc_outputs = model(images)
