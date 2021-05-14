@@ -81,17 +81,11 @@ def do_train(
                 discriminator_rec = model.discriminator(reconstructed_images)
                 discriminator_real = model.discriminator(images)
 
-                #disc_loss_real = torch.nn.BCELoss()(discriminator_real, torch.ones_like(discriminator_real))
-                #disc_loss_rec = torch.nn.BCELoss()(discriminator_rec, torch.zeros_like(discriminator_rec))
+
                 disc_loss_real = torch.square(discriminator_real - 1.)
                 disc_loss_rec = torch.square(discriminator_rec)
-                """
-                self.D_loss = tf.reduce_mean(tf.square(D_x - 1.)) + tf.reduce_mean(tf.square(D_Gz))
-            self.G_loss = tf.reduce_mean(tf.square(D_Gz - 1.))
-                """
-                disc_loss = torch.mean(disc_loss_real + disc_loss_rec)
 
-                #gen_loss = torch.nn.BCELoss()(discriminator_rec, torch.ones_like(discriminator_rec))
+                disc_loss = torch.mean(disc_loss_real + disc_loss_rec)
 
                 gen_loss = torch.mean(torch.square(discriminator_rec - 1.))
                 distortion_penalty = 10 * torch.nn.MSELoss()(reconstructed_images, images)
@@ -122,20 +116,24 @@ def do_train(
                 loss_dict_original = target(images, targets=targets)
                 loss_dict_perturbed = target(perturbed_images, targets=targets)
 
-                discriminator_rec = model.discriminator(perturbed_images)
-                discriminator_real = model.discriminator(images)
+                discriminator_rec = torch.mean(model.discriminator(perturbed_images))
+                discriminator_real = torch.mean(model.discriminator(images))
 
                 disc_loss_real = torch.square(discriminator_real - 1.)
                 disc_loss_rec = torch.square(discriminator_rec)
 
                 disc_loss = torch.mean(disc_loss_real + disc_loss_rec)
-                gen_loss = torch.mean(torch.square(discriminator_rec - 1.))
+                gen_loss = torch.square(discriminator_rec - 1.)
 
-                performance_degradation_loss = (loss_dict_original["cls_loss"] + loss_dict_original["reg_loss"]) - (loss_dict_perturbed["cls_loss"] + loss_dict_perturbed["reg_loss"])
+                performance_degradation_loss = (loss_dict_perturbed["cls_loss"] + 0.1 * loss_dict_perturbed["reg_loss"]) - (loss_dict_original["cls_loss"] + 0.1 * loss_dict_original["reg_loss"])
                 gen_loss += cfg.SOLVER.PERFORMANCE_DEGRADATION_FACTOR * torch.nn.functional.sigmoid(torch.exp(-1 * performance_degradation_loss))
 
+                hinge_loss = torch.norm(perturbations) - cfg.SOLVER.HINGE_LOSS_THRESHOLD
+                if hinge_loss < 0:
+                    hinge_loss = 0
+
                 distortion_penalty = cfg.SOLVER.DISTORTION_PENALTY_FACTOR * torch.nn.MSELoss()(perturbed_images, images)
-                gen_loss += distortion_penalty
+                gen_loss += distortion_penalty + hinge_loss
 
                 gen_optim.zero_grad()
                 disc_optim.zero_grad()

@@ -123,8 +123,8 @@ class AttackEnvironment(gym.Env):
         self.encoding = None
         self.encoding_pooling_output = None
 
-        self.action_space = Box(-1, 1, [361])  # TODO configurable
-        self.observation_space = Box(-1, 1, [361])
+        self.action_space = Box(-1, 1, [300])  # TODO configurable
+        self.observation_space = Box(-1, 1, [1083])
 
         self.step_ctr = 0
 
@@ -264,19 +264,19 @@ class AttackEnvironment(gym.Env):
     def apply_transformation(self, delta):
 
         delta = torch.nn.functional.interpolate(delta, size=(300, 300), mode='bilinear')
-        perturbed_image = self.image + delta * 255
+        perturbed_image = self.image + torch.multiply(delta, 255)
         return perturbed_image
 
     # override
     def step(self, action):
         # get perturbed encoding by applying action
-        perturbed_encoding = action.reshape(1, 1, 19, 19)
-        #perturbed_encoding = torch.nn.functional.interpolate(torch.Tensor(perturbed_encoding).reshape(1, 3, 10, 10), (19, 19))
+        perturbed_encoding = action.reshape(1, 3, 10, 10)
+        perturbed_encoding = torch.nn.functional.interpolate(torch.Tensor(perturbed_encoding).reshape(1, 3, 10, 10), (19, 19))
         # decode the perturbed encoding to generate a transformation
         reconstruction, _ = self.encoder_decoder.decode(torch.Tensor([self.encoding]))
         perturbation_transformation, _ = self.encoder_decoder.decode(torch.Tensor(perturbed_encoding))
 
-        perturbation_transformation = perturbation_transformation - reconstruction
+        perturbation_transformation = perturbation_transformation #- reconstruction
         # perturb the current image
         perturbed_image = self.apply_transformation(perturbation_transformation)
         # calculate reward based on perturbed image

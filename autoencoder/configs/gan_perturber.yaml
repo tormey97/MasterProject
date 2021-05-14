@@ -4,6 +4,7 @@ MODEL:
   AVGPOOL_ENCODING: True
   AVG_POOL_COUNT: 0
   MODEL_NAME: "gan_object_detector"
+  C: 3
 
 SOLVER:
   MAX_ITER: 10000
@@ -24,4 +25,5 @@ BATCH_SIZE: 1
 DATASET_NAME: "voc_detection"
 MODEL_SAVE_STEP: 100
 DRAW_STEP: 20
-OUTPUT_DIR: "autoencoder_outputs/gan22"
+OUTPUT_DIR: "autoencoder_outputs/gan10"
+DRAW_TO_DIR: "gan10_out"

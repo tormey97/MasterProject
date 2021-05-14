@@ -61,7 +61,7 @@ def create_encoder(cfg):
             )
         }
         checkpointer["discriminator"].load()
-        #checkpointer["generator"].load()
+        checkpointer["generator"].load()
         checkpointer["encoder"].load(use_latest=True)
         gen_optimizer = torch.optim.Adam(model.encoder_generator.parameters(), lr=0.0002)
         disc_optimizer = torch.optim.Adam(model.discriminator.parameters(), lr=0.0002)
