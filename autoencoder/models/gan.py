@@ -163,7 +163,7 @@ class EncoderGenerator(nn.Module):
             padding=1
         )
 
-        residual_blocks = [residual_block(self.f[-2], 1, 3, nn.ReLU) for _ in range(9)]
+        residual_blocks = [residual_block(self.f[-2], 1, 3, nn.ReLU) for _ in range(self.cfg.MODEL.RESIDUAL_BLOCK_COUNT)]
 
         ups2 = upsample_block(self.f[-2], self.f[-3], 2, 2, 0, nn.ReLU)
         ups3 = upsample_block(self.f[-3], self.f[-4], 2, 2, 0, nn.ReLU)
