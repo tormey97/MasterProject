@@ -21,7 +21,7 @@ from utils.entity_utils import create_target, create_encoder
 from utils.image_utils import save_decod_img
 
 
-CONFIDENCE_THRESHOLD = 0.7 # TODO make configurable
+CONFIDENCE_THRESHOLD = 0.3 # TODO make configurable
 IOU_THRESHOLD = 0.2
 
 
@@ -123,8 +123,8 @@ class AttackEnvironment(gym.Env):
         self.encoding = None
         self.encoding_pooling_output = None
 
-        self.action_space = Box(-1, 1, [300])  # TODO configurable
-        self.observation_space = Box(-1, 1, [1083])
+        self.action_space = Box(-1, 1, [361])  # TODO configurable
+        self.observation_space = Box(-1, 1, [361])
 
         self.step_ctr = 0
 
@@ -270,8 +270,8 @@ class AttackEnvironment(gym.Env):
     # override
     def step(self, action):
         # get perturbed encoding by applying action
-        perturbed_encoding = action.reshape(1, 3, 10, 10)
-        perturbed_encoding = torch.nn.functional.interpolate(torch.Tensor(perturbed_encoding).reshape(1, 3, 10, 10), (19, 19))
+        perturbed_encoding = action.reshape(1, 1, 19, 19)
+        perturbed_encoding = torch.nn.functional.interpolate(torch.Tensor(perturbed_encoding).reshape(1, 1, 19, 19), (19, 19))
         # decode the perturbed encoding to generate a transformation
         reconstruction, _ = self.encoder_decoder.decode(torch.Tensor([self.encoding]))
         perturbation_transformation, _ = self.encoder_decoder.decode(torch.Tensor(perturbed_encoding))

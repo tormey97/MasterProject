@@ -71,3 +71,4 @@ def create_encoder(cfg):
         raise NotImplementedError("Encoder type not implemented")
 
     return model, optimizers
+
