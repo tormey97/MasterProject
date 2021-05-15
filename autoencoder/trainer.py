@@ -126,7 +126,7 @@ def do_train(
                 gen_loss = torch.square(discriminator_rec - 1.)
 
                 performance_degradation_loss = (loss_dict_perturbed["cls_loss"] + 0 * loss_dict_perturbed["reg_loss"]) - (loss_dict_original["cls_loss"] + 0 * loss_dict_original["reg_loss"])
-                gen_loss += cfg.SOLVER.PERFORMANCE_DEGRADATION_FACTOR * torch.pow(1.05, (-1 * performance_degradation_loss))
+                gen_loss += cfg.SOLVER.PERFORMANCE_DEGRADATION_FACTOR * torch.pow(1.01, (-1 * performance_degradation_loss))
 
                 hinge_loss = torch.norm(perturbations) - cfg.SOLVER.HINGE_LOSS_THRESHOLD
                 if hinge_loss < 0:
