@@ -127,18 +127,14 @@ def do_train(
                 true_labels = loss_dict_perturbed["labels"]
                 # want to give loss based on transforming labels != 0 to 10. so confidence in 10 where true label != 0
                 # should be higher.
-                labels_with_gt_nonzero = true_labels.nonzero()[0]
-                target_performance_reduction=0
-                for i in labels_with_gt_nonzero:
-                    confidence = loss_dict_perturbed["confidence"][i]
-                    confidence_true = confidence[true_labels[i]]
-                    confidence_target = confidence[cfg.SOLVER.TARGET_CLASS]
-                    target_performance_reduction += confidence_target - confidence_true
-                    # want to maximize target and minimize true
+                labels_with_gt_nonzero = true_labels[true_labels > 0]
+                scores = torch.nn.functional.softmax(loss_dict_perturbed["confidence"])
+                object_hiding_loss = torch.nn.BCEWithLogitsLoss()(scores, torch.zeros_like(scores))
+
                 cls_loss = cfg.SOLVER.CLS_LOSS_FACTOR * (loss_dict_perturbed["cls_loss"] - loss_dict_original["cls_loss"])
                 reg_loss = cfg.SOLVER.REG_LOSS_FACTOR * (loss_dict_perturbed["reg_loss"] - loss_dict_original["reg_loss"])
-                target_perf_loss = cfg.SOLVER.TARGET_LOSS_FACTOR * (target_performance_reduction / labels_with_gt_nonzero.size(0))
-                performance_degradation_loss = target_perf_loss + cls_loss + reg_loss
+                gen_loss += cfg.SOLVER.TARGET_LOSS_FACTOR * object_hiding_loss
+                performance_degradation_loss = cls_loss + reg_loss
                 gen_loss += cfg.SOLVER.PERFORMANCE_DEGRADATION_FACTOR * torch.pow(cfg.SOLVER.CHI, (-1 * performance_degradation_loss))
 
                 hinge_loss = torch.norm(perturbations) - cfg.SOLVER.HINGE_LOSS_THRESHOLD
