@@ -66,19 +66,14 @@ class EncoderGenerator(nn.Module):
         return recon
 
     def make_encoder(self):
-        block1 = conv_block(self.in_channels, self.f[0], 7, 1, 3)
-        block2 = conv_block(self.f[0], self.f[1], 3, 2, 1)
-        block3 = conv_block(self.f[1], self.f[2], 3, 2, 1)
-        block4 = conv_block(self.f[2], self.f[3], 3, 2, 1)
-        block5 = conv_block(self.f[3], self.f[4], 3, 2, 1)
-        block6 = conv_block(self.f[4], self.f[5], 3, 1, 1)
+        blocks = [conv_block(self.in_channels, self.f[0], 7, 1, 3)]
+        for i in range(len(self.f) - 1):
+            stride = 2
+            if i >= len(self.f) - 2:
+                stride = 1
+            blocks.append(conv_block(self.f[i], self.f[i + 1], 3, 2, 1))
         return nn.Sequential(
-            block1,
-            block2,
-            block3,
-            block4,
-            block5,
-            block6
+            *blocks
         )
 
     def quantizer(self, x: torch.Tensor):
@@ -165,13 +160,12 @@ class EncoderGenerator(nn.Module):
 
         residual_blocks = [residual_block(self.f[-2], 1, 3, nn.ReLU) for _ in range(self.cfg.MODEL.RESIDUAL_BLOCK_COUNT)]
 
-        ups2 = upsample_block(self.f[-2], self.f[-3], 2, 2, 0, nn.ReLU)
-        ups3 = upsample_block(self.f[-3], self.f[-4], 2, 2, 0, nn.ReLU)
-        ups4 = upsample_block(self.f[-4], self.f[-5], 2, 2, 0, nn.ReLU)
-        ups5 = upsample_block(self.f[-5], self.f[-6], 2, 2, 0, nn.ReLU)
+        ups_ = []
+        for i in range(-2, -1 * (len(self.f)), -1):
+            ups_.append(upsample_block(self.f[i], self.f[i - 1], 2, 2, 0, nn.ReLU))
 
         to_img = nn.Conv2d(
-            in_channels=self.f[-6],
+            in_channels=self.f[0],
             out_channels=self.in_channels,
             kernel_size=7,
             stride=1,
@@ -183,10 +177,7 @@ class EncoderGenerator(nn.Module):
         return nn.Sequential(
             ups1,
             *residual_blocks,
-            ups2,
-            ups3,
-            ups4,
-            ups5,
+            *ups_,
             to_img,
             actv_out
         )
@@ -217,7 +208,7 @@ class Network(nn.Module):
         self.cfg = cfg
         self.in_channels = 3
         self.C = cfg.MODEL.C
-        self.f = [60, 120, 240, 480, 960, self.C]
+        self.f = cfg.MODEL.f + [self.C]
         self.encoder_generator = EncoderGenerator(cfg, self.f, self.C, self.in_channels)
         self.discriminator = Discriminator(cfg, self.in_channels)
 

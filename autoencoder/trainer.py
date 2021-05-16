@@ -132,10 +132,13 @@ def do_train(
                 for i in labels_with_gt_nonzero:
                     confidence = loss_dict_perturbed["confidence"][i]
                     confidence_true = confidence[true_labels[i]]
-                    confidence_target = confidence[10]
+                    confidence_target = confidence[cfg.SOLVER.TARGET_CLASS]
                     target_performance_reduction += confidence_target - confidence_true
                     # want to maximize target and minimize true
-                performance_degradation_loss = target_performance_reduction / labels_with_gt_nonzero.size(0) + 0 *((loss_dict_perturbed["cls_loss"] + 0 * loss_dict_perturbed["reg_loss"]) - (loss_dict_original["cls_loss"] + 0 * loss_dict_original["reg_loss"]))
+                cls_loss = cfg.SOLVER.CLS_LOSS_FACTOR * (loss_dict_perturbed["cls_loss"] - loss_dict_original["cls_loss"])
+                reg_loss = cfg.SOLVER.REG_LOSS_FACTOR * (loss_dict_perturbed["reg_loss"] - loss_dict_original["reg_loss"])
+                target_perf_loss = cfg.SOLVER.TARGET_LOSS_FACTOR * (target_performance_reduction / labels_with_gt_nonzero.size(0))
+                performance_degradation_loss = target_perf_loss + cls_loss + reg_loss
                 gen_loss += cfg.SOLVER.PERFORMANCE_DEGRADATION_FACTOR * torch.pow(cfg.SOLVER.CHI, (-1 * performance_degradation_loss))
 
                 hinge_loss = torch.norm(perturbations) - cfg.SOLVER.HINGE_LOSS_THRESHOLD
@@ -160,8 +163,8 @@ def do_train(
                                                                                    perf_deg=performance_degradation_loss,
                                                                                    distortion_penalty=distortion_penalty,
                                                                                    hinge_loss=hinge_loss,
-                                                                                   loss_dict_orig=loss_dict_original,
-                                                                                   loss_dict_perturbed=loss_dict_perturbed))
+                                                                                   loss_dict_orig="",
+                                                                                   loss_dict_perturbed=""))
 
                 print(gen_loss, disc_loss)
                 def draw_image(image, name):
