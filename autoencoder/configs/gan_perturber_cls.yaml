@@ -1,6 +1,6 @@
 IMAGE_SIZE: [300, 300]
 MODEL:
-  SAVE_STEP: 3000
+  SAVE_STEP: 4000
   AVGPOOL_ENCODING: True
   AVG_POOL_COUNT: 0
   MODEL_NAME: "gan_object_detector"
@@ -32,6 +32,6 @@ BATCH_SIZE: 1
 
 DATASET_NAME: "voc_detection"
 MODEL_SAVE_STEP: 100
-DRAW_STEP: 20
+DRAW_STEP: 40
 OUTPUT_DIR: "autoencoder_outputs/gan65"
 DRAW_TO_DIR: "gan65_out"

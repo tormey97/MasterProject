@@ -34,7 +34,7 @@ def run_demo(cfg, ckpt, score_threshold, images_dir, output_dir, dataset_type):
     weight_file = ckpt if ckpt else checkpointer.get_checkpoint_file()
     print('Loaded weights from {}'.format(weight_file))
 
-    image_paths = glob.glob(os.path.join(images_dir, '*.jpg'))
+    image_paths = glob.glob(os.path.join(images_dir, '*.png'))
     mkdir(output_dir)
 
     cpu_device = torch.device("cpu")
