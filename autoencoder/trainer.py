@@ -107,51 +107,52 @@ def do_train(
                 #generator loss:
 
             elif cfg.MODEL.MODEL_NAME == "gan_object_detector":
-                perturbations, encoding, quantized = model.encoder_generator(images)
-                perturbations = torch.nn.functional.interpolate(perturbations, size=(300, 300), mode='bilinear')
-                perturbations = perturbations
-                images = torch.divide(images, 255)
-                perturbed_images = torch.add(perturbations, images)
+                for i in range(cfg.SOLVER.ITERATIONS_PER_IMAGE):
+                    perturbations, encoding, quantized = model.encoder_generator(images)
+                    perturbations = torch.nn.functional.interpolate(perturbations, size=(300, 300), mode='bilinear')
+                    perturbations = perturbations
+                    images = torch.divide(images, 255)
+                    perturbed_images = torch.add(perturbations, images)
 
-                loss_dict_original = target(images, targets=targets)
-                loss_dict_perturbed = target(perturbed_images, targets=targets)
+                    loss_dict_original = target(images, targets=targets)
+                    loss_dict_perturbed = target(perturbed_images, targets=targets)
 
-                discriminator_rec = torch.mean(model.discriminator(perturbed_images))
-                discriminator_real = torch.mean(model.discriminator(images))
+                    discriminator_rec = torch.mean(model.discriminator(perturbed_images))
+                    discriminator_real = torch.mean(model.discriminator(images))
 
-                disc_loss_real = torch.square(discriminator_real - 1.)
-                disc_loss_rec = torch.square(discriminator_rec)
+                    disc_loss_real = torch.square(discriminator_real - 1.)
+                    disc_loss_rec = torch.square(discriminator_rec)
 
-                disc_loss = torch.mean(disc_loss_real + disc_loss_rec)
-                gen_loss = torch.square(discriminator_rec - 1.)
-                true_labels = loss_dict_perturbed["labels"]
-                # want to give loss based on transforming labels != 0 to 10. so confidence in 10 where true label != 0
-                # should be higher.
-                labels_with_gt_nonzero = true_labels[true_labels > 0]
-                scores = torch.nn.functional.softmax(loss_dict_perturbed["confidence"])
-                object_hiding_loss = torch.nn.BCEWithLogitsLoss()(scores, torch.zeros_like(scores))
+                    disc_loss = torch.mean(disc_loss_real + disc_loss_rec)
+                    gen_loss = torch.square(discriminator_rec - 1.)
+                    true_labels = loss_dict_perturbed["labels"]
+                    # want to give loss based on transforming labels != 0 to 10. so confidence in 10 where true label != 0
+                    # should be higher.
+                    labels_with_gt_nonzero = true_labels[true_labels > 0]
+                    scores = torch.nn.functional.softmax(loss_dict_perturbed["confidence"])
+                    object_hiding_loss = torch.nn.BCEWithLogitsLoss()(scores, torch.zeros_like(scores))
 
-                cls_loss = cfg.SOLVER.CLS_LOSS_FACTOR * (loss_dict_perturbed["cls_loss"] - loss_dict_original["cls_loss"])
-                reg_loss = cfg.SOLVER.REG_LOSS_FACTOR * (loss_dict_perturbed["reg_loss"] - loss_dict_original["reg_loss"])
-                gen_loss += cfg.SOLVER.TARGET_LOSS_FACTOR * object_hiding_loss
-                performance_degradation_loss = cls_loss + reg_loss
-                gen_loss += cfg.SOLVER.PERFORMANCE_DEGRADATION_FACTOR * torch.pow(cfg.SOLVER.CHI, (-1 * performance_degradation_loss))
+                    cls_loss = cfg.SOLVER.CLS_LOSS_FACTOR * (loss_dict_perturbed["cls_loss"] - loss_dict_original["cls_loss"])
+                    reg_loss = cfg.SOLVER.REG_LOSS_FACTOR * (loss_dict_perturbed["reg_loss"] - loss_dict_original["reg_loss"])
+                    gen_loss += cfg.SOLVER.TARGET_LOSS_FACTOR * object_hiding_loss
+                    performance_degradation_loss = cls_loss + reg_loss
+                    gen_loss += cfg.SOLVER.PERFORMANCE_DEGRADATION_FACTOR * torch.pow(cfg.SOLVER.CHI, (-1 * performance_degradation_loss))
 
-                hinge_loss = torch.norm(perturbations) - cfg.SOLVER.HINGE_LOSS_THRESHOLD
-                if hinge_loss < 0:
-                    hinge_loss = 0
+                    hinge_loss = torch.norm(perturbations) - cfg.SOLVER.HINGE_LOSS_THRESHOLD
+                    if hinge_loss < 0:
+                        hinge_loss = 0
 
-                distortion_penalty = cfg.SOLVER.DISTORTION_PENALTY_FACTOR * torch.nn.MSELoss()(perturbed_images, images)
-                gen_loss += distortion_penalty + cfg.SOLVER.HINGE_LOSS_FACTOR * hinge_loss
+                    distortion_penalty = cfg.SOLVER.DISTORTION_PENALTY_FACTOR * torch.nn.MSELoss()(perturbed_images, images)
+                    gen_loss += distortion_penalty + cfg.SOLVER.HINGE_LOSS_FACTOR * hinge_loss
 
-                gen_optim.zero_grad()
-                disc_optim.zero_grad()
+                    gen_optim.zero_grad()
+                    disc_optim.zero_grad()
 
-                gen_loss.backward(retain_graph=True)
-                disc_loss.backward()
+                    gen_loss.backward(retain_graph=True)
+                    disc_loss.backward()
 
-                gen_optim.step()
-                disc_optim.step()
+                    gen_optim.step()
+                    disc_optim.step()
                 logger.info("============================================================================")
                 logger.info("gen_loss: {gen_loss} \n disc_loss: {disc_loss} \n perf_degradation: {perf_deg}, \n"
                             " distortion_penalty: {distortion_penalty} \n, hinge_loss: {hinge_loss}, \n loss_dict_orig: {loss_dict_orig}"
