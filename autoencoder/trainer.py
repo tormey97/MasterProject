@@ -107,11 +107,13 @@ def do_train(
                 #generator loss:
 
             elif cfg.MODEL.MODEL_NAME == "gan_object_detector":
-                for i in range(cfg.SOLVER.ITERATIONS_PER_IMAGE):
+                images = torch.divide(images, 255)
+
+                for j in range(cfg.SOLVER.ITERATIONS_PER_IMAGE):
+                    print(j)
                     perturbations, encoding, quantized = model.encoder_generator(images)
                     perturbations = torch.nn.functional.interpolate(perturbations, size=(300, 300), mode='bilinear')
                     perturbations = perturbations
-                    images = torch.divide(images, 255)
                     perturbed_images = torch.add(perturbations, images)
 
                     loss_dict_original = target(images, targets=targets)
@@ -130,7 +132,10 @@ def do_train(
                     # should be higher.
                     labels_with_gt_nonzero = true_labels[true_labels > 0]
                     scores = torch.nn.functional.softmax(loss_dict_perturbed["confidence"])
-                    object_hiding_loss = torch.nn.BCEWithLogitsLoss()(scores, torch.zeros_like(scores))
+                    targeting = torch.zeros_like(scores)
+                    targeting[:, cfg.SOLVER.TARGET_CLASS] = 1
+
+                    object_hiding_loss = torch.nn.BCEWithLogitsLoss()(scores, targeting)
 
                     cls_loss = cfg.SOLVER.CLS_LOSS_FACTOR * (loss_dict_perturbed["cls_loss"] - loss_dict_original["cls_loss"])
                     reg_loss = cfg.SOLVER.REG_LOSS_FACTOR * (loss_dict_perturbed["reg_loss"] - loss_dict_original["reg_loss"])
@@ -153,17 +158,30 @@ def do_train(
 
                     gen_optim.step()
                     disc_optim.step()
-                logger.info("============================================================================")
-                logger.info("gen_loss: {gen_loss} \n disc_loss: {disc_loss} \n perf_degradation: {perf_deg}, \n"
-                            " distortion_penalty: {distortion_penalty} \n, hinge_loss: {hinge_loss}, \n loss_dict_orig: {loss_dict_orig}"
-                            "\n loss dict perturbed: {loss_dict_perturbed} \n".format(gen_loss=gen_loss, disc_loss=disc_loss,
-                                                                                   perf_deg=performance_degradation_loss,
-                                                                                   distortion_penalty=distortion_penalty,
-                                                                                   hinge_loss=hinge_loss,
-                                                                                   loss_dict_orig="",
-                                                                                   loss_dict_perturbed=""))
+
+                    logger.info("============================================================================")
+                    logger.info("gen_loss: {gen_loss} \n disc_loss: {disc_loss} \n perf_degradation: {perf_deg}, obj_hiding: {object_hiding_loss} \n"
+                                " distortion_penalty: {distortion_penalty} \n, hinge_loss: {hinge_loss}, \n loss_dict_orig: {loss_dict_orig}"
+                                "\n loss dict perturbed: {loss_dict_perturbed} \n".format(gen_loss=gen_loss,
+                                                                                          disc_loss=disc_loss,
+                                                                                          perf_deg=performance_degradation_loss,
+                                                                                          object_hiding_loss=object_hiding_loss,
+                                                                                          distortion_penalty=distortion_penalty,
+                                                                                          hinge_loss=hinge_loss,
+                                                                                          loss_dict_orig="",
+                                                                                          loss_dict_perturbed=""))
+
 
                 print(gen_loss, disc_loss)
+
+                def draw_image2(image, name):
+                    save_decod_img(image, str(iteration) + name, cfg=cfg, range=(0, 255))
+
+                if iteration % cfg.DRAW_STEP == 0:
+                    draw_image2(perturbed_images.cpu().data, "perturbed")
+                    draw_image2(images.cpu().data, "original")
+                    draw_image2(perturbations.cpu().data, "perturbations")
+
                 def draw_image(image, name):
                     cv2image = image.detach().cpu().numpy()[0].transpose((1, 2, 0))
                     drawn_image = draw_boxes(cv2image, [], [], [],
@@ -171,13 +189,7 @@ def do_train(
                     Image.Image.fromarray(drawn_image).save(
                         os.path.join("autoenc2_out", str(iteration) + name + ".jpg"))
 
-                def draw_image2(image, name):
-                    save_decod_img(image, str(iteration) + name, cfg=cfg, range=(0,255))
 
-                if iteration % cfg.DRAW_STEP == 0:
-                    draw_image2(perturbed_images.cpu().data, "perturbed")
-                    draw_image2(images.cpu().data, "original")
-                    draw_image2(perturbations.cpu().data, "perturbations")
 
             elif cfg.MODEL.MODEL_NAME == "autoencoder":
                 reconstructed_images, dec_outputs, enc_outputs = model(images)
