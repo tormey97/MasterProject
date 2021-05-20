@@ -7,12 +7,12 @@ MODEL:
   MODEL_NAME: "gan_object_detector"
   QUANTIZE: False
   C: 3
-  f: [100, 100, 100, 100, 100, 100, 100, 100]
+  f: [1]
 
 
 SOLVER:
   MAX_ITER: 10000
-  LR: 0.00018
+  LR: 0.0003
   WHICH_OPTIMIZER: "SGD"
   LOSS_FUNCTION: "MSE"
   L1_REGULARIZATION_FACTOR: 1e-7
@@ -36,6 +36,6 @@ BATCH_SIZE: 1
 
 DATASET_NAME: "voc_detection"
 MODEL_SAVE_STEP: 100
-DRAW_STEP: 100
+DRAW_STEP: 1
 OUTPUT_DIR: "autoencoder_outputs/gan80"
 DRAW_TO_DIR: "gan80_out"
