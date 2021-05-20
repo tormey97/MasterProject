@@ -135,7 +135,7 @@ def do_train(
                     targeting = torch.zeros_like(scores)
                     targeting[:, cfg.SOLVER.TARGET_CLASS] = 1
 
-                    object_hiding_loss = torch.nn.BCEWithLogitsLoss()(scores, targeting)
+                    object_hiding_loss = torch.nn.BCELoss()(scores, targeting)
 
                     cls_loss = cfg.SOLVER.CLS_LOSS_FACTOR * (loss_dict_perturbed["cls_loss"] - loss_dict_original["cls_loss"])
                     reg_loss = cfg.SOLVER.REG_LOSS_FACTOR * (loss_dict_perturbed["reg_loss"] - loss_dict_original["reg_loss"])

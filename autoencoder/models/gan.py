@@ -30,7 +30,10 @@ class EncoderGenerator(nn.Module):
         self.f = f
         self.C = C
         self.in_channels = in_channels
-        self.generator = self.make_generator()
+        if self.cfg.DOWNSAMPLE:
+            self.generator = self.make_generator()
+        else:
+            self.generator = lambda x: x
         self.encoder = self.make_encoder()
 
 
@@ -67,11 +70,19 @@ class EncoderGenerator(nn.Module):
 
     def make_encoder(self):
         blocks = [conv_block(self.in_channels, self.f[0], 7, 1, 3)]
+        last = len(self.f) - 2
         for i in range(len(self.f) - 1):
             stride = 2
-            if i >= len(self.f) - 2:
+            if not self.cfg.DOWNSAMPLE or i >= last:
                 stride = 1
-            blocks.append(conv_block(self.f[i], self.f[i + 1], 3, 2, 1))
+            blocks.append(conv_block(self.f[i], self.f[i + 1], 3, stride, 1))
+            if not self.cfg.DOWNSAMPLE and i < last:
+                blocks.append(nn.LeakyReLU(0.2, inplace=True))
+            elif not self.cfg.DOWNSAMPLE and i == last:
+                blocks.append(
+                    nn.Tanh()
+                )
+
         return nn.Sequential(
             *blocks
         )
