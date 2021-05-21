@@ -7,7 +7,7 @@ MODEL:
   MODEL_NAME: "gan_object_detector"
   QUANTIZE: False
   C: 3
-  f: [1]
+  f: [10, 10, 10]
 
 
 SOLVER:

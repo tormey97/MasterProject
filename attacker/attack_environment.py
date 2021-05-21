@@ -123,8 +123,8 @@ class AttackEnvironment(gym.Env):
         self.encoding = None
         self.encoding_pooling_output = None
 
-        self.action_space = Box(-1, 1, [361])  # TODO configurable
-        self.observation_space = Box(-1, 1, [361])
+        self.action_space = Box(-1, 1, [10])  # TODO configurable
+        self.observation_space = Box(-1, 1, [10])
 
         self.step_ctr = 0
 
@@ -264,17 +264,18 @@ class AttackEnvironment(gym.Env):
     def apply_transformation(self, delta):
 
         delta = torch.nn.functional.interpolate(delta, size=(300, 300), mode='bilinear')
-        perturbed_image = self.image + torch.multiply(delta, 255)
+        perturbed_image = self.image + torch.multiply(delta, 100)
         return perturbed_image
 
     # override
     def step(self, action):
         # get perturbed encoding by applying action
-        perturbed_encoding = action.reshape(1, 1, 19, 19)
-        perturbed_encoding = torch.nn.functional.interpolate(torch.Tensor(perturbed_encoding).reshape(1, 1, 19, 19), (19, 19))
+        perturbed_encoding = action.reshape(1, 1, 10,1)
+        #perturbed_encoding = torch.nn.functional.interpolate(torch.Tensor(perturbed_encoding).reshape(1, 1, 10,1), (10,1))
         # decode the perturbed encoding to generate a transformation
         reconstruction, _ = self.encoder_decoder.decode(torch.Tensor([self.encoding]))
-        perturbation_transformation, _ = self.encoder_decoder.decode(torch.Tensor(perturbed_encoding))
+        #perturbation_transformation, _ = self.encoder_decoder.decode(torch.Tensor(perturbed_encoding))
+        perturbation_transformation, _ = self.encoder_decoder.decode(torch.Tensor([self.encoding]))
 
         perturbation_transformation = perturbation_transformation #- reconstruction
         # perturb the current image
@@ -307,7 +308,7 @@ class AttackEnvironment(gym.Env):
         self.image_data = values
         self.image = values[0]
         self.encoding = self.encoder_decoder.encode(self.image)[0].detach().cpu().numpy()
-        return self.encoding.flatten()
+        return np.zeros(10)
 
 
     #override
