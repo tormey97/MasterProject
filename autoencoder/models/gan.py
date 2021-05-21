@@ -55,7 +55,10 @@ class EncoderGenerator(nn.Module):
         :param encoding:
         :return:
         """
-        quantized = self.quantizer(encoding)
+        if self.cfg.MODEL.QUANTIZE:
+            quantized = self.quantizer(encoding)
+        else:
+            quantized = encoding
         recon = self.generator(quantized)
         return recon, quantized,
 
