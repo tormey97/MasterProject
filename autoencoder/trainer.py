@@ -112,12 +112,13 @@ def do_train(
                 for j in range(cfg.SOLVER.ITERATIONS_PER_IMAGE):
                     print(j)
                     perturbations, encoding, quantized = model.encoder_generator(images)
-                    perturbations = torch.nn.functional.interpolate(perturbations, size=(300, 300), mode='bilinear')
+                    #perturbations = torch.nn.functional.interpolate(perturbations, size=(300, 300), mode='bilinear')
                     perturbations = perturbations
                     perturbed_images = torch.add(perturbations, images)
 
                     loss_dict_original = target(images, targets=targets)
                     loss_dict_perturbed = target(perturbed_images, targets=targets)
+
 
                     discriminator_rec = torch.mean(model.discriminator(perturbed_images))
                     discriminator_real = torch.mean(model.discriminator(images))
@@ -131,12 +132,14 @@ def do_train(
                     # want to give loss based on transforming labels != 0 to 10. so confidence in 10 where true label != 0
                     # should be higher.
                     labels_with_gt_nonzero = true_labels[true_labels > 0]
-                    scores = torch.nn.functional.softmax(loss_dict_perturbed["confidence"])
-                    targeting = torch.zeros_like(scores)
+                    scores_original = torch.nn.functional.softmax(loss_dict_original["confidence"][0])
+                    scores_perturbed = torch.nn.functional.softmax(loss_dict_perturbed["confidence"][0])
+                    targeting = torch.zeros_like(scores_perturbed)
                     targeting[:, cfg.SOLVER.TARGET_CLASS] = 1
-
-                    object_hiding_loss = torch.nn.BCELoss()(scores, targeting)
-
+                    criterion = torch.nn.BCELoss()
+                    object_hiding_loss_orig = criterion(scores_original, targeting)
+                    object_hiding_loss_pert = criterion(scores_perturbed, targeting)
+                    object_hiding_loss = torch.pow(cfg.SOLVER.CHI, (-1 * 1e4 * (object_hiding_loss_orig - object_hiding_loss_pert)))
                     cls_loss = cfg.SOLVER.CLS_LOSS_FACTOR * (loss_dict_perturbed["cls_loss"] - loss_dict_original["cls_loss"])
                     reg_loss = cfg.SOLVER.REG_LOSS_FACTOR * (loss_dict_perturbed["reg_loss"] - loss_dict_original["reg_loss"])
                     gen_loss += cfg.SOLVER.TARGET_LOSS_FACTOR * object_hiding_loss
