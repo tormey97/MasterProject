@@ -144,7 +144,7 @@ def do_train(
                     object_hiding_loss = torch.pow(cfg.SOLVER.CHI, (-1 * 1e3 * (object_hiding_loss_orig - object_hiding_loss_pert)))
                     cls_loss = cfg.SOLVER.CLS_LOSS_FACTOR * (loss_dict_perturbed["cls_loss"] - loss_dict_original["cls_loss"])
                     reg_loss = cfg.SOLVER.REG_LOSS_FACTOR * (loss_dict_perturbed["reg_loss"] - loss_dict_original["reg_loss"])
-                    gen_loss += cfg.SOLVER.TARGET_LOSS_FACTOR * object_hiding_loss
+                    gen_loss += cfg.SOLVER.TARGET_LOSS_FACTOR * object_hiding_loss_pert
                     performance_degradation_loss = cls_loss + reg_loss
                     gen_loss += cfg.SOLVER.PERFORMANCE_DEGRADATION_FACTOR * torch.pow(cfg.SOLVER.CHI, (-1 * performance_degradation_loss))
 
@@ -158,7 +158,7 @@ def do_train(
                     gen_optim.zero_grad()
                     disc_optim.zero_grad()
 
-                    gen_loss.backward(retain_graph=True)
+                    gen_loss.backward()
                     disc_loss.backward()
 
                     gen_optim.step()
