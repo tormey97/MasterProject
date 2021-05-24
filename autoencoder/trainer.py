@@ -135,6 +135,8 @@ def do_train(
                     scores_original = torch.nn.functional.softmax(loss_dict_original["confidence"][hard_neg_mask])
                     scores_perturbed = torch.nn.functional.softmax(loss_dict_perturbed["confidence"][hard_neg_mask])
                     targeting = torch.zeros(scores_perturbed.shape)
+                    if get_device() == "cuda":
+                        targeting = targeting.cuda()
                     targeting[:, cfg.SOLVER.TARGET_CLASS] = 1
                     criterion = torch.nn.BCELoss()
                     object_hiding_loss_orig = criterion(scores_original, targeting)
