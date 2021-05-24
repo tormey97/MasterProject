@@ -158,7 +158,7 @@ def do_train(
                     gen_optim.zero_grad()
                     disc_optim.zero_grad()
 
-                    gen_loss.backward()
+                    gen_loss.backward(retain_graph=True)
                     disc_loss.backward()
 
                     gen_optim.step()
@@ -170,7 +170,7 @@ def do_train(
                                 "\n loss dict perturbed: {loss_dict_perturbed} \n".format(gen_loss=gen_loss,
                                                                                           disc_loss=(disc_loss_rec, disc_loss_real),
                                                                                           perf_deg=performance_degradation_loss,
-                                                                                          object_hiding_loss=object_hiding_loss,
+                                                                                          object_hiding_loss=object_hiding_loss_pert,
                                                                                           distortion_penalty=distortion_penalty,
                                                                                           hinge_loss=hinge_loss,
                                                                                           loss_dict_orig="",
