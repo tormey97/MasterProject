@@ -28,12 +28,13 @@ class SSDBoxHead(nn.Module):
 
     def _forward_train(self, cls_logits, bbox_pred, targets):
         gt_boxes, gt_labels = targets['boxes'], targets['labels']
-        reg_loss, cls_loss, confidence, labels = self.loss_evaluator(cls_logits, bbox_pred, gt_labels, gt_boxes)
+        reg_loss, cls_loss, confidence, labels, mask = self.loss_evaluator(cls_logits, bbox_pred, gt_labels, gt_boxes)
         loss_dict = dict(
             reg_loss=reg_loss,
             cls_loss=cls_loss,
             confidence=confidence,
-            labels=labels
+            labels=labels,
+            mask=mask
         )
         detections = (cls_logits, bbox_pred)
         return detections, loss_dict

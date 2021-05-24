@@ -199,19 +199,30 @@ class EncoderGenerator(nn.Module):
 class Discriminator(nn.Module):
     def __init__(self, cfg, in_channels):
         super().__init__()
+        self.cfg = cfg
+        self.f = cfg.MODEL.D_F
         self.in_channels = in_channels
         self.discriminator = self.make_discriminator()
 
     def make_discriminator(self, actv=nn.LeakyReLU):
-        d_f = [64, 128, 256, 512, 1]
-        c1 = conv_block(in_channels=self.in_channels, out_channels=d_f[0], kernel_size=7, stride=1, padding=1, activ=actv)
-        c2 = conv_block(in_channels=d_f[0], out_channels=d_f[1], stride=2, padding=0, kernel_size=4, activ=actv)
-        c3 = conv_block(in_channels=d_f[1], out_channels=d_f[2], stride=2, padding=0, kernel_size=4, activ=actv)
-        c4 = conv_block(in_channels=d_f[2], out_channels=d_f[3], stride=2, padding=0, kernel_size=4, activ=actv)
+        blocks = [conv_block(self.in_channels, self.f[0], 7, 1, 3)]
+        last = len(self.f) - 1
+        for i in range(len(self.f) - 1):
+            stride = 2
+            if not self.cfg.DOWNSAMPLE or i >= last:
+                stride = 1
+            blocks.append(conv_block(self.f[i], self.f[i + 1], 3, stride, 1))
+            if not self.cfg.DOWNSAMPLE and i < last:
+                blocks.append(nn.LeakyReLU(0.2, inplace=True))
+            elif not self.cfg.DOWNSAMPLE and i == last:
+                blocks.append(conv_block(self.f[i], 1, 3, 1, 0))
+                blocks.append(
+                    nn.Sigmoid()
+                )
 
-        out = nn.Conv2d(in_channels=d_f[3], out_channels=d_f[4], kernel_size=4, stride=1, padding=0)
-        actv = nn.Sigmoid()
-        return nn.Sequential(c1, c2, c3, c4, out, actv)
+        return nn.Sequential(
+            *blocks
+        )
 
     def forward(self, x):
         return self.discriminator(x)
