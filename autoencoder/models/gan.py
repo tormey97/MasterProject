@@ -211,11 +211,11 @@ class Discriminator(nn.Module):
             stride = 2
             if i == last:
                 stride = 1
-            blocks.append(conv_block(self.f[i], self.f[i + 1], 3, stride, 1))
+            blocks.append(conv_block(self.f[i], self.f[i + 1], 4, stride, 1))
             if i < last:
                 blocks.append(nn.LeakyReLU(0.2, inplace=True))
 
-        blocks.append(conv_block(self.f[-1], 1, 3, 1, 0))
+        blocks.append(conv_block(self.f[-1], 1, 4, 1, 0))
         blocks.append(
             nn.Sigmoid()
         )
