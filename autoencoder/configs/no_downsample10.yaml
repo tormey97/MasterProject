@@ -37,5 +37,5 @@ BATCH_SIZE: 1
 DATASET_NAME: "voc_detection"
 MODEL_SAVE_STEP: 100
 DRAW_STEP: 50
-OUTPUT_DIR: "autoencoder_outputs/gan90"
-DRAW_TO_DIR: "gan90_out"
+OUTPUT_DIR: "autoencoder_outputs/gan92"
+DRAW_TO_DIR: "gan92_out"

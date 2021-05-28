@@ -1,4 +1,5 @@
 from SSD.ssd.data.datasets import VOCDataset, COCODataset
+from data_management.datasets.voc_detection import VOCDataset as _VOCDataset
 from .coco import coco_evaluation
 from .voc import voc_evaluation
 from SSD.ssd.data.datasets import MNISTDetection
@@ -23,7 +24,7 @@ def evaluate(dataset, predictions, output_dir, **kwargs):
     args = dict(
         dataset=dataset, predictions=predictions, output_dir=output_dir, **kwargs,
     )
-    if isinstance(dataset, VOCDataset):
+    if isinstance(dataset, VOCDataset) or isinstance(dataset, _VOCDataset):
         return voc_evaluation(**args)
     if isinstance(dataset, MNISTDetection):
         return voc_detection_evaluation(**args)

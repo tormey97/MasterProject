@@ -60,7 +60,7 @@ def create_encoder(cfg):
                 model.encoder_generator.encoder, save_dir=cfg.OUTPUT_DIR, last_checkpoint_name="encoder_chkpt.txt"
             )
         }
-        checkpointer["discriminator"].load()
+        #checkpointer["discriminator"].load()
         checkpointer["generator"].load()
         checkpointer["encoder"].load(use_latest=True)
         gen_optimizer = torch.optim.Adam(model.encoder_generator.parameters(), lr=0.0002)

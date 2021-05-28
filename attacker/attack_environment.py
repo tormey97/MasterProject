@@ -21,7 +21,7 @@ from utils.entity_utils import create_target, create_encoder
 from utils.image_utils import save_decod_img
 
 
-CONFIDENCE_THRESHOLD = 0.3 # TODO make configurable
+CONFIDENCE_THRESHOLD = 0.5 # TODO make configurable
 IOU_THRESHOLD = 0.2
 
 
@@ -264,7 +264,7 @@ class AttackEnvironment(gym.Env):
     def apply_transformation(self, delta):
 
         delta = torch.nn.functional.interpolate(delta, size=(300, 300), mode='bilinear')
-        perturbed_image = self.image + torch.multiply(delta, 100)
+        perturbed_image = self.image + torch.multiply(delta, 255)
         return perturbed_image
 
     # override

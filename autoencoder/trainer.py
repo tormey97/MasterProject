@@ -107,7 +107,7 @@ def do_train(
                 #generator loss:
 
             elif cfg.MODEL.MODEL_NAME == "gan_object_detector":
-                images = torch.divide(images, 255)
+                images = torch.divide(images, 1)
 
                 for j in range(cfg.SOLVER.ITERATIONS_PER_IMAGE):
                     perturbations, encoding, quantized = model.encoder_generator(images)
