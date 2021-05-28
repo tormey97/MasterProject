@@ -28,11 +28,14 @@ def compute_on_dataset(model, perturber, data_loader, device):
     for batch in data_loader:
         i += 1
         print(i)
+        if i == 30:
+            break
         images, targets, image_ids = batch
         cpu_device = torch.device("cpu")
         with torch.no_grad():
             images = images.to(device)
             outputs = model(images)
+            perturbed_images = perturber(images, model)
             outputs_p = model(perturber(images, model))
             outputs = [o.to(cpu_device) for o in outputs]
             outputs_p = [o.to(cpu_device) for o in outputs_p]
@@ -53,7 +56,7 @@ def do_evaluate(cfg, model, testloader,
     perturber = GANPerturber(model)
     results, results_p = compute_on_dataset(target, perturber, testloader, get_device())
     eval_result = _accumulate_predictions_from_multiple_gpus(results)
-    eval_result_p = _accumulate_predictions_from_multiple_gpus(results)
+    eval_result_p = _accumulate_predictions_from_multiple_gpus(results_p)
 
     eval_result = evaluate(testloader.dataset, eval_result, "some_output")
     eval_result_p = evaluate(testloader.dataset, eval_result_p, "some_output")
