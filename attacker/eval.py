@@ -27,9 +27,6 @@ def compute_on_dataset(model, perturber, data_loader, device):
     i = 0
     for batch in data_loader:
         i += 1
-        print(i)
-        if i == 30:
-            break
         images, targets, image_ids = batch
         cpu_device = torch.device("cpu")
         with torch.no_grad():
