@@ -28,9 +28,21 @@ from SSD.ssd.data.datasets import COCODataset, VOCDataset
 
 from utils.torch_utils import get_device
 
+#from FasterRCNN.lib.model.faster_rcnn.resnet import resnet
 
-
-
+"""
+def create_frcnn(cfg):
+    pascal_classes = np.asarray(['__background__',
+                                 'aeroplane', 'bicycle', 'bird', 'boat',
+                                 'bottle', 'bus', 'car', 'cat', 'chair',
+                                 'cow', 'diningtable', 'dog', 'horse',
+                                 'motorbike', 'person', 'pottedplant',
+                                 'sheep', 'sofa', 'train', 'tvmonitor'])
+    model = resnet(classes=pascal_classes, pretrained=True, class_agnostic=False)
+    model.create_architecture()
+    model.to(get_device())
+    return model
+"""
 def create_target(cfg):
     model = SSDDetector(cfg)
     model.to(get_device())

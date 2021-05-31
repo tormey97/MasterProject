@@ -11,7 +11,7 @@ import logging
 import torch
 from torchvision import datasets
 from torch.utils.data import DataLoader
-from utils.entity_utils import create_target, create_encoder
+from utils.entity_utils import create_target, create_encoder, create_frcnn
 import torch
 from autoencoder.configs.defaults import cfg
 import pathlib
@@ -19,6 +19,8 @@ from data_management.logger import setup_logger
 from autoencoder.inference import do_evaluation
 from SSD.ssd.engine.inference import (evaluate, _accumulate_predictions_from_multiple_gpus)
 from SSD.ssd.config.defaults import _C as target_cfg
+
+from FasterRCNN.lib.model.faster_rcnn.resnet import ResNet
 import argparse
 from attacker.perturber import GANPerturber
 def compute_on_dataset(model, perturber, data_loader, device):
@@ -32,7 +34,6 @@ def compute_on_dataset(model, perturber, data_loader, device):
         with torch.no_grad():
             images = images.to(device)
             outputs = model(images)
-            perturbed_images = perturber(images, model)
             outputs_p = model(perturber(images, model))
             outputs = [o.to(cpu_device) for o in outputs]
             outputs_p = [o.to(cpu_device) for o in outputs_p]
@@ -48,6 +49,7 @@ def compute_on_dataset(model, perturber, data_loader, device):
 def do_evaluate(cfg, model, testloader,
         checkpointer, arguments, target_cfg):
 
+    # black_box_target = create_frcnn(target_cfg)
     target = create_target(target_cfg)
     target.eval()
     perturber = GANPerturber(model)

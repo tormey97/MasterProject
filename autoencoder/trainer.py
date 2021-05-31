@@ -111,7 +111,7 @@ def do_train(
 
                 for j in range(cfg.SOLVER.ITERATIONS_PER_IMAGE):
                     perturbations, encoding, quantized = model.encoder_generator(images)
-                    #perturbations = torch.nn.functional.interpolate(perturbations, size=(300, 300), mode='bilinear')
+                    perturbations = torch.nn.functional.interpolate(perturbations, size=(300, 300), mode='bilinear')
                     perturbations = perturbations
                     perturbed_images = torch.add(perturbations, images)
 

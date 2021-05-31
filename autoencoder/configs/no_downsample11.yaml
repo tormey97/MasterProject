@@ -32,10 +32,10 @@ DECODER:
   CNV_OUT_CHANNELS: [300, 1]
 
 LOG_STEP: 500
-BATCH_SIZE: 1
+BATCH_SIZE: 2
 
 DATASET_NAME: "voc_detection"
 MODEL_SAVE_STEP: 100
 DRAW_STEP: 50
-OUTPUT_DIR: "autoencoder_outputs/gan92"
-DRAW_TO_DIR: "gan92_out"
+OUTPUT_DIR: "autoencoder_outputs/gan100"
+DRAW_TO_DIR: "gan100_out"
