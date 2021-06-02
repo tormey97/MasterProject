@@ -21,9 +21,20 @@ from SSD.ssd.engine.inference import (evaluate, _accumulate_predictions_from_mul
 from SSD.ssd.config.defaults import _C as target_cfg
 import argparse
 from attacker.perturber import GANPerturber
+
+def calculate_norms(images, perturbed_images):
+    norms = [1, 2, float('inf')]
+    output_dict = {}
+    for norm in norms:
+        norm_val = torch.linalg.norm(torch.subtract(perturbed_images, images), dim=2, ord=norm)
+        output_dict[str(norm)] = norm_val
+    return output_dict
+
+
 def compute_on_dataset(model, perturber, data_loader, device):
     results_dict = {}
     results_dict_p = {}
+    norm_dict = {}
     i = 0
     for batch in data_loader:
         i += 1
@@ -32,7 +43,9 @@ def compute_on_dataset(model, perturber, data_loader, device):
         with torch.no_grad():
             images = images.to(device)
             outputs = model(images)
-            outputs_p = model(perturber(images, model))
+            perturbed_images = perturber(images, model)
+            outputs_p = model(perturbed_images)
+            norm_outputs = calculate_norms(images, perturbed_images)
             outputs = [o.to(cpu_device) for o in outputs]
             outputs_p = [o.to(cpu_device) for o in outputs_p]
         results_dict.update(
@@ -41,6 +54,10 @@ def compute_on_dataset(model, perturber, data_loader, device):
         results_dict_p.update(
             {int(img_id): result for img_id, result in zip(image_ids, outputs_p)}
         )
+        norm_dict.update(
+            {int(img_id): result for img_id, result in zip(image_ids, outputs_p)}
+        )
+
 
     return results_dict, results_dict_p
 
