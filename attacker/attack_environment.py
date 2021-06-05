@@ -247,7 +247,7 @@ class AttackEnvironment(gym.Env):
         class_reward = sum(rewards)
         performance_reduction_factor = self.attacker_cfg.REWARD.PERFORMANCE_REDUCTION_FACTOR
         delta_factor = self.attacker_cfg.REWARD.DELTA_FACTOR
-        diff = np.linalg.norm(perturbation)
+        diff = np.linalg.norm(perturbation.detach().cpu().numpy())
 
         addon = 0
         if map_orig > 0 and map_orig - map_perturbed == 0:
