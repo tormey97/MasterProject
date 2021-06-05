@@ -59,6 +59,7 @@ def create_encoder(cfg):
         checkpointer.load(use_latest=True)
     elif cfg.MODEL.MODEL_NAME == "gan" or cfg.MODEL.MODEL_NAME=="gan_object_detector":
         model = GanEncoder(cfg)
+        model.to(get_device())
         checkpointer = {
             "discriminator": CheckPointer(
                 model.discriminator, save_dir=cfg.OUTPUT_DIR,
