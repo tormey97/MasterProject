@@ -141,8 +141,8 @@ class AttackEnvironment(gym.Env):
         _, gt_boxes, gt_labels = (image_, self.annotations[1][0], self.annotations[1][1])
 
         image_, boxes, labels = transform(image_, boxes, labels)
-
-        targets = {'boxes': boxes.to(get_device()), 'labels': labels.to(get_device())}
+        image_, boxes, labels = image_.to(get_device()), boxes.to(get_device()), labels.to(get_device())
+        targets = {'boxes': boxes, 'labels': labels}
         preds = self.target(image_.unsqueeze(0), targets=targets)[0] #TODO device
 
         preds = preds.resize((self.img_info['width'], self.img_info['height']))
