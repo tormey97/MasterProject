@@ -142,7 +142,7 @@ class AttackEnvironment(gym.Env):
 
         image_, boxes, labels = transform(image_, boxes, labels)
 
-        targets = {'boxes': boxes.detach().cpu().numpy(), 'labels': labels.detach().cpu().numpy()}
+        targets = {'boxes': boxes, 'labels': labels}
         preds = self.target(image_.unsqueeze(0), targets=targets)[0] #TODO device
 
         preds = preds.resize((self.img_info['width'], self.img_info['height']))
@@ -369,7 +369,6 @@ class AttackEnvironment(gym.Env):
             i, values = next(self.dataset_iterable)
         self.annotations = self.data_loader.dataset.get_annotation(i)
         self.img_info = self.data_loader.dataset.get_img_info(i)
-
         self.image_data = values
         self.image = values[0].to(get_device())
 
