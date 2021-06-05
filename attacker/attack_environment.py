@@ -19,7 +19,7 @@ from SSD.ssd.data.datasets import COCODataset, VOCDataset
 
 from utils.entity_utils import create_target, create_encoder
 from utils.image_utils import save_decod_img
-
+from utils.torch_utils import get_device
 
 CONFIDENCE_THRESHOLD = 0.5 # TODO make configurable
 IOU_THRESHOLD = 0.2
@@ -371,7 +371,7 @@ class AttackEnvironment(gym.Env):
         self.img_info = self.data_loader.dataset.get_img_info(i)
 
         self.image_data = values
-        self.image = values[0]
+        self.image = values[0].to(get_device())
 
         if True:
             return self.reset_prune()
