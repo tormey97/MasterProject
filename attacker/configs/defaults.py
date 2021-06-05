@@ -1,8 +1,8 @@
 from yacs.config import CfgNode as CN
 
 cfg = CN()
-cfg.OUTPUT_DIR = "atk_outputs"
-cfg.OUTPUT_FILE = "output1.zip"
+cfg.OUTPUT_DIR = "ppo_atk_outputs"
+cfg.OUTPUT_FILE = "ppo1.zip"
 cfg.REWARD = CN()
 cfg.REWARD.DELTA_FACTOR = 0.001
 cfg.REWARD.PERFORMANCE_REDUCTION_FACTOR = 2
