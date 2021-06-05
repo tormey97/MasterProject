@@ -301,7 +301,7 @@ class AttackEnvironment(gym.Env):
             self.perturbation = self.encoder_decoder.encode(self.image)[0]
             self.perturbed_image = self.apply_transformation(self.perturbation)
             self.perturbation_mask = torch.gt(torch.ones((300, 300)), 0)
-            return self.perturbed_image.detach().cpu().numpy()
+            return self.perturbation.detach().cpu().numpy()
 
     def get_new_mask(self, action):
         img_size = 300
@@ -344,7 +344,7 @@ class AttackEnvironment(gym.Env):
             print(pixels_removed, cls_reward, cls_reward_old, action[4])
             image_size = self.image.shape[2] * self.image.shape[3]
             final_reward = (pixels_removed.detach().cpu().numpy() / (self.image.shape[2] * self.image.shape[3])) - (cls_reward_old - cls_reward)
-            is_done = action[4] < 0.5 or pixels_removed == 0
+            is_done = action[4] < 0.5
             if is_done:
                 total_pixels_removed = torch.sum(torch.logical_not(self.perturbation_mask))
                 total_reward = total_pixels_removed / image_size
@@ -352,7 +352,7 @@ class AttackEnvironment(gym.Env):
                 self.step_ctr += 1
             print(final_reward, "\n")
 
-            return self.perturbed_image.detach().cpu().numpy(), final_reward, is_done, {}
+            return self.perturbation.detach().cpu().numpy(), final_reward, is_done, {}
 
 
     #override
