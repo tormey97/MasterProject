@@ -134,7 +134,7 @@ class AttackEnvironment(gym.Env):
             detection_transforms.ConvertFromInts(),
             ToTensor(),
         ])
-        image_ = image[0]
+        image_ = image[0].to(get_device())
         boxes = self.image_data[1]["boxes"][0]
         labels = self.image_data[1]["labels"][0]
 
@@ -142,7 +142,7 @@ class AttackEnvironment(gym.Env):
 
         image_, boxes, labels = transform(image_, boxes, labels)
 
-        targets = {'boxes': boxes, 'labels': labels}
+        targets = {'boxes': boxes.to(get_device()), 'labels': labels.to(get_device())}
         preds = self.target(image_.unsqueeze(0), targets=targets)[0] #TODO device
 
         preds = preds.resize((self.img_info['width'], self.img_info['height']))
