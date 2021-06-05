@@ -14,9 +14,10 @@ from SSD.ssd.config.defaults import _C as target_cfg
 import pathlib
 from data_management.logger import setup_logger
 
-from stable_baselines3.ddpg.policies import MlpPolicy
+from stable_baselines3.ddpg.policies import MlpPolicy, CnnPolicy
 from stable_baselines3.common.noise import NormalActionNoise, OrnsteinUhlenbeckActionNoise
 from stable_baselines3 import DDPG
+from stable_baselines3 import PPO
 
 from data_management.datasets.image_dataset import ImageDataset
 from data_management.datasets.voc_detection import VOCDataset
@@ -92,7 +93,7 @@ def start_train(attacker_cfg, encoder_cfg, target_cfg):
         attacker = DDPG.load(folder + "/" + attacker_cfg.OUTPUT_FILE)
         attacker.set_env(env)
     else:
-        attacker = DDPG(MlpPolicy, env, verbose=1, action_noise=action_noise, tensorboard_log="./logs/progress_tensorboard/")
+        attacker = PPO("CnnPolicy", env, n_steps=128, verbose=1, tensorboard_log="./logs/progress_tensorboard/")
     for i in range(attacker_cfg.TRAIN.SAVE_AMOUNT):
         attacker.learn(attacker_cfg.TRAIN.SAVE_STEP)
         attacker.save(folder + "/" + attacker_cfg.OUTPUT_FILE)

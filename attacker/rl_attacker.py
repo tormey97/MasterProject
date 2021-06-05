@@ -25,9 +25,9 @@ import gym
 import gym
 import numpy as np
 
-from stable_baselines3.ddpg.policies import MlpPolicy
+from stable_baselines3.ddpg.policies import CnnPolicy
 from stable_baselines3.common.noise import NormalActionNoise, OrnsteinUhlenbeckActionNoise
-from stable_baselines3 import DDPG
+from stable_baselines3 import PPO as DDPG
 env = gym.make('MountainCarContinuous-v0')
 
 
@@ -37,7 +37,7 @@ print(n_actions)
 param_noise = None
 action_noise = OrnsteinUhlenbeckActionNoise(mean=np.zeros(n_actions), sigma=float(0.5) * np.ones(n_actions))
 
-model = DDPG(MlpPolicy, env, verbose=1, action_noise=action_noise)
+model = DDPG("CnnPolicy", env, verbose=1)
 model.learn(total_timesteps=100)
 model.save("ddpg_mountain")
 

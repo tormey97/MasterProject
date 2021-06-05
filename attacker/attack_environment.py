@@ -123,8 +123,8 @@ class AttackEnvironment(gym.Env):
         self.encoding = None
         self.encoding_pooling_output = None
 
-        self.action_space = Box(-1, 1, [10])  # TODO configurable
-        self.observation_space = Box(-1, 1, [10])
+        self.action_space = Box(0, 1, [5])  # TODO configurable
+        self.observation_space = Box(low=0, high=255, shape=(3, 300, 300), dtype=np.uint8)
 
         self.step_ctr = 0
 
@@ -158,7 +158,7 @@ class AttackEnvironment(gym.Env):
         # need to find out which boxes are the "same" and add the predictions to a dict
 
         # Quickly visualize image
-        if self.step_ctr % 1 == 0:
+        if self.step_ctr % 10 == 0:
             cv2image = image_.detach().cpu().numpy().transpose((1, 2, 0)).astype(np.uint8)
             drawn_image = draw_boxes(cv2image, pred_boxes, pred_labels, pred_scores, VOCDataset.class_names).astype(np.uint8)
             Image.fromarray(drawn_image).save(os.path.join("justtosee", str(self.step_ctr) + name + ".jpg"))
@@ -251,9 +251,9 @@ class AttackEnvironment(gym.Env):
 
         addon = 0
         if map_orig > 0 and map_orig - map_perturbed == 0:
-            addon = -5
+            addon = 0
         reward = addon + performance_reduction_factor * (map_orig - map_perturbed)
-        if self.step_ctr % 5 == 0:
+        if self.step_ctr % 20 == 0:
             print("DIFF: ", diff)
             print("REWARD: ", reward)
             print("CLS_REWARD: ", class_reward)
@@ -263,12 +263,15 @@ class AttackEnvironment(gym.Env):
 
     def apply_transformation(self, delta):
 
-        delta = torch.nn.functional.interpolate(delta, size=(300, 300), mode='bilinear')
         perturbed_image = self.image + torch.multiply(delta, 255)
         return perturbed_image
 
     # override
     def step(self, action):
+        return self.step_prune(action)
+
+
+    def step_latent_space(self, action):
         # get perturbed encoding by applying action
         perturbed_encoding = action.reshape(1, 1, 10,1)
         #perturbed_encoding = torch.nn.functional.interpolate(torch.Tensor(perturbed_encoding).reshape(1, 1, 10,1), (10,1))
@@ -290,6 +293,68 @@ class AttackEnvironment(gym.Env):
         self.step_ctr += 1
         return perturbed_encoding.flatten(), class_reward, done, {}
 
+    def count_pixels_removed(self):
+        self.perturbation_mask.size() - self.perturbation_mask.count_nonzero()
+
+    def reset_prune(self):
+        with torch.no_grad():
+            self.perturbation = self.encoder_decoder.encode(self.image)[0]
+            self.perturbed_image = self.apply_transformation(self.perturbation)
+            self.perturbation_mask = torch.gt(torch.ones((300, 300)), 0)
+            return self.perturbed_image.detach().cpu().numpy()
+
+    def get_new_mask(self, action):
+        img_size = 300
+
+        action = action * img_size
+        action = np.round(action)
+        x = action[[0, 1]]
+        y = action[[2, 3]]
+        x_0 = x.min().astype(np.int32)
+        x_1 = x.max().astype(np.int32)
+        y_0 = y.min().astype(np.int32)
+        y_1 = y.max().astype(np.int32)
+
+        box_width = x_1 - x_0
+        box_height = y_1 - y_0
+
+        BOX_SIZE_THRESHOLD = 2
+
+        done = box_width * box_height < BOX_SIZE_THRESHOLD
+
+        new_perturbation_mask = self.perturbation_mask.clone()
+        new_perturbation_mask[x_0:x_1, y_0:y_1] = False
+        return new_perturbation_mask
+
+    def step_prune(self, action):
+        with torch.no_grad():
+
+            new_perturbation_mask = self.get_new_mask(action)
+            val1 = torch.zeros_like(self.perturbation_mask, dtype=torch.uint8)
+            val2 = torch.zeros_like(self.perturbation_mask, dtype=torch.uint8)
+            val1[self.perturbation_mask] = 1
+            val2[new_perturbation_mask] = 1
+            pixels_removed = torch.sum(torch.subtract(val1, val2))
+            cls_reward_old = self.calculate_class_reward(self.image, self.perturbed_image, self.perturbation)
+            self.perturbation[:, torch.logical_not(new_perturbation_mask)] = 0
+            new_perturbed_image = self.apply_transformation(self.perturbation)
+            cls_reward = self.calculate_class_reward(self.image, new_perturbed_image, self.perturbation)
+            self.perturbed_image = new_perturbed_image
+            print(action[:4])
+            print(pixels_removed, cls_reward, cls_reward_old, action[4])
+            image_size = self.image.shape[2] * self.image.shape[3]
+            final_reward = (pixels_removed.detach().cpu().numpy() / (self.image.shape[2] * self.image.shape[3])) - (cls_reward_old - cls_reward)
+            is_done = action[4] < 0.5 or pixels_removed == 0
+            if is_done:
+                total_pixels_removed = torch.sum(torch.logical_not(self.perturbation_mask))
+                total_reward = total_pixels_removed / image_size
+                final_reward += (total_reward.detach().cpu().numpy() - 0.25)
+                self.step_ctr += 1
+            print(final_reward, "\n")
+
+            return self.perturbed_image.detach().cpu().numpy(), final_reward, is_done, {}
+
+
     #override
     def reset(self):
         """
@@ -307,8 +372,21 @@ class AttackEnvironment(gym.Env):
 
         self.image_data = values
         self.image = values[0]
+
+        if True:
+            return self.reset_prune()
+        else:
+            return self.reset_latent_space()
+
+
+
+
+    def reset_latent_space(self):
+        """
+        :return: the initial state of the problem, which is an encoding of the image
+        """
         self.encoding = self.encoder_decoder.encode(self.image)[0].detach().cpu().numpy()
-        return np.zeros(10)
+        return np.zeros_like(self.observation_space.shape)
 
 
     #override
