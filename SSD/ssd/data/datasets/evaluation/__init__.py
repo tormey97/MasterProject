@@ -11,7 +11,7 @@ import pathlib
 
 
 
-def evaluate(dataset, predictions, output_dir, **kwargs):
+def evaluate(dataset, predictions, output_dir, norm_list, **kwargs):
     """evaluate dataset using different methods based on dataset type.
     Args:
         dataset: Dataset object
@@ -22,7 +22,7 @@ def evaluate(dataset, predictions, output_dir, **kwargs):
         evaluation result
     """
     args = dict(
-        dataset=dataset, predictions=predictions, output_dir=output_dir, **kwargs,
+        dataset=dataset, predictions=predictions, output_dir=output_dir, **kwargs, norm_list=norm_list
     )
     if isinstance(dataset, VOCDataset) or isinstance(dataset, _VOCDataset):
         return voc_evaluation(**args)
@@ -33,7 +33,7 @@ def evaluate(dataset, predictions, output_dir, **kwargs):
     else:
         raise NotImplementedError
 
-def voc_detection_evaluation(dataset, predictions, output_dir, iteration=None):
+def voc_detection_evaluation(dataset, predictions, output_dir, iteration=None, norm_list=None):
     class_names = dataset.class_names
 
     pred_boxes_list = []
@@ -42,7 +42,9 @@ def voc_detection_evaluation(dataset, predictions, output_dir, iteration=None):
     gt_boxes_list = []
     gt_labels_list = []
 
-    for i in range(len(dataset)):
+    norm_sums = {key: 0 for key in norm_list[0].keys()}
+    lngth = len(dataset)
+    for i in range(lngth):
         annotation = dataset.get_annotation(i)
         gt_boxes, gt_labels = annotation
         gt_boxes_list.append(gt_boxes)
@@ -56,6 +58,13 @@ def voc_detection_evaluation(dataset, predictions, output_dir, iteration=None):
         pred_boxes_list.append(boxes)
         pred_labels_list.append(labels)
         pred_scores_list.append(scores)
+
+        norms = norm_list[i]
+        for j in norms:
+            norm_sums[i] += norms[i]
+
+    norm_sums = {key: value / lngth for (key, value) in enumerate(norm_sums)}
+
     result = eval_detection_voc(pred_bboxes=pred_boxes_list,
                                 pred_labels=pred_labels_list,
                                 pred_scores=pred_scores_list,

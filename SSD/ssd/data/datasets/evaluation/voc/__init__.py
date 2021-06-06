@@ -7,7 +7,7 @@ import numpy as np
 from .eval_detection_voc import eval_detection_voc
 
 
-def voc_evaluation(dataset, predictions, output_dir, iteration=None):
+def voc_evaluation(dataset, predictions, output_dir, iteration=None, norm_list=None):
     class_names = dataset.class_names
 
     pred_boxes_list = []
@@ -17,7 +17,9 @@ def voc_evaluation(dataset, predictions, output_dir, iteration=None):
     gt_labels_list = []
     gt_difficults = []
 
-    for i in range(min(len(dataset), len(predictions))):
+    norm_sums = {key: 0 for key in norm_list[0].keys()}
+    lngth = min(len(dataset), len(predictions))
+    for i in range(lngth):
         image_id, annotation = dataset.get_annotation(i)
         gt_boxes, gt_labels, is_difficult = annotation
         gt_boxes_list.append(gt_boxes)
@@ -32,6 +34,12 @@ def voc_evaluation(dataset, predictions, output_dir, iteration=None):
         pred_boxes_list.append(boxes)
         pred_labels_list.append(labels)
         pred_scores_list.append(scores)
+        norms = norm_list[i]
+        for j in norms:
+            norm_sums[j] += norms[j]
+
+    norm_mean = {key: norm_sums[key] / lngth for key in norm_sums}
+
     result = eval_detection_voc(pred_bboxes=pred_boxes_list,
                                 pred_labels=pred_labels_list,
                                 pred_scores=pred_scores_list,
@@ -48,6 +56,11 @@ def voc_evaluation(dataset, predictions, output_dir, iteration=None):
             continue
         metrics[class_names[i]] = ap
         result_str += "{:<16}: {:.4f}\n".format(class_names[i], ap)
+
+    for key in norm_mean:
+        metrics[key] = norm_mean[key]
+        result_str += "{:<16}: {:.4f}\n".format(key + "_norm", norm_mean[key])
+
     logger.info(result_str)
 
     if iteration is not None:

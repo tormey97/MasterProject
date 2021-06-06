@@ -20,14 +20,18 @@ from autoencoder.inference import do_evaluation
 from SSD.ssd.engine.inference import (evaluate, _accumulate_predictions_from_multiple_gpus)
 from SSD.ssd.config.defaults import _C as target_cfg
 import argparse
+import numpy as np
 from attacker.perturber import GANPerturber
 
 def calculate_norms(images, perturbed_images):
     norms = [1, 2, float('inf')]
+    difference = torch.subtract(perturbed_images, images)
     output_dict = {}
     for norm in norms:
-        norm_val = torch.linalg.norm(torch.subtract(perturbed_images, images), dim=2, ord=norm)
-        output_dict[str(norm)] = norm_val
+        norm_val = torch.norm(images - perturbed_images, p=norm)
+        output_dict[str(norm)] = norm_val.detach().cpu().numpy()
+
+    output_dict["mse"] = torch.nn.MSELoss()(perturbed_images, images).detach().cpu().numpy()
     return output_dict
 
 
@@ -45,7 +49,7 @@ def compute_on_dataset(model, perturber, data_loader, device):
             outputs = model(images)
             perturbed_images = perturber(images, model)
             outputs_p = model(perturbed_images)
-            norm_outputs = calculate_norms(images, perturbed_images)
+            norm_outputs = [calculate_norms(images, perturbed_images)]
             outputs = [o.to(cpu_device) for o in outputs]
             outputs_p = [o.to(cpu_device) for o in outputs_p]
         results_dict.update(
@@ -55,11 +59,11 @@ def compute_on_dataset(model, perturber, data_loader, device):
             {int(img_id): result for img_id, result in zip(image_ids, outputs_p)}
         )
         norm_dict.update(
-            {int(img_id): result for img_id, result in zip(image_ids, outputs_p)}
+            {int(img_id): result for img_id, result in zip(image_ids, norm_outputs)}
         )
 
 
-    return results_dict, results_dict_p
+    return results_dict, results_dict_p, norm_dict
 
 def do_evaluate(cfg, model, testloader,
         checkpointer, arguments, target_cfg):
@@ -68,12 +72,12 @@ def do_evaluate(cfg, model, testloader,
     target = create_target(target_cfg)
     target.eval()
     perturber = GANPerturber(model)
-    results, results_p = compute_on_dataset(target, perturber, testloader, get_device())
+    results, results_p, norm_dict = compute_on_dataset(target, perturber, testloader, get_device())
     eval_result = _accumulate_predictions_from_multiple_gpus(results)
     eval_result_p = _accumulate_predictions_from_multiple_gpus(results_p)
-
-    eval_result = evaluate(testloader.dataset, eval_result, "some_output")
-    eval_result_p = evaluate(testloader.dataset, eval_result_p, "some_output")
+    norm_list = [norm_dict[i] for i in norm_dict.keys()]
+    eval_result = evaluate(testloader.dataset, eval_result, "original_evals", norm_list)
+    eval_result_p = evaluate(testloader.dataset, eval_result_p, "perturbation_evals", norm_list)
 
     print(eval_result, eval_result_p)
 
