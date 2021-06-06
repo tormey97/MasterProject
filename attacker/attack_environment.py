@@ -127,6 +127,7 @@ class AttackEnvironment(gym.Env):
         self.observation_space = Box(low=0, high=255, shape=(3, 300, 300), dtype=np.uint8)
 
         self.step_ctr = 0
+        self.boxes_placed = 0
 
     def calculate_map(self, image, name):
         transform = detection_transforms.Compose([
@@ -161,7 +162,7 @@ class AttackEnvironment(gym.Env):
         if self.step_ctr % 10 == 0:
             cv2image = image_.detach().cpu().numpy().transpose((1, 2, 0)).astype(np.uint8)
             drawn_image = draw_boxes(cv2image, pred_boxes, pred_labels, pred_scores, VOCDataset.class_names).astype(np.uint8)
-            Image.fromarray(drawn_image).save(os.path.join("justtosee", str(self.step_ctr) + name + ".jpg"))
+            Image.fromarray(drawn_image).save(os.path.join(self.attacker_cfg.DRAW_DIR, str(self.step_ctr) + name + ".jpg"))
 
             def draw_image2(image, name2):
                 save_decod_img(image.cpu().data, str(self.step_ctr) + name2, cfg=self.encoder_cfg, range=(0, 255))
@@ -298,6 +299,7 @@ class AttackEnvironment(gym.Env):
 
     def reset_prune(self):
         with torch.no_grad():
+            self.boxes_placed = 0
             self.perturbation = self.encoder_decoder.encode(self.image)[0]
             self.perturbed_image = self.apply_transformation(self.perturbation)
             self.perturbation_mask = torch.gt(torch.ones((300, 300)), 0)
@@ -310,11 +312,16 @@ class AttackEnvironment(gym.Env):
         action = np.round(action)
         x = action[[0, 1]]
         y = action[[2, 3]]
+        ''' # This is an inc
         x_0 = x.min().astype(np.int32)
         x_1 = x.max().astype(np.int32)
         y_0 = y.min().astype(np.int32)
         y_1 = y.max().astype(np.int32)
-
+        '''
+        x_0 = x[0].astype(np.int32)
+        x_1 = max(x[0], x[1]).astype(np.int32)
+        y_0 = y[0].astype(np.int32)
+        y_1 = max(y[0], y[1]).astype(np.int32)
         box_width = x_1 - x_0
         box_height = y_1 - y_0
 
@@ -340,19 +347,23 @@ class AttackEnvironment(gym.Env):
             new_perturbed_image = self.apply_transformation(self.perturbation)
             cls_reward = self.calculate_class_reward(self.image, new_perturbed_image, self.perturbation)
             self.perturbed_image = new_perturbed_image
-            print(action[:4])
-            print(pixels_removed, cls_reward, cls_reward_old, action[4])
+            print(action)
+            print("Pixels removed: ", pixels_removed, "Cls_reward: ", cls_reward, "Cls_reward_old: ", cls_reward_old, "IsDone: ", action[4])
             image_size = self.image.shape[2] * self.image.shape[3]
-            final_reward = (pixels_removed.detach().cpu().numpy() / (self.image.shape[2] * self.image.shape[3])) - (cls_reward_old - cls_reward)
-            is_done = action[4] < 0.5
+            final_reward = self.attacker_cfg.REWARD.PIXELS_REMOVED_FACTOR * (pixels_removed.detach().cpu().numpy() / (self.image.shape[2] * self.image.shape[3])) - self.attacker_cfg.REWARD.CLS_REWARD_REDUCTION_FACTOR * (cls_reward_old - cls_reward)
+            is_done = action[4] < self.attacker_cfg.DONE_THRESHOLD
+            self.boxes_placed += 1
             if is_done:
                 total_pixels_removed = torch.sum(torch.logical_not(self.perturbation_mask))
                 total_reward = total_pixels_removed / image_size
-                final_reward += (total_reward.detach().cpu().numpy() - 0.25)
+                final_reward += self.attacker_cfg.REWARD.END_PIXEL_BONUS_FACTOR * (total_reward.detach().cpu().numpy()) + self.attacker_cfg.REWARD.BOXES_PLACED_FACTOR * self.boxes_placed
                 self.step_ctr += 1
-            print(final_reward, "\n")
 
-            return self.perturbation.detach().cpu().numpy(), final_reward, is_done, {}
+            # This is to teach the RL agent that action[1] is to the right of action[0]
+            box_encouragement = min(0, action[1] - action[0]) + min(0, action[3] - action[2])
+            print("Reward: ", final_reward, box_encouragement, "\n")
+
+            return self.perturbation.detach().cpu().numpy(), final_reward + self.attacker_cfg.REWARD.BOX_ENCOURAGEMENT_FACTOR * box_encouragement, is_done, {}
 
 
     #override

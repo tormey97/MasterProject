@@ -93,7 +93,7 @@ def start_train(attacker_cfg, encoder_cfg, target_cfg):
         attacker = DDPG.load(folder + "/" + attacker_cfg.OUTPUT_FILE)
         attacker.set_env(env)
     else:
-        attacker = PPO("CnnPolicy", env, n_steps=128, verbose=1, tensorboard_log="./logs/progress_tensorboard/")
+        attacker = PPO("CnnPolicy", env, n_steps=64, verbose=1, tensorboard_log="./logs/progress_tensorboard/")
     for i in range(attacker_cfg.TRAIN.SAVE_AMOUNT):
         attacker.learn(attacker_cfg.TRAIN.SAVE_STEP)
         attacker.save(folder + "/" + attacker_cfg.OUTPUT_FILE)
