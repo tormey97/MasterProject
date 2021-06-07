@@ -47,7 +47,7 @@ def create_target(cfg):
     model = SSDDetector(cfg)
     model.to(get_device())
     checkpointer = SSDCheckPointer(model, save_dir=cfg.OUTPUT_DIR)
-    checkpointer.load('https://github.com/lufficc/SSD/releases/download/1.2/vgg_ssd300_voc0712.pth', use_latest=False)
+    checkpointer.load(use_latest=True)
     return model
 
 
