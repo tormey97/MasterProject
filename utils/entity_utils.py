@@ -28,7 +28,28 @@ from SSD.ssd.data.datasets import COCODataset, VOCDataset
 
 from utils.torch_utils import get_device
 
-#from FasterRCNN.lib.model.faster_rcnn.resnet import resnet
+import detectron2.data.transforms as T
+from detectron2.checkpoint import DetectionCheckpointer
+from detectron2.config import CfgNode, LazyConfig
+from detectron2.data import (
+    MetadataCatalog,
+    build_detection_test_loader,
+    build_detection_train_loader,
+)
+from detectron2.evaluation import (
+    DatasetEvaluator,
+    inference_on_dataset,
+    print_csv_format,
+    verify_results,
+)
+from detectron2.modeling import build_model
+from detectron2.solver import build_lr_scheduler, build_optimizer
+from detectron2.utils import comm
+from detectron2.utils.collect_env import collect_env_info
+from detectron2.utils.env import seed_all_rng
+from detectron2.utils.events import CommonMetricPrinter, JSONWriter, TensorboardXWriter
+from detectron2.utils.file_io import PathManager
+from detectron2.utils.logger import setup_logger
 
 """
 def create_frcnn(cfg):
@@ -50,6 +71,16 @@ def create_target(cfg):
     checkpointer.load(use_latest=True)
     return model
 
+def create_bb_target(cfg):
+    cfg = cfg.clone()  # cfg can be modified by model
+    model = build_model(cfg)
+    model.eval()
+    if len(cfg.DATASETS.TEST):
+        metadata = MetadataCatalog.get(cfg.DATASETS.TEST[0])
+
+    checkpointer = DetectionCheckpointer(model)
+    checkpointer.load(cfg.MODEL.WEIGHTS)
+    return model
 
 def create_encoder(cfg):
     optimizers = []

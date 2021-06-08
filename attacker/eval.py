@@ -11,7 +11,7 @@ import logging
 import torch
 from torchvision import datasets
 from torch.utils.data import DataLoader
-from utils.entity_utils import create_target, create_encoder
+from utils.entity_utils import create_target, create_bb_target
 import torch
 from autoencoder.configs.defaults import cfg
 import pathlib
@@ -19,6 +19,9 @@ from data_management.logger import setup_logger
 from autoencoder.inference import do_evaluation
 from SSD.ssd.engine.inference import (evaluate, _accumulate_predictions_from_multiple_gpus)
 from SSD.ssd.config.defaults import _C as target_cfg
+from SSD.ssd.structures.container import Container
+
+from detectron2.config.defaults import _C as bb_target_cfg
 import argparse
 import numpy as np
 from attacker.perturber import GANPerturber
@@ -35,53 +38,88 @@ def calculate_norms(images, perturbed_images):
     return output_dict
 
 
-def compute_on_dataset(model, perturber, data_loader, device):
+def compute_on_dataset(model, black_box_target, perturber, data_loader, device):
+
+    def convert_output_format(output):
+        output = output[0]["instances"]._fields
+        container = Container(
+            boxes=output["pred_boxes"].tensor,
+            labels=torch.add(output["pred_classes"], 1),
+            scores=output["scores"],
+        )
+        container.img_width = 300
+        container.img_height = 300
+        return [container]
     results_dict = {}
     results_dict_p = {}
+    results_dict_bb = {}
+    results_dict_bb_p = {}
+
     norm_dict = {}
     i = 0
     for batch in data_loader:
         i += 1
+        if i == 6:
+            break
         images, targets, image_ids = batch
         cpu_device = torch.device("cpu")
         with torch.no_grad():
             images = images.to(device)
             outputs = model(images)
+            outputs_bb = black_box_target([{"image": images[0], "height": 300, "width": 300}])
+            outputs_bb = convert_output_format(outputs_bb)
             perturbed_images = perturber(images, model)
             outputs_p = model(perturbed_images)
+            outputs_bb_p = black_box_target([{"image": perturbed_images[0], "height": 300, "width": 300}])
+            outputs_bb_p = convert_output_format(outputs_bb_p)
             norm_outputs = [calculate_norms(images, perturbed_images)]
             outputs = [o.to(cpu_device) for o in outputs]
             outputs_p = [o.to(cpu_device) for o in outputs_p]
+            outputs_bb = [o.to(cpu_device) for o in outputs_bb]
+            outputs_bb_p = [o.to(cpu_device) for o in outputs_bb_p]
+
         results_dict.update(
             {int(img_id): result for img_id, result in zip(image_ids, outputs)}
         )
         results_dict_p.update(
             {int(img_id): result for img_id, result in zip(image_ids, outputs_p)}
         )
+        results_dict_bb.update(
+            {int(img_id): result for img_id, result in zip(image_ids, outputs_bb)}
+        )
+        results_dict_bb_p.update(
+            {int(img_id): result for img_id, result in zip(image_ids, outputs_bb_p)}
+        )
         norm_dict.update(
             {int(img_id): result for img_id, result in zip(image_ids, norm_outputs)}
         )
 
 
-    return results_dict, results_dict_p, norm_dict
+    return results_dict, results_dict_p, results_dict_bb, results_dict_bb_p, norm_dict
 
 def do_evaluate(cfg, model, testloader,
-        checkpointer, arguments, target_cfg):
+        checkpointer, arguments, target_cfg, bb_target_cfg):
 
-    # black_box_target = create_frcnn(target_cfg)
+    black_box_target = create_bb_target(bb_target_cfg)
     target = create_target(target_cfg)
     target.eval()
     perturber = GANPerturber(model)
-    results, results_p, norm_dict = compute_on_dataset(target, perturber, testloader, get_device())
+    results, results_p, results_bb, results_bb_p, norm_dict = compute_on_dataset(target, black_box_target, perturber, testloader, get_device())
+
     eval_result = _accumulate_predictions_from_multiple_gpus(results)
     eval_result_p = _accumulate_predictions_from_multiple_gpus(results_p)
+    eval_result_bb = _accumulate_predictions_from_multiple_gpus(results_bb)
+    eval_result_bb_p = _accumulate_predictions_from_multiple_gpus(results_bb_p)
+
     norm_list = [norm_dict[i] for i in norm_dict.keys()]
     eval_result = evaluate(testloader.dataset, eval_result, "original_evals", norm_list)
     eval_result_p = evaluate(testloader.dataset, eval_result_p, "perturbation_evals", norm_list)
+    eval_result_bb = evaluate(testloader.dataset, eval_result_bb, "bb_original_evals", norm_list)
+    eval_result_bb_p = evaluate(testloader.dataset, eval_result_bb_p, "bb_perturbation_evals", norm_list)
 
-    print(eval_result, eval_result_p)
+    print(eval_result, "\n", eval_result_p, "\n", eval_result_bb, "\n", eval_result_bb_p)
 
-def start_evaluation(cfg, target_cfg):
+def start_evaluation(cfg, target_cfg, bb_target_cfg):
     logger = logging.getLogger('SSD.trainer')
     models = {
         "autoencoder": Autoencoder,
@@ -142,7 +180,7 @@ def start_evaluation(cfg, target_cfg):
 
     model = do_evaluate(
         cfg, model, testloader,
-        checkpointer, arguments, target_cfg)
+        checkpointer, arguments, target_cfg, bb_target_cfg)
     return model
 
 
@@ -163,6 +201,14 @@ def get_parser():
         type=str,
     )
     parser.add_argument(
+        "bb_target_config",
+        default="",
+        metavar="FILE",
+        help="path to target black box config file",
+        type=str,
+    )
+
+    parser.add_argument(
         "opts",
         help="Modify config options using the command-line",
         default=None,
@@ -178,6 +224,8 @@ def main():
     cfg.freeze()
     target_cfg.merge_from_file(args.target_config)
     target_cfg.freeze()
+
+    bb_target_cfg.merge_from_file(args.bb_target_config)
     output_dir = pathlib.Path(cfg.OUTPUT_DIR)
     output_dir.mkdir(exist_ok=True, parents=True)
 
@@ -190,7 +238,7 @@ def main():
         logger.info(config_str)
     logger.info("Running with config:\n{}".format(cfg))
 
-    model = start_evaluation(cfg, target_cfg)
+    model = start_evaluation(cfg, target_cfg, bb_target_cfg)
 
     logger.info('Start evaluating...')
     torch.cuda.empty_cache()  # speed up evaluating after training finished
