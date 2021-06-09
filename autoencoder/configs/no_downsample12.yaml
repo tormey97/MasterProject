@@ -38,4 +38,4 @@ DATASET_NAME: "voc_detection"
 MODEL_SAVE_STEP: 100
 DRAW_STEP: 50
 OUTPUT_DIR: "autoencoder_outputs/gan120"
-DRAW_TO_DIR: "good_out1"
+DRAW_TO_DIR: "gan120_out"
