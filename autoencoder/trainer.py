@@ -138,8 +138,8 @@ def do_train(
                     # should be higher.
                     labels_with_gt_nonzero = true_labels[true_labels > 0]
                     hard_neg_mask = loss_dict_original["mask"]
-                    scores_original = torch.nn.functional.softmax(loss_dict_original["confidence"][hard_neg_mask])
-                    scores_perturbed = torch.nn.functional.softmax(loss_dict_perturbed["confidence"][hard_neg_mask])
+                    scores_original = torch.nn.functional.softmax(loss_dict_original["confidence"][0])
+                    scores_perturbed = torch.nn.functional.softmax(loss_dict_perturbed["confidence"][0])
                     targeting = torch.zeros(scores_perturbed.shape)
                     if get_device() == "cuda":
                         targeting = targeting.cuda()
@@ -154,7 +154,7 @@ def do_train(
                     performance_degradation_loss = cls_loss + reg_loss
                     gen_loss += cfg.SOLVER.PERFORMANCE_DEGRADATION_FACTOR * torch.pow(cfg.SOLVER.CHI, (-1 * performance_degradation_loss))
 
-                    hinge_loss = torch.norm(perturbations) - cfg.SOLVER.HINGE_LOSS_THRESHOLD
+                    hinge_loss = torch.subtract(torch.norm(perturbations), cfg.SOLVER.HINGE_LOSS_THRESHOLD)
                     if hinge_loss < 0:
                         hinge_loss = 0
 
