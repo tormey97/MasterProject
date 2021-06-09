@@ -147,7 +147,7 @@ def do_train(
                     criterion = torch.nn.BCELoss()
                     object_hiding_loss_orig = criterion(scores_original, targeting)
                     object_hiding_loss_pert = criterion(scores_perturbed, targeting)
-                    object_hiding_loss = torch.pow(cfg.SOLVER.CHI, (-1 * 1e3 * (object_hiding_loss_orig - object_hiding_loss_pert)))
+                    object_hiding_loss = torch.pow(cfg.SOLVER.CHI, (-1 * 1e3 * (torch.subtract(object_hiding_loss_orig, object_hiding_loss_pert))))
                     cls_loss = cfg.SOLVER.CLS_LOSS_FACTOR * (loss_dict_perturbed["cls_loss"] - loss_dict_original["cls_loss"])
                     reg_loss = cfg.SOLVER.REG_LOSS_FACTOR * (loss_dict_perturbed["reg_loss"] - loss_dict_original["reg_loss"])
                     gen_loss += cfg.SOLVER.TARGET_LOSS_FACTOR * object_hiding_loss
