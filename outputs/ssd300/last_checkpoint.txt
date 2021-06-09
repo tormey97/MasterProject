@@ -1,1 +1,1 @@
-outputs/ssd300/ssd300_mAP_77.43_v2.pth
+outputs/ssd300/vgg_ssd300_voc0712.pth

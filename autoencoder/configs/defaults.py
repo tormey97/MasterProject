@@ -3,6 +3,7 @@ from yacs.config import CfgNode as CN
 cfg = CN()
 cfg.MODEL = CN()
 cfg.MODEL.SAVE_STEP = 5000
+cfg.MODEL.EVAL_STEP = 20000
 cfg.MODEL.AVGPOOL_ENCODING = False
 cfg.MODEL.AVG_POOL_COUNT = 1
 cfg.MODEL.MODEL_NAME="gan"

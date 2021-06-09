@@ -11,7 +11,7 @@ import pathlib
 
 
 
-def evaluate(dataset, predictions, output_dir, norm_list, **kwargs):
+def evaluate(dataset, predictions, output_dir, norm_list, filename="", **kwargs):
     """evaluate dataset using different methods based on dataset type.
     Args:
         dataset: Dataset object
@@ -22,7 +22,7 @@ def evaluate(dataset, predictions, output_dir, norm_list, **kwargs):
         evaluation result
     """
     args = dict(
-        dataset=dataset, predictions=predictions, output_dir=output_dir, **kwargs, norm_list=norm_list
+        dataset=dataset, predictions=predictions, output_dir=output_dir, **kwargs, norm_list=norm_list, filename=filename
     )
     if isinstance(dataset, VOCDataset) or isinstance(dataset, _VOCDataset):
         return voc_evaluation(**args)
@@ -33,7 +33,7 @@ def evaluate(dataset, predictions, output_dir, norm_list, **kwargs):
     else:
         raise NotImplementedError
 
-def voc_detection_evaluation(dataset, predictions, output_dir, iteration=None, norm_list=None):
+def voc_detection_evaluation(dataset, predictions, output_dir, iteration=None, norm_list=None, filename=None):
     class_names = dataset.class_names
 
     pred_boxes_list = []

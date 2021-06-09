@@ -59,7 +59,6 @@ def compute_on_dataset(model, black_box_target, perturber, data_loader, device):
     i = 0
     for batch in data_loader:
         i += 1
-
         images, targets, image_ids = batch
         cpu_device = torch.device("cpu")
         with torch.no_grad():
@@ -97,11 +96,11 @@ def compute_on_dataset(model, black_box_target, perturber, data_loader, device):
     return results_dict, results_dict_p, results_dict_bb, results_dict_bb_p, norm_dict
 
 def do_evaluate(cfg, model, testloader,
-        checkpointer, arguments, target_cfg, bb_target_cfg):
+        checkpointer, arguments, target, black_box_target):
 
-    black_box_target = create_bb_target(bb_target_cfg)
-    target = create_target(target_cfg)
     target.eval()
+    black_box_target.eval()
+
     perturber = GANPerturber(model)
     results, results_p, results_bb, results_bb_p, norm_dict = compute_on_dataset(target, black_box_target, perturber, testloader, get_device())
 
@@ -111,12 +110,15 @@ def do_evaluate(cfg, model, testloader,
     eval_result_bb_p = _accumulate_predictions_from_multiple_gpus(results_bb_p)
 
     norm_list = [norm_dict[i] for i in norm_dict.keys()]
-    eval_result = evaluate(testloader.dataset, eval_result, "original_evals", norm_list)
-    eval_result_p = evaluate(testloader.dataset, eval_result_p, "perturbation_evals", norm_list)
-    eval_result_bb = evaluate(testloader.dataset, eval_result_bb, "bb_original_evals", norm_list)
-    eval_result_bb_p = evaluate(testloader.dataset, eval_result_bb_p, "bb_perturbation_evals", norm_list)
+    eval_result = evaluate(testloader.dataset, eval_result, "original_evals", norm_list, cfg.DRAW_TO_DIR)
+    eval_result_p = evaluate(testloader.dataset, eval_result_p, "perturbation_evals", norm_list, cfg.DRAW_TO_DIR)
+    eval_result_bb = evaluate(testloader.dataset, eval_result_bb, "bb_original_evals", norm_list, cfg.DRAW_TO_DIR)
+    eval_result_bb_p = evaluate(testloader.dataset, eval_result_bb_p, "bb_perturbation_evals", norm_list, cfg.DRAW_TO_DIR)
 
     print(eval_result, "\n", eval_result_p, "\n", eval_result_bb, "\n", eval_result_bb_p)
+
+    target.train()
+    model.train()
 
 def start_evaluation(cfg, target_cfg, bb_target_cfg):
     logger = logging.getLogger('SSD.trainer')
@@ -177,11 +179,12 @@ def start_evaluation(cfg, target_cfg, bb_target_cfg):
 
     max_iter = cfg.SOLVER.MAX_ITER
 
-    model = do_evaluate(
-        cfg, model, testloader,
-        checkpointer, arguments, target_cfg, bb_target_cfg)
-    return model
+    target = create_target(target_cfg)
+    black_box_target = create_bb_target(bb_target_cfg)
 
+    do_evaluate(
+        cfg, model, testloader,
+        checkpointer, arguments, target, black_box_target)
 
 def get_parser():
     parser = argparse.ArgumentParser(description='Autoencoder')

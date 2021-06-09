@@ -67,8 +67,8 @@ def create_frcnn(cfg):
 def create_target(cfg):
     model = SSDDetector(cfg)
     model.to(get_device())
-    checkpointer = SSDCheckPointer(model, save_dir=cfg.OUTPUT_DIR)
-    checkpointer.load(use_latest=True)
+    ssd_checkpointer = SSDCheckPointer(model, save_dir=cfg.OUTPUT_DIR)
+    ssd_checkpointer.load(use_latest=True)
     return model
 
 def create_bb_target(cfg):

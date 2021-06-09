@@ -3,6 +3,7 @@ from autoencoder.models.autoencoder import Autoencoder
 from autoencoder.models.gan import Network as GANEncoder
 from autoencoder.models.test_enc import Autoencoder as at
 from autoencoder.models.test_cnv import ConvAutoencoder
+from attacker.eval import do_evaluate
 from data_management.checkpoint import CheckPointer
 from data_management.datasets.image_dataset import ImageDataset
 from data_management.datasets.pascal_voc import VocDataset
@@ -20,7 +21,7 @@ from torchvision.utils import save_image
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
-from utils.entity_utils import create_target, create_encoder
+from utils.entity_utils import create_target, create_bb_target, create_encoder
 from utils.image_utils import save_decod_img
 import os
 
@@ -39,12 +40,17 @@ def do_train(
         cfg,
         model,
         data_loader,
+        test_loader,
         optimizer,
         checkpointer,
         arguments,
         args,
-        target_cfg=None
+        target_cfg=None,
+        bb_target_cfg=None,
     ):
+
+    if bb_target_cfg is not None:
+        black_box_target = create_bb_target(bb_target_cfg)
     logger = logging.getLogger("SSD.trainer")
     logger.info("Start training ...")
     make_dir()
@@ -144,7 +150,7 @@ def do_train(
                     object_hiding_loss = torch.pow(cfg.SOLVER.CHI, (-1 * 1e3 * (object_hiding_loss_orig - object_hiding_loss_pert)))
                     cls_loss = cfg.SOLVER.CLS_LOSS_FACTOR * (loss_dict_perturbed["cls_loss"] - loss_dict_original["cls_loss"])
                     reg_loss = cfg.SOLVER.REG_LOSS_FACTOR * (loss_dict_perturbed["reg_loss"] - loss_dict_original["reg_loss"])
-                    gen_loss += cfg.SOLVER.TARGET_LOSS_FACTOR * object_hiding_loss_pert
+                    gen_loss += cfg.SOLVER.TARGET_LOSS_FACTOR * object_hiding_loss
                     performance_degradation_loss = cls_loss + reg_loss
                     gen_loss += cfg.SOLVER.PERFORMANCE_DEGRADATION_FACTOR * torch.pow(cfg.SOLVER.CHI, (-1 * performance_degradation_loss))
 
@@ -170,7 +176,7 @@ def do_train(
                                 "\n loss dict perturbed: {loss_dict_perturbed} \n".format(gen_loss=gen_loss,
                                                                                           disc_loss=(disc_loss_rec, disc_loss_real),
                                                                                           perf_deg=performance_degradation_loss,
-                                                                                          object_hiding_loss=object_hiding_loss_pert,
+                                                                                          object_hiding_loss=object_hiding_loss,
                                                                                           distortion_penalty=distortion_penalty,
                                                                                           hinge_loss=hinge_loss,
                                                                                           loss_dict_orig="",
@@ -235,9 +241,12 @@ def do_train(
                         checkpointer[i].save("{}_{:06d}".format(i, iteration), **arguments)
                 else:
                     checkpointer.save("model_{:06d}".format(iteration), **arguments)
+            if iteration % cfg.MODEL.EVAL_STEP == 0:
+                result = do_evaluate(cfg, model, test_loader,
+                            checkpointer, arguments, target, black_box_target)
 
 
-def start_train(cfg, target_cfg):
+def start_train(cfg, target_cfg, bb_target_cfg):
     logger = logging.getLogger('SSD.trainer')
     models = {
         "autoencoder": Autoencoder,
@@ -348,8 +357,8 @@ def start_train(cfg, target_cfg):
     )
     testloader = DataLoader(
         testset,
-        batch_size=cfg.BATCH_SIZE,
-        shuffle=True,
+        batch_size=1,
+        shuffle=False,
         num_workers=0
     )
 
@@ -385,7 +394,6 @@ def start_train(cfg, target_cfg):
 
     max_iter = cfg.SOLVER.MAX_ITER
 
-    model = do_train(
-        cfg, model, train_loader, optimizer,
-        checkpointer, arguments, None, target_cfg)
-    return model
+    do_train(
+        cfg, model, train_loader, testloader, optimizer,
+        checkpointer, arguments, None, target_cfg, bb_target_cfg)

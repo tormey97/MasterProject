@@ -8,6 +8,7 @@ MODEL:
   QUANTIZE: False
   C: 3
   f: [100, 100, 100, 100, 100, 100, 100, 100]
+  EVAL_STEP: 1
 
 
 SOLVER:
@@ -37,5 +38,5 @@ BATCH_SIZE: 1
 DATASET_NAME: "voc_detection"
 MODEL_SAVE_STEP: 100
 DRAW_STEP: 100
-OUTPUT_DIR: "autoencoder_outputs/gan96"
+OUTPUT_DIR: "autoencoder_outputs/gan150"
 DRAW_TO_DIR: "gan96_out"

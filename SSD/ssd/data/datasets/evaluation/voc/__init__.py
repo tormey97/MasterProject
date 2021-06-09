@@ -7,7 +7,7 @@ import numpy as np
 from .eval_detection_voc import eval_detection_voc
 
 
-def voc_evaluation(dataset, predictions, output_dir, iteration=None, norm_list=None):
+def voc_evaluation(dataset, predictions, output_dir, iteration=None, norm_list=None, filename=""):
     class_names = dataset.class_names
 
     pred_boxes_list = []
@@ -66,7 +66,7 @@ def voc_evaluation(dataset, predictions, output_dir, iteration=None, norm_list=N
     if iteration is not None:
         result_path = os.path.join(output_dir, 'result_{:07d}.txt'.format(iteration))
     else:
-        result_path = os.path.join(output_dir, 'result_{}.txt'.format(datetime.now().strftime('%Y-%m-%d_%H-%M-%S')))
+        result_path = os.path.join(output_dir, 'result_{}-{}.txt'.format(filename, datetime.now().strftime('%Y-%m-%d_%H-%M-%S')))
     with open(result_path, "w") as f:
         f.write(result_str)
 

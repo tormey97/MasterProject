@@ -2,6 +2,7 @@ _BASE_: "../Base-RCNN-C4.yaml"
 MODEL:
   WEIGHTS: "detectron2://ImageNetPretrained/MSRA/model_final_b1acc2.pkl"
   MASK_ON: False
+  DEVICE: "cpu"
   PIXEL_MEAN: [123.675, 116.280, 103.530]
   RESNETS:
     DEPTH: 50
