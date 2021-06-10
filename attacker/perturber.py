@@ -15,7 +15,9 @@ class GANPerturber():
         self.i +=1
         images_div = torch.divide(images, 255)
         perturbations = self.network(images)
+
         perturbed_images = torch.clip(torch.multiply(torch.add(perturbations[0], images_div), 255), 0, 10000)
+
         img.save_decod_img(torch.divide(perturbed_images, 255), str(self.i), cfg)
         return perturbed_images
 

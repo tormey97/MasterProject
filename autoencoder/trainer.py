@@ -132,7 +132,7 @@ def do_train(
                     disc_loss_rec = torch.square(discriminator_rec)
 
                     disc_loss = torch.mean(disc_loss_real + disc_loss_rec)
-                    gen_loss = torch.square(discriminator_rec - 1.)
+                    gen_loss = torch.multiply(torch.square(discriminator_rec - 1.), cfg.SOLVER.DISCRIMINATOR_IMPORTANCE)
                     true_labels = loss_dict_perturbed["labels"]
                     # want to give loss based on transforming labels != 0 to 10. so confidence in 10 where true label != 0
                     # should be higher.
