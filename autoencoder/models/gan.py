@@ -2,6 +2,7 @@ import torch
 from torch import nn
 import numpy as np
 from utils.torch_utils import get_device
+import torchvision.models as t_models
 import torch.nn.functional as F
 # need:
 # encoder - encodes an image down to some size.
@@ -202,7 +203,10 @@ class Discriminator(nn.Module):
         self.cfg = cfg
         self.f = cfg.MODEL.D_F
         self.in_channels = in_channels
-        self.discriminator = self.make_discriminator()
+        self.discriminator = self.make_discriminator_()
+
+    def make_discriminator_(self):
+        return t_models.resnet34(num_classes=1)
 
     def make_discriminator(self, actv=nn.LeakyReLU):
         blocks = [conv_block(self.in_channels, self.f[0], 7, 1, 3)]

@@ -7,6 +7,7 @@ MODEL:
   AVG_POOL_COUNT: 0
   MODEL_NAME: "gan_object_detector"
   QUANTIZE: False
+  D_F: [100, 200, 300, 400, 500, 600, 1200]
   C: 3
 
 SOLVER:

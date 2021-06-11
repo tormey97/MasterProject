@@ -367,7 +367,7 @@ def start_train(cfg, target_cfg, bb_target_cfg):
     arguments = {"iteration": 0}
     save_to_disk = True
     if cfg.MODEL.MODEL_NAME == "gan" or cfg.MODEL.MODEL_NAME == "gan_object_detector":
-        disc_optim = torch.optim.Adam(params=model.discriminator.parameters(), lr=cfg.SOLVER.LR)
+        disc_optim = torch.optim.Adam(params=model.discriminator.parameters(), lr=cfg.SOLVER.DISC_LR)
         gen_optim = torch.optim.Adam(params=model.encoder_generator.parameters(), lr=cfg.SOLVER.LR)
         checkpointer = {
             "discriminator": CheckPointer(
