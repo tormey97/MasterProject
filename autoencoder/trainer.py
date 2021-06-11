@@ -131,7 +131,7 @@ def do_train(
                     disc_loss_real = torch.square(discriminator_real - 1.)
                     disc_loss_rec = torch.square(discriminator_rec)
 
-                    disc_loss = torch.mean(disc_loss_real + disc_loss_rec)
+                    disc_loss = torch.add(torch.mean(disc_loss_real), torch.mean(disc_loss_rec))
                     gen_loss = torch.multiply(torch.square(discriminator_rec - 1.), cfg.SOLVER.DISCRIMINATOR_IMPORTANCE)
                     true_labels = loss_dict_perturbed["labels"]
                     # want to give loss based on transforming labels != 0 to 10. so confidence in 10 where true label != 0
@@ -154,11 +154,12 @@ def do_train(
                     performance_degradation_loss = cls_loss + reg_loss
                     gen_loss += cfg.SOLVER.PERFORMANCE_DEGRADATION_FACTOR * torch.pow(cfg.SOLVER.CHI, (-1 * performance_degradation_loss))
 
-                    hinge_loss = torch.subtract(torch.norm(perturbations), cfg.SOLVER.HINGE_LOSS_THRESHOLD)
+                    perturbation_mse = torch.nn.MSELoss()(torch.multiply(perturbed_images, 255), torch.multiply(images, 255))
+                    hinge_loss = torch.subtract(perturbation_mse, cfg.SOLVER.HINGE_LOSS_THRESHOLD)
                     if hinge_loss < 0:
                         hinge_loss = 0
 
-                    distortion_penalty = cfg.SOLVER.DISTORTION_PENALTY_FACTOR * torch.nn.MSELoss()(perturbed_images, images)
+                    distortion_penalty = cfg.SOLVER.DISTORTION_PENALTY_FACTOR * perturbation_mse
                     gen_loss += distortion_penalty + cfg.SOLVER.HINGE_LOSS_FACTOR * hinge_loss
 
                     gen_optim.zero_grad()
@@ -170,20 +171,21 @@ def do_train(
                     gen_optim.step()
                     disc_optim.step()
 
-                    logger.info("============================================================================")
-                    logger.info("gen_loss: {gen_loss} \n disc_loss: {disc_loss} \n perf_degradation: {perf_deg}, obj_hiding: {object_hiding_loss} \n"
-                                " distortion_penalty: {distortion_penalty} \n, hinge_loss: {hinge_loss}, \n loss_dict_orig: {loss_dict_orig}"
-                                "\n loss dict perturbed: {loss_dict_perturbed} \n".format(gen_loss=gen_loss,
-                                                                                          disc_loss=(disc_loss_rec, disc_loss_real),
-                                                                                          perf_deg=performance_degradation_loss,
-                                                                                          object_hiding_loss=object_hiding_loss,
-                                                                                          distortion_penalty=distortion_penalty,
-                                                                                          hinge_loss=hinge_loss,
-                                                                                          loss_dict_orig="",
-                                                                                          loss_dict_perturbed=""))
+                    if iteration % cfg.LOG_STEP == 0:
+                        logger.info("============================================================================")
+                        logger.info("gen_loss: {gen_loss} \n disc_loss: {disc_loss} \n perf_degradation: {perf_deg}, obj_hiding: {object_hiding_loss} \n"
+                                    " distortion_penalty: {distortion_penalty} \n, hinge_loss: {hinge_loss}, \n loss_dict_orig: {loss_dict_orig}"
+                                    "\n loss dict perturbed: {loss_dict_perturbed} \n".format(gen_loss=gen_loss,
+                                                                                              disc_loss=(disc_loss_rec, disc_loss_real),
+                                                                                              perf_deg=performance_degradation_loss,
+                                                                                              object_hiding_loss=object_hiding_loss,
+                                                                                              distortion_penalty=distortion_penalty,
+                                                                                              hinge_loss=hinge_loss,
+                                                                                              loss_dict_orig="",
+                                                                                              loss_dict_perturbed=""))
 
 
-                print(gen_loss, disc_loss)
+                    print(gen_loss, disc_loss)
 
                 def draw_image2(image, name):
                     save_decod_img(image, str(iteration) + name, cfg=cfg, range=(0, 255))
