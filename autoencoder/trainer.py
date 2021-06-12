@@ -129,7 +129,7 @@ def do_train(
                     discriminator_real = torch.mean(model.discriminator(images))
 
                     disc_loss_real = torch.square(discriminator_real - 1.)
-                    disc_loss_rec = torch.square(discriminator_rec)
+                    disc_loss_rec = torch.multiply(cfg.DISC_REC_IMPORTANCE, torch.square(discriminator_rec))
 
                     disc_loss = torch.add(torch.mean(disc_loss_real), torch.mean(disc_loss_rec))
                     gen_loss = torch.multiply(torch.square(discriminator_rec - 1.), cfg.SOLVER.DISCRIMINATOR_IMPORTANCE)
