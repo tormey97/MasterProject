@@ -7,7 +7,7 @@ MODEL:
   MODEL_NAME: "gan_object_detector"
   QUANTIZE: False
   C: 3
-  f: [100, 256, 512, 960, 1200]
+  f: [100, 100, 100, 100]
 
 
 SOLVER:
@@ -32,11 +32,11 @@ ENCODER:
 DECODER:
   CNV_OUT_CHANNELS: [300, 1]
 
-LOG_STEP: 500
+LOG_STEP: 1
 BATCH_SIZE: 1
 
 DATASET_NAME: "voc_detection"
 MODEL_SAVE_STEP: 100
-DRAW_STEP: 50
+DRAW_STEP: 1
 OUTPUT_DIR: "autoencoder_outputs/gan_attacker_05"
 DRAW_TO_DIR: "gan_attacker_05"
