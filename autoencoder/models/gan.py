@@ -226,7 +226,7 @@ class Discriminator(nn.Module):
         )
 
     def forward(self, x):
-        return self.discriminator(x)
+        return F.sigmoid(self.discriminator(x))
 
 class Network(nn.Module):
     def __init__(self, cfg):

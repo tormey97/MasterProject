@@ -125,14 +125,8 @@ def do_train(
                     loss_dict_perturbed = target(perturbed_images, targets=targets)
 
 
-                    discriminator_rec = torch.mean(model.discriminator(perturbed_images))
-                    discriminator_real = torch.mean(model.discriminator(images))
-
-                    disc_loss_real = torch.square(discriminator_real - 1.)
-                    disc_loss_rec = torch.multiply(torch.square(discriminator_rec), cfg.SOLVER.DISC_REC_IMPORTANCE)
-
-                    disc_loss = torch.add(torch.mean(disc_loss_real), torch.mean(disc_loss_rec))
-                    gen_loss = torch.multiply(torch.square(discriminator_rec - 1.), cfg.SOLVER.DISCRIMINATOR_IMPORTANCE)
+                    discriminator_rec = model.discriminator(perturbed_images)
+                    gen_loss = torch.multiply(torch.mean(torch.square(discriminator_rec - 1.)), cfg.SOLVER.DISCRIMINATOR_IMPORTANCE)
                     true_labels = loss_dict_perturbed["labels"]
                     # want to give loss based on transforming labels != 0 to 10. so confidence in 10 where true label != 0
                     # should be higher.
@@ -163,12 +157,23 @@ def do_train(
                     gen_loss += distortion_penalty + cfg.SOLVER.HINGE_LOSS_FACTOR * hinge_loss
 
                     gen_optim.zero_grad()
+
+                    gen_loss.backward()
+                    gen_optim.step()
+
+
                     disc_optim.zero_grad()
 
-                    gen_loss.backward(retain_graph=True)
+                    discriminator_rec2 = model.discriminator(perturbed_images.detach())
+                    discriminator_real = model.discriminator(images)
+
+                    disc_loss_real = torch.square(discriminator_real - 1.)
+                    disc_loss_rec = torch.multiply(torch.square(discriminator_rec2), cfg.SOLVER.DISC_REC_IMPORTANCE)
+
+                    disc_loss = torch.add(torch.mean(disc_loss_real), torch.mean(disc_loss_rec))
+
                     disc_loss.backward()
 
-                    gen_optim.step()
                     disc_optim.step()
 
                     if iteration % cfg.LOG_STEP == 0:
