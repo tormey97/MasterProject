@@ -17,7 +17,7 @@ def conv_block(in_channels, out_channels, kernel_size, stride, padding, activ=nn
             stride=stride,
             padding=padding
         )
-    #torch.nn.init.xavier_uniform_(cnv.weight)
+    torch.nn.init.xavier_uniform_(cnv.weight)
     return nn.Sequential(
         cnv,
         nn.InstanceNorm2d(num_features=out_channels),

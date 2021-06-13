@@ -116,6 +116,9 @@ def do_train(
                 images = torch.divide(images, 255)
 
                 for j in range(cfg.SOLVER.ITERATIONS_PER_IMAGE):
+
+                    gen_optim.zero_grad()
+
                     perturbations, encoding, quantized = model.encoder_generator(images)
                     perturbations = torch.nn.functional.interpolate(perturbations, size=(300, 300), mode='bilinear')
                     perturbations = perturbations
@@ -156,7 +159,6 @@ def do_train(
                     distortion_penalty = cfg.SOLVER.DISTORTION_PENALTY_FACTOR * perturbation_mse
                     gen_loss += distortion_penalty + cfg.SOLVER.HINGE_LOSS_FACTOR * hinge_loss
 
-                    gen_optim.zero_grad()
 
                     gen_loss.backward()
                     gen_optim.step()
