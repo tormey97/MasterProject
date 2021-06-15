@@ -43,9 +43,9 @@ def calculate_norms(images, perturbed_images):
 
 def draw_detection_output(image, boxes, labels, scores, class_names, filename):
     indices = scores > CONFIDENCE_THRESHOLD
-    boxes = boxes[indices]
-    labels = labels[indices]
-    scores = scores[indices]
+    boxes = boxes[indices].cpu()
+    labels = labels[indices].cpu()
+    scores = scores[indices].cpu()
     cv2image = image.detach().clip(0, 255).cpu().numpy().transpose((1, 2, 0)).astype(np.uint8)
     drawn_image = draw_boxes(cv2image, boxes, labels, scores,
                              class_names).astype(
