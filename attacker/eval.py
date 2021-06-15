@@ -3,6 +3,9 @@ from autoencoder.models.autoencoder import Autoencoder
 from autoencoder.models.gan import Network as GANEncoder
 from data_management.checkpoint import CheckPointer
 from data_management.datasets.voc_detection import VOCDataset as VOCDetection
+from data_management.datasets.coco_detection import COCODataset as COCODetection
+
+from detectron2.model_zoo.model_zoo import get
 from vizer.draw import draw_boxes
 from SSD.ssd.data.transforms import build_target_transform
 import SSD.ssd.data.transforms as detection_transforms
@@ -21,6 +24,7 @@ from autoencoder.inference import do_evaluation
 from SSD.ssd.engine.inference import (evaluate, _accumulate_predictions_from_multiple_gpus)
 from SSD.ssd.config.defaults import _C as target_cfg
 from SSD.ssd.structures.container import Container
+from SSD.ssd.modeling.detector.ssd_detector import SSDDetector
 from SSD.ssd.data.datasets import COCODataset, VOCDataset
 import os
 from detectron2.config.defaults import _C as bb_target_cfg
@@ -51,7 +55,7 @@ def draw_detection_output(image, boxes, labels, scores, class_names, filename):
                              class_names).astype(
         np.uint8)
     Image.fromarray(drawn_image).save(os.path.join("eval_detector_outputs", filename + ".jpg"))
-def compute_on_dataset(model, black_box_target, perturber, data_loader, device):
+def compute_on_dataset(target_models, perturber, data_loader, device):
 
     def convert_output_format(output):
         output = output[0]["instances"]._fields
@@ -63,116 +67,102 @@ def compute_on_dataset(model, black_box_target, perturber, data_loader, device):
         container.img_width = 300
         container.img_height = 300
         return [container]
-    results_dict = {}
-    results_dict_p = {}
-    results_dict_bb = {}
-    results_dict_bb_p = {}
 
+    result_dicts_original = {t: {} for t in target_models}
+    result_dicts_perturbed = {t: {} for t in target_models}
     norm_dict = {}
     i = 0
     for batch in data_loader:
         i += 1
+
         images, targets, image_ids = batch
         cpu_device = torch.device("cpu")
         with torch.no_grad():
             images = images.to(device)
-            outputs = model(images)
-            outputs_bb = black_box_target([{"image": images[0], "height": 300, "width": 300}])
-            outputs_bb = convert_output_format(outputs_bb)
-            perturbed_images = perturber(images, model)
-            outputs_p = model(perturbed_images)
+            perturbed_images = perturber(images, None)
 
-            outputs_bb_p = black_box_target([{"image": perturbed_images[0], "height": 300, "width": 300}])
-            outputs_bb_p = convert_output_format(outputs_bb_p)
+            for t in target_models:
+                target_model = target_models[t]
+                model_input = [{"image": images[0], "height": 300, "width": 300}]
+                is_ssd = isinstance(target_model, SSDDetector)
+                if is_ssd:
+                    model_input = images
 
-            draw_detection_output(
-                image=perturbed_images[0],
-                boxes=outputs_p[0]["boxes"],
-                labels=outputs_p[0]["labels"],
-                scores=outputs_p[0]["scores"],
-                class_names=VOCDataset.class_names,
-                filename= str(i) + "white_box_perturbed"
-            )
+                output = target_model(model_input)
 
-            draw_detection_output(
-                image=perturbed_images[0],
-                boxes=outputs_bb_p[0]["boxes"],
-                labels=outputs_bb_p[0]["labels"],
-                scores=outputs_bb_p[0]["scores"],
-                class_names=VOCDataset.class_names,
-                filename=str(i) + "black_box_perturbed"
-            )
+                model_input = [{"image": perturbed_images[0], "height": 300, "width": 300}]
+                if is_ssd:
+                    model_input = perturbed_images
+                output_perturbed = target_model(model_input)
+                if not is_ssd:
+                    output = convert_output_format(output)
+                    output_perturbed = convert_output_format(output_perturbed)
 
-            draw_detection_output(
-                image=images[0],
-                boxes=outputs_bb[0]["boxes"],
-                labels=outputs_bb[0]["labels"],
-                scores=outputs_bb[0]["scores"],
-                class_names=VOCDataset.class_names,
-                filename=str(i) + "black_box_orig"
-            )
+                draw_detection_output(
+                    image=perturbed_images[0],
+                    boxes=output_perturbed[0]["boxes"],
+                    labels=output_perturbed[0]["labels"],
+                    scores=output_perturbed[0]["scores"],
+                    class_names=data_loader.dataset.class_names,
+                    filename=str(i) + "_" + t + "_perturbed"
+                )
 
-            draw_detection_output(
-                image=images[0],
-                boxes=outputs[0]["boxes"],
-                labels=outputs[0]["labels"],
-                scores=outputs[0]["scores"],
-                class_names=VOCDataset.class_names,
-                filename=str(i) + "white_box_orig"
-            )
-
+                draw_detection_output(
+                    image=images[0],
+                    boxes=output[0]["boxes"],
+                    labels=output[0]["labels"],
+                    scores=output[0]["scores"],
+                    class_names=data_loader.dataset.class_names,
+                    filename=str(i) + "_" + t + "_original"
+                )
+                outputs_original = [o.to(cpu_device) for o in output]
+                outputs_perturbed = [o.to(cpu_device) for o in output_perturbed]
+                result_dicts_original[t].update(
+                    {int(img_id): result for img_id, result in zip(image_ids, outputs_original)}
+                )
+                result_dicts_perturbed[t].update(
+                    {int(img_id): result for img_id, result in zip(image_ids, outputs_perturbed)}
+                )
 
             norm_outputs = [calculate_norms(images, perturbed_images)]
-            outputs = [o.to(cpu_device) for o in outputs]
-            outputs_p = [o.to(cpu_device) for o in outputs_p]
-            outputs_bb = [o.to(cpu_device) for o in outputs_bb]
-            outputs_bb_p = [o.to(cpu_device) for o in outputs_bb_p]
-
-        results_dict.update(
-            {int(img_id): result for img_id, result in zip(image_ids, outputs)}
-        )
-        results_dict_p.update(
-            {int(img_id): result for img_id, result in zip(image_ids, outputs_p)}
-        )
-        results_dict_bb.update(
-            {int(img_id): result for img_id, result in zip(image_ids, outputs_bb)}
-        )
-        results_dict_bb_p.update(
-            {int(img_id): result for img_id, result in zip(image_ids, outputs_bb_p)}
-        )
-        norm_dict.update(
-            {int(img_id): result for img_id, result in zip(image_ids, norm_outputs)}
-        )
+            norm_dict.update(
+                {int(img_id): result for img_id, result in zip(image_ids, norm_outputs)}
+            )
 
 
-    return results_dict, results_dict_p, results_dict_bb, results_dict_bb_p, norm_dict
+    return result_dicts_original, result_dicts_perturbed, norm_dict
 
 def do_evaluate(cfg, model, testloader,
-        checkpointer, arguments, target, black_box_target):
+        checkpointer, arguments, targets):
 
-    target.eval()
-    black_box_target.eval()
+    for i in targets:
+        targets[i].eval()
 
     perturber = GANPerturber(model)
-    results, results_p, results_bb, results_bb_p, norm_dict = compute_on_dataset(target, black_box_target, perturber, testloader, get_device())
-
-    eval_result = _accumulate_predictions_from_multiple_gpus(results)
-    eval_result_p = _accumulate_predictions_from_multiple_gpus(results_p)
-    eval_result_bb = _accumulate_predictions_from_multiple_gpus(results_bb)
-    eval_result_bb_p = _accumulate_predictions_from_multiple_gpus(results_bb_p)
-
+    results, results_p, norm_dict = compute_on_dataset(targets, perturber, testloader, get_device())
     norm_list = [norm_dict[i] for i in norm_dict.keys()]
-    eval_result = evaluate(testloader.dataset, eval_result, "original_evals", norm_list, cfg.DRAW_TO_DIR)
-    eval_result_p = evaluate(testloader.dataset, eval_result_p, "perturbation_evals", norm_list, cfg.DRAW_TO_DIR)
-    eval_result_bb = evaluate(testloader.dataset, eval_result_bb, "bb_original_evals", norm_list, cfg.DRAW_TO_DIR)
-    eval_result_bb_p = evaluate(testloader.dataset, eval_result_bb_p, "bb_perturbation_evals", norm_list, cfg.DRAW_TO_DIR)
 
-    print(eval_result, "\n", eval_result_p, "\n", eval_result_bb, "\n", eval_result_bb_p)
+    for i in results:
+        result_original = results[i]
+        result_perturbed = results_p[i]
 
-    target.train()
+        eval_result = _accumulate_predictions_from_multiple_gpus(result_original)
+        eval_result_p = _accumulate_predictions_from_multiple_gpus(result_perturbed)
+
+        eval_result = evaluate(testloader.dataset, eval_result, "original_evals", norm_list, i + "_" + cfg.DRAW_TO_DIR)
+        eval_result_p = evaluate(testloader.dataset, eval_result_p, "perturbation_evals", norm_list, i + "_" + cfg.DRAW_TO_DIR)
+
+        print(eval_result, "\n", eval_result_p, "\n")
+
+    for i in targets:
+        targets[i].train()
     model.train()
 
-def start_evaluation(cfg, target_cfg, bb_target_cfg):
+def eval_voc():
+    pass
+def eval_coco():
+    pass
+def start_evaluation(cfg, target_cfg, bb_target_cfg, dataset="voc"):
     logger = logging.getLogger('SSD.trainer')
     models = {
         "autoencoder": Autoencoder,
@@ -188,20 +178,36 @@ def start_evaluation(cfg, target_cfg, bb_target_cfg):
         detection_transforms.ConvertFromInts(),
         detection_transforms.ToTensor(),
     ])
-    testset = VOCDetection(
-        data_dir='./datasets/Voc/VOCdevkit/VOC2012',
-        transform=transform,
-        split="val",
-        target_transform=target_transform,
-        keep_difficult=True
-    )
 
-    testloader = DataLoader(
-        testset,
-        batch_size=cfg.BATCH_SIZE,
-        shuffle=False,
-        num_workers=0
-    )
+    if dataset == "voc":
+        testset = VOCDetection(
+            data_dir='./datasets/Voc/VOCdevkit/VOC2012',
+            transform=transform,
+            split="val",
+            target_transform=target_transform,
+            keep_difficult=True
+        )
+
+        testloader = DataLoader(
+            testset,
+            batch_size=cfg.BATCH_SIZE,
+            shuffle=False,
+            num_workers=0
+        )
+    else:
+        testset = COCODetection(
+            data_dir='./datasets/Coco/test2017',
+            ann_file='./datasets/Coco/annotations/image_info_test2017.json',
+            transform=transform,
+            target_transform=None,
+        )
+
+        testloader = DataLoader(
+            testset,
+            batch_size=cfg.BATCH_SIZE,
+            shuffle=False,
+            num_workers=0
+        )
 
     arguments = {"iteration": 0}
     save_to_disk = True
@@ -231,12 +237,41 @@ def start_evaluation(cfg, target_cfg, bb_target_cfg):
 
     max_iter = cfg.SOLVER.MAX_ITER
 
-    target = create_target(target_cfg)
-    black_box_target = create_bb_target(bb_target_cfg)
+    if dataset == "coco":
+        ssd_detector_configs = dict(
+
+        )
+
+        detectron_detector_configs = dict(
+            X101_FPN='COCO-Detection/faster_rcnn_X_101_32x8d_FPN_3x.yaml',
+            R101_FPN="COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml",
+         #   R101_DC5="COCO-Detection/faster_rcnn_R_101_DC5_3x.yaml",
+          #  R101_C4="COCO-Detection/faster_rcnn_R_101_C4_3x.yaml",
+            R50_C4="COCO-Detection/faster_rcnn_R_50_C4_3x.yaml",
+            RN_R50="COCO-Detection/retinanet_R_50_FPN_3x.yaml",
+            RN_R101="COCO-Detection/retinanet_R_101_FPN_3x.yaml"
+        )
+
+
+        targets = {}
+        for i in detectron_detector_configs:
+            config = bb_target_cfg.clone()
+            #config.merge_from_file(detectron_detector_configs[i])
+            #targets[i] =  create_bb_target(config)
+            targets[i] = get(detectron_detector_configs[i], trained=True)
+        for i in ssd_detector_configs:
+            config = target_cfg.clone()
+            config.merge_from_file(ssd_detector_configs[i])
+            targets[i] = create_target(config)
+    else:
+        targets = dict(
+            white_box=create_target(target_cfg),
+            black_box=create_bb_target(bb_target_cfg)
+        )
 
     do_evaluate(
         cfg, model, testloader,
-        checkpointer, arguments, target, black_box_target)
+        checkpointer, arguments, targets)
 
 def get_parser():
     parser = argparse.ArgumentParser(description='Autoencoder')
@@ -260,6 +295,11 @@ def get_parser():
         metavar="FILE",
         help="path to target black box config file",
         type=str,
+    )
+    parser.add_argument(
+        "dataset",
+        default="voc",
+        type=str
     )
 
     parser.add_argument(
@@ -292,7 +332,7 @@ def main():
         logger.info(config_str)
     logger.info("Running with config:\n{}".format(cfg))
 
-    model = start_evaluation(cfg, target_cfg, bb_target_cfg)
+    model = start_evaluation(cfg, target_cfg, bb_target_cfg, args.dataset)
 
     logger.info('Start evaluating...')
     torch.cuda.empty_cache()  # speed up evaluating after training finished

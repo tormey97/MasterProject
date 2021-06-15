@@ -246,8 +246,12 @@ def do_train(
                 else:
                     checkpointer.save("model_{:06d}".format(iteration), **arguments)
             if iteration % cfg.MODEL.EVAL_STEP == 0:
+                targets = dict(
+                    white_box=target,
+                    black_box=black_box_target,
+                )
                 result = do_evaluate(cfg, model, test_loader,
-                            checkpointer, arguments, target, black_box_target)
+                            checkpointer, arguments, targets)
 
 
 def start_train(cfg, target_cfg, bb_target_cfg):

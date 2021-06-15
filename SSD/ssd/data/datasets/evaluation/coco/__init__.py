@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 
 
-def coco_evaluation(dataset, predictions, output_dir, iteration=None):
+def coco_evaluation(dataset, predictions, output_dir, iteration=None, norm_list=None, filename=""):
     coco_results = []
     for i, prediction in enumerate(predictions):
         img_info = dataset.get_img_info(i)
@@ -55,7 +55,7 @@ def coco_evaluation(dataset, predictions, output_dir, iteration=None):
     if iteration is not None:
         result_path = os.path.join(output_dir, 'result_{:07d}.txt'.format(iteration))
     else:
-        result_path = os.path.join(output_dir, 'result_{}.txt'.format(datetime.now().strftime('%Y-%m-%d_%H-%M-%S')))
+        result_path = os.path.join(output_dir, 'result_{}_{}.txt'.format(filename, datetime.now().strftime('%Y-%m-%d_%H-%M-%S')))
     with open(result_path, "w") as f:
         f.write('\n'.join(result_strings))
 

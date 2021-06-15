@@ -1,5 +1,7 @@
 from SSD.ssd.data.datasets import VOCDataset, COCODataset
 from data_management.datasets.voc_detection import VOCDataset as _VOCDataset
+from data_management.datasets.coco_detection import COCODataset as _COCODataset
+
 from .coco import coco_evaluation
 from .voc import voc_evaluation
 from SSD.ssd.data.datasets import MNISTDetection
@@ -28,7 +30,7 @@ def evaluate(dataset, predictions, output_dir, norm_list, filename="", **kwargs)
         return voc_evaluation(**args)
     if isinstance(dataset, MNISTDetection):
         return voc_detection_evaluation(**args)
-    elif isinstance(dataset, COCODataset):
+    elif isinstance(dataset, COCODataset) or isinstance(dataset, _COCODataset):
         return coco_evaluation(**args)
     else:
         raise NotImplementedError
