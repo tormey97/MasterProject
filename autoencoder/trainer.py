@@ -116,16 +116,19 @@ def do_train(
                 images = torch.divide(images, 255)
 
                 for j in range(cfg.SOLVER.ITERATIONS_PER_IMAGE):
+                    gen_optim.zero_grad()
+                    disc_optim.zero_grad()
+
                     perturbations, encoding, quantized = model.encoder_generator(images)
                     perturbations = torch.nn.functional.interpolate(perturbations, size=(300, 300), mode='bilinear')
-                    perturbations = perturbations
                     perturbed_images = torch.add(perturbations, images)
 
                     loss_dict_original = target(images, targets=targets)
                     loss_dict_perturbed = target(perturbed_images, targets=targets)
 
-                    discriminator_rec = model.discriminator(perturbed_images)
-                    gen_loss = torch.multiply(torch.mean(torch.square(discriminator_rec - 1.)), cfg.SOLVER.DISCRIMINATOR_IMPORTANCE)
+                    discriminator_rec = torch.mean(model.discriminator(perturbed_images))
+
+                    gen_loss = torch.multiply(torch.square(discriminator_rec - 1.), cfg.SOLVER.DISCRIMINATOR_IMPORTANCE)
                     true_labels = loss_dict_perturbed["labels"]
                     # want to give loss based on transforming labels != 0 to 10. so confidence in 10 where true label != 0
                     # should be higher.
@@ -148,19 +151,15 @@ def do_train(
                     gen_loss += cfg.SOLVER.PERFORMANCE_DEGRADATION_FACTOR * torch.pow(cfg.SOLVER.CHI, (-1 * performance_degradation_loss))
 
                     perturbation_mse = torch.nn.MSELoss()(torch.multiply(perturbed_images, 255), torch.multiply(images, 255))
-                    hinge_loss = torch.subtract(perturbation_mse, cfg.SOLVER.HINGE_LOSS_THRESHOLD)
-                    if hinge_loss < 0:
-                        hinge_loss = 0
+                    hinge_loss = torch.nn.ReLU()(torch.subtract(perturbation_mse, cfg.SOLVER.HINGE_LOSS_THRESHOLD))
 
                     distortion_penalty = cfg.SOLVER.DISTORTION_PENALTY_FACTOR * perturbation_mse
                     gen_loss += distortion_penalty + cfg.SOLVER.HINGE_LOSS_FACTOR * hinge_loss
 
-                    gen_optim.zero_grad()
 
                     gen_loss.backward()
                     gen_optim.step()
 
-                    disc_optim.zero_grad()
 
                     discriminator_rec2 = model.discriminator(perturbed_images.detach())
                     discriminator_real = model.discriminator(images)

@@ -159,7 +159,7 @@ class EncoderGenerator(nn.Module):
                 kernel_size=kernel_size,
                 padding=padding
             )
-            #nn.init.xavier_uniform_(transpose.weight)
+            nn.init.xavier_uniform_(transpose.weight, 5)
             return nn.Sequential(
                 transpose,
                 actv()
@@ -228,7 +228,7 @@ class Discriminator(nn.Module):
     def forward(self, x):
         return F.sigmoid(self.discriminator(x))
 
-class Network():
+class Network(nn.Module):
     def __init__(self, cfg):
         super().__init__()
         self.cfg = cfg
@@ -237,14 +237,6 @@ class Network():
         self.f = cfg.MODEL.f + [self.C]
         self.encoder_generator = EncoderGenerator(cfg, self.f, self.C, self.in_channels)
         self.discriminator = Discriminator(cfg, self.in_channels)
-
-    def train(self):
-        self.encoder_generator.train()
-        self.discriminator.train()
-
-    def to(self, device):
-        self.encoder_generator.to(device)
-        self.discriminator.to(device)
 
     def encgen_forward(self, x):
         return self.encoder_generator(x)

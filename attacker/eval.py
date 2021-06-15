@@ -6,7 +6,8 @@ from data_management.datasets.voc_detection import VOCDataset as VOCDetection
 from vizer.draw import draw_boxes
 from SSD.ssd.data.transforms import build_target_transform
 import SSD.ssd.data.transforms as detection_transforms
-import PIL as Image
+from PIL import Image
+
 import logging
 import torch
 from torchvision import datasets
@@ -20,11 +21,14 @@ from autoencoder.inference import do_evaluation
 from SSD.ssd.engine.inference import (evaluate, _accumulate_predictions_from_multiple_gpus)
 from SSD.ssd.config.defaults import _C as target_cfg
 from SSD.ssd.structures.container import Container
-
+from SSD.ssd.data.datasets import COCODataset, VOCDataset
+import os
 from detectron2.config.defaults import _C as bb_target_cfg
 import argparse
 import numpy as np
 from attacker.perturber import GANPerturber
+
+CONFIDENCE_THRESHOLD = 0.5
 
 def calculate_norms(images, perturbed_images):
     norms = [1, 2, float('inf')]
@@ -37,7 +41,16 @@ def calculate_norms(images, perturbed_images):
     output_dict["mse"] = torch.nn.MSELoss()(perturbed_images, images).detach().cpu().numpy()
     return output_dict
 
-
+def draw_detection_output(image, boxes, labels, scores, class_names, filename):
+    indices = scores > CONFIDENCE_THRESHOLD
+    boxes = boxes[indices]
+    labels = labels[indices]
+    scores = scores[indices]
+    cv2image = image.detach().clip(0, 255).cpu().numpy().transpose((1, 2, 0)).astype(np.uint8)
+    drawn_image = draw_boxes(cv2image, boxes, labels, scores,
+                             class_names).astype(
+        np.uint8)
+    Image.fromarray(drawn_image).save(os.path.join("eval_detector_outputs", filename + ".jpg"))
 def compute_on_dataset(model, black_box_target, perturber, data_loader, device):
 
     def convert_output_format(output):
@@ -68,8 +81,47 @@ def compute_on_dataset(model, black_box_target, perturber, data_loader, device):
             outputs_bb = convert_output_format(outputs_bb)
             perturbed_images = perturber(images, model)
             outputs_p = model(perturbed_images)
+
             outputs_bb_p = black_box_target([{"image": perturbed_images[0], "height": 300, "width": 300}])
             outputs_bb_p = convert_output_format(outputs_bb_p)
+
+            draw_detection_output(
+                image=perturbed_images[0],
+                boxes=outputs_p[0]["boxes"],
+                labels=outputs_p[0]["labels"],
+                scores=outputs_p[0]["scores"],
+                class_names=VOCDataset.class_names,
+                filename= str(i) + "white_box_perturbed"
+            )
+
+            draw_detection_output(
+                image=perturbed_images[0],
+                boxes=outputs_bb_p[0]["boxes"],
+                labels=outputs_bb_p[0]["labels"],
+                scores=outputs_bb_p[0]["scores"],
+                class_names=VOCDataset.class_names,
+                filename=str(i) + "black_box_perturbed"
+            )
+
+            draw_detection_output(
+                image=images[0],
+                boxes=outputs_bb[0]["boxes"],
+                labels=outputs_bb[0]["labels"],
+                scores=outputs_bb[0]["scores"],
+                class_names=VOCDataset.class_names,
+                filename=str(i) + "black_box_orig"
+            )
+
+            draw_detection_output(
+                image=images[0],
+                boxes=outputs[0]["boxes"],
+                labels=outputs[0]["labels"],
+                scores=outputs[0]["scores"],
+                class_names=VOCDataset.class_names,
+                filename=str(i) + "white_box_orig"
+            )
+
+
             norm_outputs = [calculate_norms(images, perturbed_images)]
             outputs = [o.to(cpu_device) for o in outputs]
             outputs_p = [o.to(cpu_device) for o in outputs_p]
