@@ -98,23 +98,25 @@ def compute_on_dataset(target_models, perturber, data_loader, device):
                     output = convert_output_format(output)
                     output_perturbed = convert_output_format(output_perturbed)
 
-                draw_detection_output(
-                    image=perturbed_images[0],
-                    boxes=output_perturbed[0]["boxes"],
-                    labels=output_perturbed[0]["labels"],
-                    scores=output_perturbed[0]["scores"],
-                    class_names=data_loader.dataset.class_names,
-                    filename=str(i) + "_" + t + "_perturbed"
-                )
+                if i % 100 == 0:
+                    draw_detection_output(
+                        image=perturbed_images[0],
+                        boxes=output_perturbed[0]["boxes"],
+                        labels=output_perturbed[0]["labels"],
+                        scores=output_perturbed[0]["scores"],
+                        class_names=data_loader.dataset.class_names,
+                        filename=str(i) + "_" + t + "_perturbed"
+                    )
 
-                draw_detection_output(
-                    image=images[0],
-                    boxes=output[0]["boxes"],
-                    labels=output[0]["labels"],
-                    scores=output[0]["scores"],
-                    class_names=data_loader.dataset.class_names,
-                    filename=str(i) + "_" + t + "_original"
-                )
+                    draw_detection_output(
+                        image=images[0],
+                        boxes=output[0]["boxes"],
+                        labels=output[0]["labels"],
+                        scores=output[0]["scores"],
+                        class_names=data_loader.dataset.class_names,
+                        filename=str(i) + "_" + t + "_original"
+                    )
+
                 outputs_original = [o.to(cpu_device) for o in output]
                 outputs_perturbed = [o.to(cpu_device) for o in output_perturbed]
                 result_dicts_original[t].update(
