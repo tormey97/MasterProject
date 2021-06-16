@@ -45,7 +45,7 @@ def calculate_norms(images, perturbed_images):
     output_dict["mse"] = torch.nn.MSELoss()(perturbed_images, images).detach().cpu().numpy()
     return output_dict
 
-def draw_detection_output(image, boxes, labels, scores, class_names, filename):
+def draw_detection_output(image, boxes, labels, scores, class_names, filename, folder_name):
     indices = scores > CONFIDENCE_THRESHOLD
     boxes = boxes[indices].cpu()
     labels = labels[indices].cpu()
@@ -54,8 +54,8 @@ def draw_detection_output(image, boxes, labels, scores, class_names, filename):
     drawn_image = draw_boxes(cv2image, boxes, labels, scores,
                              class_names).astype(
         np.uint8)
-    Image.fromarray(drawn_image).save(os.path.join("eval_detector_outputs", filename + ".jpg"))
-def compute_on_dataset(target_models, perturber, data_loader, device):
+    Image.fromarray(drawn_image).save(os.path.join(folder_name, filename + ".jpg"))
+def compute_on_dataset(target_models, perturber, data_loader, device, folder_name):
 
     def convert_output_format(output):
         output = output[0]["instances"]._fields
@@ -105,7 +105,8 @@ def compute_on_dataset(target_models, perturber, data_loader, device):
                         labels=output_perturbed[0]["labels"],
                         scores=output_perturbed[0]["scores"],
                         class_names=data_loader.dataset.class_names,
-                        filename=str(i) + "_" + t + "_perturbed"
+                        filename=str(i) + "_" + t + "_perturbed",
+                        folder_name=folder_name
                     )
 
                     draw_detection_output(
@@ -114,7 +115,8 @@ def compute_on_dataset(target_models, perturber, data_loader, device):
                         labels=output[0]["labels"],
                         scores=output[0]["scores"],
                         class_names=data_loader.dataset.class_names,
-                        filename=str(i) + "_" + t + "_original"
+                        filename=str(i) + "_" + t + "_original",
+                        folder_name=folder_name
                     )
 
                 outputs_original = [o.to(cpu_device) for o in output]
@@ -141,7 +143,7 @@ def do_evaluate(cfg, model, testloader,
         targets[i].eval()
 
     perturber = GANPerturber(model)
-    results, results_p, norm_dict = compute_on_dataset(targets, perturber, testloader, get_device())
+    results, results_p, norm_dict = compute_on_dataset(targets, perturber, testloader, get_device(), cfg.DRAW_TO_DIR)
     norm_list = [norm_dict[i] for i in norm_dict.keys()]
 
     for i in results:
@@ -250,7 +252,7 @@ def start_evaluation(cfg, target_cfg, bb_target_cfg, dataset="voc"):
          #   R101_DC5="COCO-Detection/faster_rcnn_R_101_DC5_3x.yaml",
           #  R101_C4="COCO-Detection/faster_rcnn_R_101_C4_3x.yaml",
             R50_C4="COCO-Detection/faster_rcnn_R_50_C4_3x.yaml",
-            RN_R50="COCO-Detection/retinanet_R_50_FPN_3x.yaml",
+            #RN_R50="COCO-Detection/retinanet_R_50_FPN_3x.yaml",
             RN_R101="COCO-Detection/retinanet_R_101_FPN_3x.yaml"
         )
 
