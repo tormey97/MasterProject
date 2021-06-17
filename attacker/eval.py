@@ -10,7 +10,7 @@ from vizer.draw import draw_boxes
 from SSD.ssd.data.transforms import build_target_transform
 import SSD.ssd.data.transforms as detection_transforms
 from PIL import Image
-
+from attacker.defender import defender
 import logging
 import torch
 from torchvision import datasets
@@ -68,65 +68,79 @@ def compute_on_dataset(target_models, perturber, data_loader, device, folder_nam
         container.img_height = 300
         return [container]
 
-    result_dicts_original = {t: {} for t in target_models}
-    result_dicts_perturbed = {t: {} for t in target_models}
+    defense_levels = [0, 10]
+
+    def get_index(_t, _l):
+        return _t + "_" + str(_l)
+    result_dicts_original = {get_index(t, l): {} for t in target_models for l in defense_levels}
+    result_dicts_perturbed = {get_index(t, l): {} for t in target_models for l in defense_levels}
+
+
+
     norm_dict = {}
     i = 0
     for batch in data_loader:
         i += 1
-
         images, targets, image_ids = batch
         cpu_device = torch.device("cpu")
         with torch.no_grad():
             images = images.to(device)
             perturbed_images = perturber(images, None)
+            defended_images = defender(images, defense_levels)
+            defended_perturbed_images = defender(perturbed_images, defense_levels)
 
             for t in target_models:
-                target_model = target_models[t]
-                model_input = [{"image": images[0], "height": 300, "width": 300}]
-                is_ssd = isinstance(target_model, SSDDetector)
-                if is_ssd:
-                    model_input = images
+                for l in range(len(defense_levels)):
+                    image = defended_images[l]
+                    perturbed_image = defended_perturbed_images[l]
+                    if defense_levels[l] == 0:
+                        image = images
+                        perturbed_image = perturbed_images
+                    target_model = target_models[t]
+                    model_input = [{"image": image[0], "height": 300, "width": 300}]
+                    is_ssd = isinstance(target_model, SSDDetector)
+                    if is_ssd:
+                        model_input = images
 
-                output = target_model(model_input)
+                    output = target_model(model_input)
 
-                model_input = [{"image": perturbed_images[0], "height": 300, "width": 300}]
-                if is_ssd:
-                    model_input = perturbed_images
-                output_perturbed = target_model(model_input)
-                if not is_ssd:
-                    output = convert_output_format(output)
-                    output_perturbed = convert_output_format(output_perturbed)
+                    model_input = [{"image": perturbed_image[0], "height": 300, "width": 300}]
+                    if is_ssd:
+                        model_input = perturbed_image
+                    output_perturbed = target_model(model_input)
+                    if not is_ssd:
+                        output = convert_output_format(output)
+                        output_perturbed = convert_output_format(output_perturbed)
 
-                if i % 100 == 0:
-                    draw_detection_output(
-                        image=perturbed_images[0],
-                        boxes=output_perturbed[0]["boxes"],
-                        labels=output_perturbed[0]["labels"],
-                        scores=output_perturbed[0]["scores"],
-                        class_names=data_loader.dataset.class_names,
-                        filename=str(i) + "_" + t + "_perturbed",
-                        folder_name=folder_name
+                    if i % 1 == 0:
+                        draw_detection_output(
+                            image=perturbed_image[0],
+                            boxes=output_perturbed[0]["boxes"],
+                            labels=output_perturbed[0]["labels"],
+                            scores=output_perturbed[0]["scores"],
+                            class_names=data_loader.dataset.class_names,
+                            filename=str(i) + "_" + t + "_" + str(defense_levels[l]) + "_perturbed",
+                            folder_name=folder_name
+                        )
+
+                        draw_detection_output(
+                            image=image[0],
+                            boxes=output[0]["boxes"],
+                            labels=output[0]["labels"],
+                            scores=output[0]["scores"],
+                            class_names=data_loader.dataset.class_names,
+                            filename=str(i) + "_" + t + "_" + str(defense_levels[l]) + "_original",
+                            folder_name=folder_name
+                        )
+
+                    outputs_original = [o.to(cpu_device) for o in output]
+                    outputs_perturbed = [o.to(cpu_device) for o in output_perturbed]
+                    result_dicts_original[get_index(t, defense_levels[l])].update(
+                        {int(img_id): result for img_id, result in zip(image_ids, outputs_original)}
                     )
-
-                    draw_detection_output(
-                        image=images[0],
-                        boxes=output[0]["boxes"],
-                        labels=output[0]["labels"],
-                        scores=output[0]["scores"],
-                        class_names=data_loader.dataset.class_names,
-                        filename=str(i) + "_" + t + "_original",
-                        folder_name=folder_name
+                    result_dicts_perturbed[get_index(t, defense_levels[l])].update(
+                        {int(img_id): result for img_id, result in zip(image_ids, outputs_perturbed)}
                     )
-
-                outputs_original = [o.to(cpu_device) for o in output]
-                outputs_perturbed = [o.to(cpu_device) for o in output_perturbed]
-                result_dicts_original[t].update(
-                    {int(img_id): result for img_id, result in zip(image_ids, outputs_original)}
-                )
-                result_dicts_perturbed[t].update(
-                    {int(img_id): result for img_id, result in zip(image_ids, outputs_perturbed)}
-                )
 
             norm_outputs = [calculate_norms(images, perturbed_images)]
             norm_dict.update(
@@ -200,8 +214,8 @@ def start_evaluation(cfg, target_cfg, bb_target_cfg, dataset="voc"):
         )
     else:
         testset = COCODetection(
-            data_dir='./datasets/Coco/test2017',
-            ann_file='./datasets/Coco/annotations/image_info_test2017.json',
+            data_dir='./datasets/Coco/val2017',
+            ann_file='./datasets/Coco/annotations_trainval2017/annotations/instances_val2017.json',
             transform=transform,
             target_transform=None,
         )
@@ -251,9 +265,9 @@ def start_evaluation(cfg, target_cfg, bb_target_cfg, dataset="voc"):
             R101_FPN="COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml",
          #   R101_DC5="COCO-Detection/faster_rcnn_R_101_DC5_3x.yaml",
           #  R101_C4="COCO-Detection/faster_rcnn_R_101_C4_3x.yaml",
-            R50_C4="COCO-Detection/faster_rcnn_R_50_C4_3x.yaml",
+            #R50_C4="COCO-Detection/faster_rcnn_R_50_C4_3x.yaml",
             #RN_R50="COCO-Detection/retinanet_R_50_FPN_3x.yaml",
-            RN_R101="COCO-Detection/retinanet_R_101_FPN_3x.yaml"
+            #RN_R101="COCO-Detection/retinanet_R_101_FPN_3x.yaml"
         )
 
 
