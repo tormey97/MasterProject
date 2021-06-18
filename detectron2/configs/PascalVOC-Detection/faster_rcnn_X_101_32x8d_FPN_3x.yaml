@@ -12,7 +12,7 @@ MODEL:
     NUM_CLASSES: 20
 
 DATASETS:
-  TRAIN: ('voc_2012_trainval')
+  TRAIN: ('voc_2012_trainval',)
   TEST: ('voc_2012_test',)
 
 SOLVER:
