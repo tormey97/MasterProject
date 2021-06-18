@@ -2,7 +2,6 @@ _BASE_: "../Base-RCNN-FPN.yaml"
 MODEL:
   WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
   MASK_ON: False
-  DEVICE: "cpu"
   RESNETS:
     DEPTH: 50
   ROI_HEADS:
@@ -11,7 +10,7 @@ INPUT:
   MIN_SIZE_TRAIN: (480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800)
   MIN_SIZE_TEST: 800
 DATASETS:
-  TRAIN: ('voc_2007_trainval', 'voc_2012_trainval')
+  TRAIN: ('voc_2007_trainval',)
   TEST: ('voc_2007_test',)
 SOLVER:
   STEPS: (12000, 16000)
