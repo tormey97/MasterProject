@@ -3,6 +3,7 @@ MODEL:
   MASK_ON: False
   WEIGHTS: "detectron2://ImageNetPretrained/FAIR/X-101-32x8d.pkl"
   PIXEL_STD: [57.375, 57.120, 58.395]
+  PIXEL_MEAN: [123.675, 116.280, 103.530]
   RESNETS:
     STRIDE_IN_1X1: False  # this is a C2 model
     NUM_GROUPS: 32
@@ -10,7 +11,9 @@ MODEL:
     DEPTH: 101
   ROI_HEADS:
     NUM_CLASSES: 20
-
+INPUT:
+  MIN_SIZE_TRAIN: (480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800)
+  MIN_SIZE_TEST: 800
 DATASETS:
   TRAIN: ('voc_2012_trainval',)
   TEST: ('voc_2012_test',)
