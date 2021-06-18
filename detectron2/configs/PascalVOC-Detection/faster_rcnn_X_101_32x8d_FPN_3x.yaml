@@ -10,13 +10,13 @@ MODEL:
     WIDTH_PER_GROUP: 8
     DEPTH: 101
   ROI_HEADS:
-    NUM_CLASSES: 21
+    NUM_CLASSES: 20
 INPUT:
   MIN_SIZE_TRAIN: (480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800)
   MIN_SIZE_TEST: 800
 DATASETS:
-  TRAIN: ('voc_2012_trainval',)
-  TEST: ('voc_2012_test',)
+  TRAIN: ('voc_2012_train',)
+  TEST: ('voc_2012_val',)
 
 SOLVER:
   STEPS: (210000, 250000)
