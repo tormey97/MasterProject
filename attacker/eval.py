@@ -100,7 +100,7 @@ def compute_on_dataset(target_models, perturber, data_loader, device, folder_nam
                     model_input = [{"image": image[0], "height": 300, "width": 300}]
                     is_ssd = isinstance(target_model, SSDDetector)
                     if is_ssd:
-                        model_input = images
+                        model_input = image
 
                     output = target_model(model_input)
 
@@ -112,7 +112,7 @@ def compute_on_dataset(target_models, perturber, data_loader, device, folder_nam
                         output = convert_output_format(output)
                         output_perturbed = convert_output_format(output_perturbed)
 
-                    if i % 100 == 0:
+                    if i % 50 == 0:
                         draw_detection_output(
                             image=perturbed_image[0],
                             boxes=output_perturbed[0]["boxes"],
@@ -282,9 +282,13 @@ def start_evaluation(cfg, target_cfg, bb_target_cfg, dataset="voc"):
             config.merge_from_file(ssd_detector_configs[i])
             targets[i] = create_target(config)
     else:
+        config = target_cfg.clone()
+        config.merge_from_file("./SSD/configs/efficient_net_b3_ssd300_voc0712_local.yaml")
+        # targets[i] =  create_bb_target(config)
         targets = dict(
             white_box=create_target(target_cfg),
-            black_box=create_bb_target(bb_target_cfg)
+           # black_box=create_bb_target(bb_target_cfg),
+            grey_box=create_target(config)
         )
 
     do_evaluate(
