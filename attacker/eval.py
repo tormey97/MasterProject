@@ -68,7 +68,7 @@ def compute_on_dataset(target_models, perturber, data_loader, device, folder_nam
         container.img_height = 300
         return [container]
 
-    defense_levels = [0]
+    defense_levels = [0, 5, 10]
 
     def get_index(_t, _l):
         return _t + "_" + str(_l)
