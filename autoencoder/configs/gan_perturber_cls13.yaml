@@ -38,5 +38,5 @@ BATCH_SIZE: 2
 DATASET_NAME: "voc_detection"
 MODEL_SAVE_STEP: 100
 DRAW_STEP: 20
-OUTPUT_DIR: "autoencoder_outputs/gan_attacker_04_downsample_10"
-DRAW_TO_DIR: "gan_attacker_04_downsample_10"
+OUTPUT_DIR: "autoencoder_outputs/gan_attacker_06_downsample_10"
+DRAW_TO_DIR: "gan_attacker_06_downsample_10"

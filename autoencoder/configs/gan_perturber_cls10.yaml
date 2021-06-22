@@ -7,7 +7,6 @@ MODEL:
   AVG_POOL_COUNT: 0
   MODEL_NAME: "gan_object_detector"
   QUANTIZE: False
-  D_F: [100, 200, 300, 400, 500, 600, 1200]
   C: 64
 
 SOLVER:
@@ -19,7 +18,7 @@ SOLVER:
   DISTORTION_PENALTY_FACTOR: 0.
   DISCRIMINATOR_IMPORTANCE: 20.
   DISC_REC_IMPORTANCE: 1.
-  PERFORMANCE_DEGRADATION_FACTOR: 0
+  PERFORMANCE_DEGRADATION_FACTOR: 4
   TARGET_LOSS_FACTOR: 20
   HINGE_LOSS_THRESHOLD: 50000
   HINGE_LOSS_FACTOR: 0.
@@ -38,5 +37,5 @@ BATCH_SIZE: 2
 DATASET_NAME: "voc_detection"
 MODEL_SAVE_STEP: 100
 DRAW_STEP: 20
-OUTPUT_DIR: "autoencoder_outputs/gan_attacker_04_downsample"
-DRAW_TO_DIR: "gan_attacker_04_downsample"
+OUTPUT_DIR: "autoencoder_outputs/gan_attacker_06_downsample"
+DRAW_TO_DIR: "gan_attacker_06_downsample"

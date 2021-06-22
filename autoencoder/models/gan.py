@@ -203,7 +203,7 @@ class Discriminator(nn.Module):
         self.cfg = cfg
         self.f = cfg.MODEL.D_F
         self.in_channels = in_channels
-        self.discriminator = self.make_discriminator_()
+        self.discriminator = self.make_discriminator()
 
     def make_discriminator_(self):
         return t_models.resnet34(num_classes=1)
@@ -226,7 +226,7 @@ class Discriminator(nn.Module):
         )
 
     def forward(self, x):
-        return F.sigmoid(self.discriminator(x))
+        return self.discriminator(x)
 
 class Network(nn.Module):
     def __init__(self, cfg):
