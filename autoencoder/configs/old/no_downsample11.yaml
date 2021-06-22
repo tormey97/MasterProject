@@ -7,7 +7,7 @@ MODEL:
   MODEL_NAME: "gan_object_detector"
   QUANTIZE: False
   C: 3
-  f: [100, 100, 100, 100, 100, 256, 512, 960]
+  f: [100, 100, 100, 100, 100, 100, 100, 100]
 
 
 SOLVER:
@@ -37,5 +37,5 @@ BATCH_SIZE: 2
 DATASET_NAME: "voc_detection"
 MODEL_SAVE_STEP: 100
 DRAW_STEP: 50
-OUTPUT_DIR: "autoencoder_outputs/gan202"
-DRAW_TO_DIR: "gan202_out"
+OUTPUT_DIR: "autoencoder_outputs/gan84"
+DRAW_TO_DIR: "gan84_out"
