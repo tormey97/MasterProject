@@ -161,7 +161,7 @@ def do_train(
                     gen_optim.step()
 
 
-                    discriminator_rec2 = model.discriminator(perturbed_images.detach())
+                    discriminator_rec2 = model.discriminator(perturbations.detach())
                     discriminator_real = model.discriminator(torch.normal(0, 10, size=images.shape).to(get_device()))
 
                     disc_loss_real = torch.square(discriminator_real - 1.)
