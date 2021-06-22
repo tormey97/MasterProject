@@ -287,7 +287,7 @@ def start_evaluation(cfg, target_cfg, bb_target_cfg, dataset="voc"):
         # targets[i] =  create_bb_target(config)
         targets = dict(
             white_box=create_target(target_cfg),
-           # black_box=create_bb_target(bb_target_cfg),
+            black_box=create_bb_target(bb_target_cfg),
             grey_box=create_target(config)
         )
 

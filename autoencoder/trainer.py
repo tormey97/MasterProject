@@ -162,7 +162,7 @@ def do_train(
 
 
                     discriminator_rec2 = model.discriminator(perturbed_images.detach())
-                    discriminator_real = model.discriminator(images)
+                    discriminator_real = model.discriminator(torch.normal(0, 10, size=images.shape).to(get_device()))
 
                     disc_loss_real = torch.square(discriminator_real - 1.)
                     disc_loss_rec = torch.multiply(torch.square(discriminator_rec2), cfg.SOLVER.DISC_REC_IMPORTANCE)
