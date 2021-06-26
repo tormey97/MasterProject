@@ -64,8 +64,8 @@ def compute_on_dataset(target_models, perturber, data_loader, device, folder_nam
             labels=torch.add(output["pred_classes"], 1),
             scores=output["scores"],
         )
-        container.img_width = 300
-        container.img_height = 300
+        container.img_width = perturber.image_size
+        container.img_height = perturber.image_size
         return [container]
 
     defense_levels = [0]
@@ -97,14 +97,14 @@ def compute_on_dataset(target_models, perturber, data_loader, device, folder_nam
                         image = images
                         perturbed_image = perturbed_images
                     target_model = target_models[t]
-                    model_input = [{"image": image[0], "height": 300, "width": 300}]
+                    model_input = [{"image": image[0], "height": perturber.image_size, "width": perturber.image_size}]
                     is_ssd = isinstance(target_model, SSDDetector)
                     if is_ssd:
                         model_input = image
 
                     output = target_model(model_input)
 
-                    model_input = [{"image": perturbed_image[0], "height": 300, "width": 300}]
+                    model_input = [{"image": perturbed_image[0], "height": perturber.image_size, "width": perturber.image_size}]
                     if is_ssd:
                         model_input = perturbed_image
                     output_perturbed = target_model(model_input)
@@ -156,7 +156,7 @@ def do_evaluate(cfg, model, testloader,
     for i in targets:
         targets[i].eval()
 
-    perturber = GANPerturber(model)
+    perturber = GANPerturber(model, 600)
     results, results_p, norm_dict = compute_on_dataset(targets, perturber, testloader, get_device(), cfg.DRAW_TO_DIR)
     norm_list = [norm_dict[i] for i in norm_dict.keys()]
 
@@ -192,7 +192,7 @@ def start_evaluation(cfg, target_cfg, bb_target_cfg, dataset="voc"):
     model.to(get_device())
     target_transform = build_target_transform(target_cfg)
     transform = detection_transforms.Compose([
-        detection_transforms.Resize(600),
+        detection_transforms.Resize(target_cfg.INPUT.IMAGE_SIZE),
         detection_transforms.ConvertFromInts(),
         detection_transforms.ToTensor(),
     ])

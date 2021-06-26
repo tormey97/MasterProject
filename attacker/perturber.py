@@ -7,8 +7,9 @@ class Perturber():
 
 
 class GANPerturber():
-    def __init__(self, network):
+    def __init__(self, network, image_size):
         self.network = network
+        self.image_size = image_size
         self.i = 0
 
     def __call__(self, images, targets):
