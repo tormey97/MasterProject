@@ -217,7 +217,7 @@ def start_evaluation(cfg, target_cfg, bb_target_cfg, dataset="voc"):
             data_dir='./datasets/Coco/val2017',
             ann_file='./datasets/Coco/annotations_trainval2017/annotations/instances_val2017.json',
             transform=transform,
-            target_transform=target_transform,
+            target_transform=None,
         )
 
         testloader = DataLoader(
