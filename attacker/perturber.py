@@ -16,7 +16,7 @@ class GANPerturber():
         self.i +=1
         images_div = torch.divide(images, 255)
         perturbations = list(self.network(images))
-        perturbations[0] = torch.nn.functional.interpolate(perturbations[0], size=(300, 300), mode='bilinear')
+        perturbations[0] = torch.nn.functional.interpolate(perturbations[0], size=(self.image_size, self.image_size), mode='bilinear')
 
         perturbed_images = torch.clip(torch.multiply(torch.add(perturbations[0], images_div), 255), 0, 255)
 
