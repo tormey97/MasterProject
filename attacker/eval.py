@@ -261,12 +261,12 @@ def start_evaluation(cfg, target_cfg, bb_target_cfg, dataset="voc"):
         )
 
         detectron_detector_configs = dict(
-            X101_FPN='COCO-Detection/faster_rcnn_X_101_32x8d_FPN_3x.yaml',
-           # R101_FPN="COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml",
-            R101_C4="COCO-Detection/faster_rcnn_R_101_C4_3x.yaml",
-           # R50_C4="COCO-Detection/faster_rcnn_R_50_C4_3x.yaml",
-           # RN_R50="COCO-Detection/retinanet_R_50_FPN_3x.yaml",
-            RN_R101="COCO-Detection/retinanet_R_101_FPN_3x.yaml"
+           # X101_FPN='COCO-Detection/faster_rcnn_X_101_32x8d_FPN_3x.yaml',
+            R101_FPN="COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml",
+           # R101_C4="COCO-Detection/faster_rcnn_R_101_C4_3x.yaml",
+            R50_C4="COCO-Detection/faster_rcnn_R_50_C4_3x.yaml",
+            RN_R50="COCO-Detection/retinanet_R_50_FPN_3x.yaml",
+            #RN_R101="COCO-Detection/retinanet_R_101_FPN_3x.yaml"
         )
 
 
