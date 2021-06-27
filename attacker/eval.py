@@ -192,7 +192,7 @@ def start_evaluation(cfg, target_cfg, bb_target_cfg, dataset="voc"):
     model.to(get_device())
     target_transform = build_target_transform(target_cfg)
     transform = detection_transforms.Compose([
-        detection_transforms.Resize(800),
+       # detection_transforms.Resize(800),
         detection_transforms.ConvertFromInts(),
         detection_transforms.ToTensor(),
     ])
