@@ -112,7 +112,7 @@ def compute_on_dataset(target_models, perturber, data_loader, device, folder_nam
                         output = convert_output_format(output)
                         output_perturbed = convert_output_format(output_perturbed)
 
-                    if i % 50 == 0:
+                    if i % 20 == 0:
                         draw_detection_output(
                             image=perturbed_image[0],
                             boxes=output_perturbed[0]["boxes"],
@@ -202,7 +202,7 @@ def start_evaluation(cfg, target_cfg, bb_target_cfg, dataset="voc"):
             data_dir='./datasets/Voc/VOCdevkit/VOC2012',
             transform=transform,
             split="val",
-            target_transform=target_transform,
+            target_transform=None,
             keep_difficult=True
         )
 
@@ -285,9 +285,9 @@ def start_evaluation(cfg, target_cfg, bb_target_cfg, dataset="voc"):
         config.merge_from_file("./SSD/configs/efficient_net_b3_ssd300_voc0712.yaml")
         # targets[i] =  create_bb_target(config)
         targets = dict(
-            white_box=create_target(target_cfg),
+            #white_box=create_target(target_cfg),
             black_box=create_bb_target(bb_target_cfg),
-            grey_box=create_target(config)
+            #grey_box=create_target(config)
         )
 
     do_evaluate(
