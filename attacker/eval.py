@@ -285,9 +285,9 @@ def start_evaluation(cfg, target_cfg, bb_target_cfg, dataset="voc"):
         config.merge_from_file("./SSD/configs/efficient_net_b3_ssd300_voc0712.yaml")
         # targets[i] =  create_bb_target(config)
         targets = dict(
-            white_box=create_target(target_cfg),
-          #  black_box=create_bb_target(bb_target_cfg),
-            grey_box=create_target(config)
+            #white_box=create_target(target_cfg),
+            black_box=create_bb_target(bb_target_cfg),
+            #grey_box=create_target(config)
         )
 
     do_evaluate(
