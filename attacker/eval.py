@@ -81,8 +81,6 @@ def compute_on_dataset(target_models, perturber, data_loader, device, folder_nam
     i = 0
     for batch in data_loader:
         i += 1
-        if i == 60:
-            break
         images, targets, image_ids = batch
         cpu_device = torch.device("cpu")
         with torch.no_grad():
