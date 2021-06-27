@@ -57,7 +57,7 @@ def draw_detection_output(image, boxes, labels, scores, class_names, filename, f
     Image.fromarray(drawn_image).save(os.path.join(folder_name, filename + ".jpg"))
 def compute_on_dataset(target_models, perturber, data_loader, device, folder_name):
 
-    def convert_output_format(output, x, y):
+    def convert_output_format(output, y, x):
         output = output[0]["instances"]._fields
         container = Container(
             boxes=output["pred_boxes"].tensor,
@@ -81,6 +81,8 @@ def compute_on_dataset(target_models, perturber, data_loader, device, folder_nam
     i = 0
     for batch in data_loader:
         i += 1
+        if i == 60:
+            break
         images, targets, image_ids = batch
         cpu_device = torch.device("cpu")
         with torch.no_grad():
