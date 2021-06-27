@@ -57,15 +57,15 @@ def draw_detection_output(image, boxes, labels, scores, class_names, filename, f
     Image.fromarray(drawn_image).save(os.path.join(folder_name, filename + ".jpg"))
 def compute_on_dataset(target_models, perturber, data_loader, device, folder_name):
 
-    def convert_output_format(output):
+    def convert_output_format(output, x, y):
         output = output[0]["instances"]._fields
         container = Container(
             boxes=output["pred_boxes"].tensor,
             labels=torch.add(output["pred_classes"], 1),
             scores=output["scores"],
         )
-        container.img_width = perturber.image_size
-        container.img_height = perturber.image_size
+        container.img_width = x
+        container.img_height = y
         return [container]
 
     defense_levels = [0]
@@ -97,20 +97,20 @@ def compute_on_dataset(target_models, perturber, data_loader, device, folder_nam
                         image = images
                         perturbed_image = perturbed_images
                     target_model = target_models[t]
-                    model_input = [{"image": image[0], "height": images.shape[2], "width": images.shape[3]}]
+                    model_input = [{"image": image[0], "height": images.shape[3], "width": images.shape[2]}]
                     is_ssd = isinstance(target_model, SSDDetector)
                     if is_ssd:
                         model_input = image
 
                     output = target_model(model_input)
 
-                    model_input = [{"image": perturbed_image[0], "height": images.shape[2], "width": images.shape[3]}]
+                    model_input = [{"image": perturbed_image[0], "height": images.shape[3], "width": images.shape[2]}]
                     if is_ssd:
                         model_input = perturbed_image
                     output_perturbed = target_model(model_input)
                     if not is_ssd:
-                        output = convert_output_format(output)
-                        output_perturbed = convert_output_format(output_perturbed)
+                        output = convert_output_format(output, images.shape[3], images.shape[2])
+                        output_perturbed = convert_output_format(output_perturbed, images.shape[3], images.shape[2])
 
                     if i % 2 == 0:
                         draw_detection_output(
