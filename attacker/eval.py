@@ -68,7 +68,7 @@ def compute_on_dataset(target_models, perturber, data_loader, device, folder_nam
         container.img_height = perturber.image_size
         return [container]
 
-    defense_levels = [0, 10]
+    defense_levels = [0]
 
     def get_index(_t, _l):
         return _t + "_" + str(_l)
@@ -97,14 +97,14 @@ def compute_on_dataset(target_models, perturber, data_loader, device, folder_nam
                         image = images
                         perturbed_image = perturbed_images
                     target_model = target_models[t]
-                    model_input = [{"image": image[0], "height": perturber.image_size, "width": perturber.image_size}]
+                    model_input = [{"image": image[0], "height": images.shape[2], "width": images.shape[3]}]
                     is_ssd = isinstance(target_model, SSDDetector)
                     if is_ssd:
                         model_input = image
 
                     output = target_model(model_input)
 
-                    model_input = [{"image": perturbed_image[0], "height": perturber.image_size, "width": perturber.image_size}]
+                    model_input = [{"image": perturbed_image[0], "height": images.shape[2], "width": images.shape[3]}]
                     if is_ssd:
                         model_input = perturbed_image
                     output_perturbed = target_model(model_input)
@@ -112,7 +112,7 @@ def compute_on_dataset(target_models, perturber, data_loader, device, folder_nam
                         output = convert_output_format(output)
                         output_perturbed = convert_output_format(output_perturbed)
 
-                    if i % 10 == 0:
+                    if i % 2 == 0:
                         draw_detection_output(
                             image=perturbed_image[0],
                             boxes=output_perturbed[0]["boxes"],
