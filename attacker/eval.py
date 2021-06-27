@@ -68,7 +68,7 @@ def compute_on_dataset(target_models, perturber, data_loader, device, folder_nam
         container.img_height = perturber.image_size
         return [container]
 
-    defense_levels = [0]
+    defense_levels = [0, 10]
 
     def get_index(_t, _l):
         return _t + "_" + str(_l)
@@ -156,7 +156,7 @@ def do_evaluate(cfg, model, testloader,
     for i in targets:
         targets[i].eval()
 
-    perturber = GANPerturber(model, 600)
+    perturber = GANPerturber(model, 800)
     results, results_p, norm_dict = compute_on_dataset(targets, perturber, testloader, get_device(), cfg.DRAW_TO_DIR)
     norm_list = [norm_dict[i] for i in norm_dict.keys()]
 
@@ -192,7 +192,7 @@ def start_evaluation(cfg, target_cfg, bb_target_cfg, dataset="voc"):
     model.to(get_device())
     target_transform = build_target_transform(target_cfg)
     transform = detection_transforms.Compose([
-        detection_transforms.Resize(600),
+        detection_transforms.Resize(800),
         detection_transforms.ConvertFromInts(),
         detection_transforms.ToTensor(),
     ])
