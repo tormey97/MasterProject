@@ -112,7 +112,7 @@ def compute_on_dataset(target_models, perturber, data_loader, device, folder_nam
                         output = convert_output_format(output)
                         output_perturbed = convert_output_format(output_perturbed)
 
-                    if i % 20 == 0:
+                    if i % 1 == 0:
                         draw_detection_output(
                             image=perturbed_image[0],
                             boxes=output_perturbed[0]["boxes"],
